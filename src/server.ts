@@ -423,6 +423,21 @@ const TEMPLATE_DESCRIPTIONS: Record<string, Record<string, { description: string
   }
 };
 
+// File extension to language mapping for syntax highlighting
+const FILE_EXTENSION_MAP: Record<string, string> = {
+  '.cs': 'csharp',
+  '.java': 'java',
+  '.py': 'python',
+  '.ts': 'typescript',
+  '.js': 'javascript',
+  '.json': 'json',
+  '.xml': 'xml',
+  '.md': 'markdown',
+  '.txt': 'text',
+  '.yml': 'yaml',
+  '.yaml': 'yaml'
+};
+
 // Helper function to generate template descriptions for tool schema
 function generateTemplateDescriptions(language: string): string {
   const templates = VALID_TEMPLATES[language];
@@ -813,6 +828,8 @@ Useful for:
 
     // Group by category
     const categories: Record<string, string[]> = {};
+    const uncategorizedTemplates: string[] = [];
+    
     templates.forEach(template => {
       const desc = descriptions[template];
       if (desc) {
@@ -820,8 +837,16 @@ Useful for:
           categories[desc.category] = [];
         }
         categories[desc.category].push(template);
+      } else {
+        // Add templates without descriptions to uncategorized list
+        uncategorizedTemplates.push(template);
       }
     });
+    
+    // Add uncategorized templates to a special category if any exist
+    if (uncategorizedTemplates.length > 0) {
+      categories['Uncategorized'] = uncategorizedTemplates;
+    }
 
     // Display templates by category
     Object.keys(categories).sort().forEach(category => {
@@ -829,8 +854,13 @@ Useful for:
       categories[category].forEach(template => {
         const desc = descriptions[template];
         result += `### ${template}\n`;
-        result += `**Description**: ${desc.description}\n`;
-        result += `**Use Case**: ${desc.useCase}\n\n`;
+        if (desc) {
+          result += `**Description**: ${desc.description}\n`;
+          result += `**Use Case**: ${desc.useCase}\n\n`;
+        } else {
+          result += `**Description**: Template available (description not yet provided)\n`;
+          result += `**Use Case**: See template files for implementation details\n\n`;
+        }
       });
     });
 
@@ -840,7 +870,12 @@ Useful for:
     Object.keys(categories).sort().forEach(category => {
       result += `**${category}**:\n`;
       categories[category].forEach(template => {
-        result += `- \`${template}\`: ${descriptions[template].description}\n`;
+        const desc = descriptions[template];
+        if (desc) {
+          result += `- \`${template}\`: ${desc.description}\n`;
+        } else {
+          result += `- \`${template}\`: Template available (description not yet provided)\n`;
+        }
       });
       result += `\n`;
     });
@@ -997,20 +1032,7 @@ This indicates an internal error. Please verify the template exists.`
 // Helper function to get file extension for syntax highlighting
 function getFileExtension(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();
-  switch (ext) {
-    case '.cs': return 'csharp';
-    case '.java': return 'java';
-    case '.py': return 'python';
-    case '.ts': return 'typescript';
-    case '.js': return 'javascript';
-    case '.json': return 'json';
-    case '.xml': return 'xml';
-    case '.md': return 'markdown';
-    case '.txt': return 'text';
-    case '.yml':
-    case '.yaml': return 'yaml';
-    default: return 'text';
-  }
+  return FILE_EXTENSION_MAP[ext] || 'text';
 }
 
 async function main() {
