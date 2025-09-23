@@ -430,7 +430,8 @@ function generateTemplateDescriptions(language: string): string {
   
   return templates.map(template => {
     const desc = descriptions[template];
-    return `- ${template}: ${desc.description}`;
+    const description = desc?.description ?? "No description available";
+    return `- ${template}: ${description}`;
   }).join('\n');
 }
 
