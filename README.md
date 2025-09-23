@@ -28,7 +28,7 @@ This starts a stdio MCP server waiting for an MCP client connection. The server 
 npm run smoke
 ```
 
-Runs a simple test that calls `get_azure_functions_templates` with a Python HTTP trigger template.
+Runs a simple test that calls the MCP server tools with sample requests.
 
 ## Use with MCP Inspector
 
@@ -55,7 +55,7 @@ The inspector will:
 
 1. Start your MCP server as a subprocess
 2. Open a web interface (usually at <http://localhost:5173>)
-3. Allow you to interactively test the `get_azure_functions_templates` tool
+3. Allow you to interactively test all available tools
 
 ## Use with VS Code
 
@@ -66,13 +66,15 @@ You can use this MCP server with VS Code through GitHub Copilot or other MCP-com
 1. **Install the MCP extension for VS Code** (if available in marketplace)
 2. **Configure the server** in VS Code mcp.json settings:
 
+- Replace the path in "args" below with the absolute path to your compiled server.js file in the dist folder
+
 ```json
 {
  "servers": {
   "azure-functions-template-mcp-server": {
    "type": "stdio",
    "command": "node",
-   "args": ["D:\\PyFx\\templatesmcp\\dist\\src\\server.js"]
+   "args": ["D:\\azure-functions-templates-mcp-server\\dist\\src\\server.js"]
   }
  },
  "inputs": []
@@ -81,9 +83,12 @@ You can use this MCP server with VS Code through GitHub Copilot or other MCP-com
 
 ## What it provides
 
-**Single comprehensive tool:**
+**Four comprehensive tools for Azure Functions template management:**
 
-- `get_azure_functions_templates`: Retrieve complete Azure Functions templates with all project files, configuration, and documentation.
+1. **`get_azure_functions_templates`**: Retrieve complete Azure Functions templates with all project files, configuration, and documentation
+2. **`get_supported_languages`**: Get detailed information about all supported programming languages, their runtimes, and capabilities
+3. **`get_templates_by_language`**: Explore all available templates for a specific language with descriptions, categories, and use cases
+4. **`get_template_files`**: Get the complete file structure and content for a specific template
 
 **Supported languages and templates:**
 
@@ -176,18 +181,43 @@ HttpTrigger-CSharp-Isolated/
 
 ## Usage examples
 
-**Get a complete template:**
+### Discovering Available Languages
+
+**Get supported languages:**
 
 ```text
+Tool: get_supported_languages
+```
+
+Returns all supported languages with runtime details, programming models, and template counts.
+
+### Exploring Templates by Language
+
+**Get templates for a specific language:**
+
+```text
+Tool: get_templates_by_language
+Language: python
+```
+
+Returns all Python templates with descriptions, categories, and use cases.
+
+### Getting Complete Templates
+
+**Get a complete template with all files:**
+
+```text
+Tool: get_azure_functions_templates
 Language: python
 Template: HttpTrigger
 ```
 
 Returns all files in the template plus key configuration files.
 
-**Get a specific file:**
+**Get a specific file from a template:**
 
 ```text
+Tool: get_azure_functions_templates
 Language: python
 Template: HttpTrigger
 FilePath: function_app.py
@@ -195,25 +225,37 @@ FilePath: function_app.py
 
 Returns just the function_app.py file content.
 
+### Getting Template Files (Alternative Method)
+
+**Get complete file structure for a template:**
+
+```text
+Tool: get_template_files
+Language: csharp
+Template: HttpTrigger-CSharp-Isolated
+```
+
+Returns all files with complete content and syntax highlighting.
+
+### Language-Specific Examples
+
 **Get a Java source file:**
 
 ```text
+Tool: get_azure_functions_templates
 Language: java
 Template: HttpTrigger-Java
 FilePath: src/main/java/com/function/Function.java
 ```
 
-Returns the Java function source code from the Maven project structure.
-
 **Get a C# template configuration:**
 
 ```text
+Tool: get_azure_functions_templates
 Language: csharp
 Template: HttpTrigger-CSharp-Isolated
 FilePath: .template.config/template.json
 ```
-
-Returns the template metadata from the .template.config subfolder.
 
 ## Troubleshooting
 
