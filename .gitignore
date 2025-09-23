@@ -4,5 +4,15 @@ dist/
 *.tsbuildinfo
 package-lock.json
 
+# .NET build output
+bin/
+obj/
+**/bin/
+**/obj/
+
+# C# template build artifacts
+templates/csharp/*/bin/
+templates/csharp/*/obj/
+
 # VS Code temporary settings
 .vscode/
