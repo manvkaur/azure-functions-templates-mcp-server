@@ -90,30 +90,114 @@ server.registerTool(
 This tool provides ready-to-use Azure Functions templates across multiple programming languages and trigger types. Each template includes:
 
 File Patterns by Language:
-- Python: function_app.py, host.json, local.settings.json, requirements.txt (Azure Functions v2 programming model)
-- C#: .cs files, .template.config/template.json (minimal configuration files)
-- Java: pom.xml, host.json, src/ directories (includes Maven configuration)
-- TypeScript: function.json, index.ts, metadata.json (Node.js based functions)
+- Python: function_app.py, host.json, local.settings.json, requirements.txt (Azure Functions v2 programming model with decorators)
+- C#: .cs files with isolated worker model, .template.config/template.json, host.json (minimal configuration files for .NET)
+- Java: pom.xml with Azure Functions Maven plugin, host.json, src/main/java structure (includes complete Maven project setup)  
+- TypeScript: function.json metadata, index.ts with typed interfaces, package.json dependencies (Node.js v4 programming model)
+
+Template Categories:
+• HTTP Triggers: RESTful API endpoints with authentication levels and route handling
+• Storage Triggers: Blob, Queue, and Table storage event processing  
+• Database Triggers: Cosmos DB change feed, SQL triggers, MySQL integration
+• Messaging: Service Bus queues/topics, Event Grid, Event Hub streaming
+• Scheduling: Timer triggers with CRON expressions for batch processing
+• Durable Functions: Orchestrators, activities, entities for stateful workflows
+• Integration: SignalR real-time, IoT Hub, Kafka, RabbitMQ messaging
+• AI/ML: Model Context Protocol (MCP) tool integration for AI assistants
+• External Services: SendGrid email, Dapr microservices, Kusto analytics
 
 Perfect for:
-- Bootstrapping new Azure Functions projects
-- Learning Azure Functions patterns and best practices  
-- Creating production-ready serverless applications
-- Exploring different trigger types and bindings
-- Rapid prototyping and development
+- Bootstrapping new Azure Functions projects with best practices
+- Learning Azure Functions patterns across different languages  
+- Creating production-ready serverless applications with proper configuration
+- Exploring different trigger types and output bindings
+- Rapid prototyping and development with complete project structure
+- Understanding cross-language Azure Functions implementations
 
-The templates cover major Azure services including HTTP APIs, blob storage, cosmos DB, event processing, durable functions, AI/ML integrations, and more.`,
+All templates include proper error handling, logging, configuration files, and follow Azure Functions best practices for each runtime.`,
     inputSchema: {
       language: z.enum(VALID_LANGUAGES).describe(`Programming language for the Azure Functions template. Valid values: ${VALID_LANGUAGES.join(", ")}`),
       template: z.string().describe(`Template name. Valid templates vary by language:
       
-C# (.NET Isolated): ${VALID_TEMPLATES.csharp.join(", ")}
+C# (.NET Isolated): 
+- BlobTrigger-CSharp-Isolated: Triggered by Azure Blob Storage operations (create, update, delete)
+- CosmosDbTrigger-CSharp-Isolated: Triggered by changes in Azure Cosmos DB collections using change feed
+- DaprPublishOutputBinding-CSharp-Isolated: Publishes messages to Dapr pub/sub components
+- DaprServiceInvocationTrigger-CSharp-Isolated: Handles Dapr service invocation requests
+- DaprTopicTrigger-CSharp-Isolated: Subscribes to Dapr pub/sub topics for message processing
+- DurableFunctionsEntityClass-CSharp-Isolated: Stateful entity class for Durable Functions workflows
+- DurableFunctionsEntityFunction-CSharp-Isolated: Entity function for maintaining state in Durable Functions
+- DurableFunctionsOrchestration-CSharp-Isolated: Orchestrator function for complex workflow coordination
+- EventGridBlobTrigger-CSharp-Isolated: Triggered by Azure Event Grid blob events with enhanced filtering
+- EventGridTrigger-CSharp-Isolated: Handles Azure Event Grid custom events and system events
+- EventHubTrigger-CSharp-Isolated: Processes high-throughput data streams from Azure Event Hubs
+- HttpTrigger-CSharp-Isolated: RESTful HTTP API endpoints with GET/POST support
+- KustoInputBinding-CSharp-Isolated: Reads data from Azure Data Explorer (Kusto) databases
+- KustoOutputBinding-CSharp-Isolated: Writes data to Azure Data Explorer (Kusto) databases
+- MCPToolTrigger-CSharp-Isolated: Model Context Protocol tool integration for AI workflows
+- MySqlInputBinding-CSharp-Isolated: Reads data from MySQL databases
+- MySqlOutputBinding-CSharp-Isolated: Writes data to MySQL databases
+- MySqlTrigger-CSharp-Isolated: Triggered by MySQL database changes
+- QueueTrigger-CSharp-Isolated: Processes messages from Azure Storage Queues
+- RabbitMQTrigger-CSharp-Isolated: Consumes messages from RabbitMQ queues
+- ServiceBusQueueTrigger-CSharp-Isolated: Handles Azure Service Bus queue messages with reliability
+- ServiceBusTopicTrigger-CSharp-Isolated: Subscribes to Azure Service Bus topics for pub/sub messaging
+- SignalRConnectionInfoHttpTrigger-CSharp-Isolated: Provides SignalR connection info for real-time apps
+- SqlInputBinding-CSharp-Isolated: Reads data from SQL Server/Azure SQL databases
+- SqlTrigger-CSharp-Isolated: Triggered by SQL database changes using change tracking
+- TimerTrigger-CSharp-Isolated: Scheduled execution using CRON expressions
 
-Java: ${VALID_TEMPLATES.java.join(", ")}
+Java: 
+- BlobTrigger-Java: Triggered by Azure Blob Storage operations with Maven configuration
+- DurableFunctions-Java: Orchestration and activity functions for complex workflows
+- EventGridTrigger-Java: Handles Azure Event Grid events in Java runtime
+- EventHubTrigger-Java: Processes streaming data from Azure Event Hubs
+- HttpTrigger-Java: RESTful API endpoints with annotation-based configuration
+- MCPToolTrigger-Java: Model Context Protocol integration for AI tool workflows
+- QueueTrigger-Java: Processes Azure Storage Queue messages
+- ServiceBusQueueTrigger-Java: Handles Service Bus queue messages with Java annotations
+- ServiceBusTopicTrigger-Java: Subscribes to Service Bus topics for messaging
+- TimerTrigger-Java: Scheduled functions using CRON expressions with Java
 
-Python: ${VALID_TEMPLATES.python.join(", ")}
+Python: 
+- BlobInputBinding: Reads blob data as input binding (v2 programming model)
+- BlobOutputBinding: Writes data to Azure Blob Storage as output binding
+- BlobTrigger: Triggered by blob storage events using v2 programming model decorators
+- CosmosDBTrigger: Responds to Cosmos DB document changes via change feed
+- EventHubTrigger: Processes high-volume event streams from Event Hubs
+- HttpTrigger: HTTP API endpoints with request/response handling
+- McpTrigger: Model Context Protocol integration for AI assistant workflows
+- QueueTrigger: Processes Azure Storage Queue messages asynchronously
+- TimerTrigger: Scheduled execution using CRON expressions
 
-TypeScript: ${VALID_TEMPLATES.typescript.join(", ")}`),
+TypeScript: 
+- AuthenticationEventsTrigger-TypeScript: Handles Azure AD B2C authentication events
+- BlobTrigger-TypeScript: Triggered by Azure Blob Storage operations
+- CosmosDbTrigger-TypeScript: Responds to Cosmos DB document changes
+- DurableFunctionsActivity-TypeScript: Activity function for Durable Functions workflows
+- DurableFunctionsEntity-TypeScript: Stateful entity for maintaining state
+- DurableFunctionsHttpStart-TypeScript: HTTP starter for initiating orchestrations
+- DurableFunctionsOrchestrator-TypeScript: Orchestrates complex multi-step workflows
+- EventGridBlobTrigger-TypeScript: Enhanced blob event handling via Event Grid
+- EventGridTrigger-TypeScript: Processes Event Grid custom and system events
+- EventHubTrigger-TypeScript: Handles Event Hub streaming data
+- HttpTrigger-TypeScript: RESTful API endpoints with TypeScript type safety
+- IoTHubTrigger-TypeScript: Processes IoT device messages from Azure IoT Hub
+- KafkaOutput-TypeScript: Produces messages to Apache Kafka topics
+- MCPToolTrigger-TypeScript: Model Context Protocol tool integration
+- MySqlInputBinding-Typescript: Reads data from MySQL databases
+- MySqlOutputBinding-Typescript: Writes data to MySQL databases
+- MySqlTrigger-Typescript: Responds to MySQL database changes
+- QueueTrigger-TypeScript: Processes Azure Storage Queue messages
+- RabbitMQTrigger-TypeScript: Consumes RabbitMQ messages
+- SendGrid-TypeScript: Sends emails using SendGrid service
+- ServiceBusQueueTrigger-TypeScript: Handles Service Bus queue messages
+- ServiceBusTopicTrigger-TypeScript: Subscribes to Service Bus topics
+- SignalRConnectionInfoHttpTrigger-TypeScript: Provides SignalR connection info
+- SqlInputBinding-Typescript: Reads from SQL databases
+- SqlOutputBinding-Typescript: Writes to SQL databases
+- SqlTrigger-Typescript: Triggered by SQL database changes
+- TimerTrigger-TypeScript: Scheduled functions with CRON expressions`),
       filePath: z.string().optional().describe("Optional: specific file path within the template to retrieve (e.g., 'function_app.py', 'host.json', 'requirements.txt'). If omitted, returns all files in the template as a structured listing.")
     },
   },
