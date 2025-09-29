@@ -12,7 +12,7 @@ public class Function {
      */
     @FunctionName("Function")
     public void run(
-        @QueueTrigger(name = "message", queueName = "myqueue", connection = "<connection>") String message,
+        @QueueTrigger(name = "message", queueName = "myqueue", connection = "QueueConnection") String message,
         final ExecutionContext context
     ) {
         context.getLogger().info("Java Queue trigger function processed a message: " + message);
