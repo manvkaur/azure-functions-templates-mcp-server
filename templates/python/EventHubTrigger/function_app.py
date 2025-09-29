@@ -7,7 +7,7 @@ app = func.FunctionApp()
 
 
 @app.event_hub_message_trigger(arg_name="azeventhub", event_hub_name="eventhubname",
-                               connection="EventHubConnectionString") 
+                               connection="EventHubConnection") 
 def eventhub_trigger(azeventhub: func.EventHubEvent):
     logging.info('Python EventHub trigger processed an event: %s',
                 azeventhub.get_body().decode('utf-8'))
@@ -17,7 +17,7 @@ def eventhub_trigger(azeventhub: func.EventHubEvent):
 # To use, uncomment the section below and add azurefunctions-extensions-bindings-eventhub to your requirements.txt file
 # import azurefunctions.extensions.bindings.eventhub as eh
 # @app.event_hub_message_trigger(
-#     arg_name="event", event_hub_name="eventhubname", connection="EventHubConnectionString"
+#     arg_name="event", event_hub_name="eventhubname", connection="EventHubConnection"
 # )
 # def eventhub_trigger(event: eh.EventData):
 #     logging.info(
