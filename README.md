@@ -1,6 +1,15 @@
 # Azure Functions Templates MCP Server
 
-A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across multiple programming languages and trigger types. Templates are packaged with the server for easy distribution and deployment.
+A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 64+ templates covering all major Azure services and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
+
+## Features
+
+**Multi-Language Support**: C# (.NET Isolated), Java (Maven), Python (v2 Model), TypeScript (Node.js v4)  
+**Complete Templates**: Full project structure with dependencies, configuration, and best practices  
+**Modern Patterns**: Latest programming models and Azure Functions runtime features  
+**Rich Categories**: Web APIs, Storage, Database, Streaming, Messaging, AI/ML, Microservices, Analytics  
+**Tool Integration**: Built-in support for VS Code Copilot, MCP Inspector, and AI assistants  
+**Packaged Distribution**: Templates embedded with server for easy deployment and offline usage
 
 ## Prerequisites
 
@@ -92,75 +101,89 @@ You can use this MCP server with VS Code through GitHub Copilot or other MCP-com
 
 **Supported languages and templates:**
 
-- **C# (.NET Isolated)**: 26 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, and more
-- **Java**: 10 templates covering core triggers and bindings  
-- **Python**: 9 templates including core triggers and bindings (BlobInputBinding, BlobOutputBinding, BlobTrigger, CosmosDBTrigger, EventHubTrigger, HttpTrigger, McpTrigger, QueueTrigger, TimerTrigger)
-- **TypeScript**: 27 templates with comprehensive Azure service coverage
+- **C# (.NET Isolated Worker)**: 29 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, Dapr integration, MySQL/SQL bindings, Kusto analytics, and MCP tool integration
+- **Java (Maven-based)**: 14 templates covering core triggers, bindings, and Durable Functions with annotation-based configuration
+- **Python (v2 Programming Model)**: 11 templates using modern decorator-based patterns including blob processing, database triggers, streaming, and AI/ML integrations
+- **TypeScript (Node.js v4)**: 10 templates with full type safety covering storage, database, streaming, and real-time communication scenarios
 
 Each template includes:
 
-- Complete function code with proper bindings
-- Configuration files (host.json, local.settings.json, etc.)
-- Project files (requirements.txt, package.json, .csproj, etc.)
-- Documentation and deployment instructions
+- **Complete function code** with proper bindings and error handling
+- **Configuration files** (host.json, local.settings.json, etc.)
+- **Project files** (requirements.txt, package.json, .csproj, pom.xml, etc.)
+- **Language-specific patterns** (decorators for Python, annotations for Java, isolated worker for C#)
+- **Best practices** for each runtime and programming model
 
-Perfect for bootstrapping new Azure Functions projects, learning patterns, and rapid prototyping.
+**Template Categories:**
+
+- **Web APIs**: HTTP triggers for REST endpoints and webhooks
+- **Storage**: Blob triggers/bindings, Queue processing
+- **Database**: Cosmos DB, SQL Server, MySQL triggers and bindings
+- **Streaming**: Event Hubs for real-time data processing  
+- **Messaging**: Service Bus, Event Grid, RabbitMQ integration
+- **Scheduling**: Timer triggers with CRON expressions
+- **Durable Functions**: Orchestrators, activities, entities for workflows
+- **Microservices**: Dapr integration for distributed architectures
+- **AI/ML**: Model Context Protocol (MCP) tool integration for AI assistants
+- **Real-time**: SignalR for live updates and notifications
+- **Analytics**: Kusto (Azure Data Explorer) for time-series analysis
+
+Perfect for bootstrapping new Azure Functions projects, learning cross-language patterns, and rapid prototyping.
+
+## Recent Updates
+
+**Template Inventory Updated**: Synchronized template lists with actual available templates  
+**Language-Agnostic Descriptions**: Removed language-specific implementation details from descriptions  
+**Consistent Categories**: Unified template categorization across all languages  
+**Accurate Counts**: Updated template counts (C#: 29, Java: 14, Python: 11, TypeScript: 10)  
+**Clean Documentation**: Improved descriptions for better tool compatibility (VS Code Copilot, MCP Inspector)  
+**Modern Patterns**: Reflects current Azure Functions programming models and best practices
 
 ## Template Structure
 
-This MCP server provides access to Azure Functions templates across multiple programming languages. Each language has different folder structures and file patterns:
+This MCP server provides access to Azure Functions templates across multiple programming languages. Each language follows modern programming models and best practices:
 
-### Python Templates
-
-```text
-HttpTrigger-Python/
-├── function_app.py          # Main function code
-├── blueprint.py             # Blueprint definition
-├── blueprint_body.py        # Blueprint implementation
-├── function_body.py         # Function implementation
-├── template.json           # Template metadata
-└── http_trigger_template.md # Documentation
-```
-
-### TypeScript Templates
+### Python Templates (v2 Programming Model)
 
 ```text
-HttpTrigger-TypeScript/
-├── function.json           # Function configuration
-├── index.ts               # Main function code
-├── metadata.json          # Template metadata
-└── sample.dat            # Sample data
-```
-
-### Java Templates
-
-```text
-HttpTrigger-Java/
-├── pom.xml                # Maven configuration
-├── host.json             # Function host configuration
-├── local.settings.json   # Local development settings
-├── src/
-│   └── main/
-│       └── java/
-│           └── com/
-│               └── function/       # Standard Java package structure
-│                   └── Function.java
-└── target/               # Maven build output (compiled classes)
-    └── classes/
-        └── com/
-            └── function/
-                └── Function.class
-```
-
-### C# Templates
-
-```text
-HttpTrigger-CSharp-Isolated/
-├── HttpTriggerCSharp.cs    # Main function code
+HttpTrigger/
+├── function_app.py         # Main function code with @app decorators
 ├── host.json              # Function host configuration
 ├── local.settings.json    # Local development settings
-└── .template.config/      # Template metadata
-    ├── template.json      # Template definition
+└── requirements.txt       # Python dependencies
+```
+
+### TypeScript Templates (Node.js v4 Model)
+
+```text
+HttpTrigger/
+├── src/                   # Source code directory
+├── package.json           # Node.js dependencies and scripts
+├── package-lock.json      # Locked dependency versions
+├── tsconfig.json          # TypeScript configuration
+├── host.json             # Function host configuration
+└── local.settings.json   # Local development settings
+```
+
+### Java Templates (Maven-based)
+
+```text
+HttpTrigger/
+├── pom.xml               # Maven configuration and dependencies
+├── host.json             # Function host configuration
+├── local.settings.json   # Local development settings
+└── src/                  # Java source code with annotations
+    └── main/
+        └── java/
+```
+
+### C# Templates (.NET Isolated Worker)
+
+```text
+HttpTrigger/
+├── HttpTriggerCSharp.cs  # Main function code (isolated worker)
+└── .template.config/     # Template metadata for tooling
+    ├── template.json     # Template definition
     └── vs-2017.3.host.json # Visual Studio configuration
 ```
 
@@ -232,20 +255,20 @@ Returns just the function_app.py file content.
 ```text
 Tool: get_template_files
 Language: csharp
-Template: HttpTrigger-CSharp-Isolated
+Template: HttpTrigger
 ```
 
 Returns all files with complete content and syntax highlighting.
 
 ### Language-Specific Examples
 
-**Get a Java source file:**
+**Get a Java Maven configuration:**
 
 ```text
 Tool: get_azure_functions_templates
 Language: java
-Template: HttpTrigger-Java
-FilePath: src/main/java/com/function/Function.java
+Template: HttpTrigger
+FilePath: pom.xml
 ```
 
 **Get a C# template configuration:**
@@ -253,8 +276,26 @@ FilePath: src/main/java/com/function/Function.java
 ```text
 Tool: get_azure_functions_templates
 Language: csharp
-Template: HttpTrigger-CSharp-Isolated
+Template: HttpTrigger
 FilePath: .template.config/template.json
+```
+
+**Get TypeScript project configuration:**
+
+```text
+Tool: get_azure_functions_templates
+Language: typescript
+Template: HttpTrigger
+FilePath: package.json
+```
+
+**Get Python requirements:**
+
+```text
+Tool: get_azure_functions_templates
+Language: python
+Template: HttpTrigger
+FilePath: requirements.txt
 ```
 
 ## Troubleshooting
