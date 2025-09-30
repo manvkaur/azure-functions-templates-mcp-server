@@ -20,403 +20,355 @@ const VALID_LANGUAGES = ["csharp", "java", "python", "typescript"] as const;
 
 const VALID_TEMPLATES: Record<string, string[]> = {
   csharp: [
-    "BlobTrigger-CSharp-Isolated", "CosmosDbTrigger-CSharp-Isolated", "DaprPublishOutputBinding-CSharp-Isolated",
-    "DaprServiceInvocationTrigger-CSharp-Isolated", "DaprTopicTrigger-CSharp-Isolated", "DurableFunctionsEntityClass-CSharp-Isolated",
-    "DurableFunctionsEntityFunction-CSharp-Isolated", "DurableFunctionsOrchestration-CSharp-Isolated", "EventGridBlobTrigger-CSharp-Isolated",
-    "EventGridTrigger-CSharp-Isolated", "EventHubTrigger-CSharp-Isolated", "HttpTrigger-CSharp-Isolated",
-    "KustoInputBinding-CSharp-Isolated", "KustoOutputBinding-CSharp-Isolated", "MCPToolTrigger-CSharp-Isolated",
-    "MySqlInputBinding-CSharp-Isolated", "MySqlOutputBinding-CSharp-Isolated", "MySqlTrigger-CSharp-Isolated",
-    "QueueTrigger-CSharp-Isolated", "RabbitMQTrigger-CSharp-Isolated", "ServiceBusQueueTrigger-CSharp-Isolated",
-    "ServiceBusTopicTrigger-CSharp-Isolated", "SignalRConnectionInfoHttpTrigger-CSharp-Isolated", "SqlInputBinding-CSharp-Isolated",
-    "SqlTrigger-CSharp-Isolated", "TimerTrigger-CSharp-Isolated"
+    "BlobInputOutputBindings", "BlobTrigger", "CosmosDBInputBinding", "CosmosDBOutputBinding", "CosmosDbTrigger",
+    "DaprPublishOutputBinding", "DaprServiceInvocationTrigger", "DaprTopicTrigger", "DurableFunctionsEntityClass",
+    "DurableFunctionsEntityFunction", "DurableFunctionsOrchestration", "EventGridBlobTrigger", "EventGridTrigger",
+    "EventHubTrigger", "HttpTrigger", "KustoInputBinding", "KustoOutputBinding", "MCPToolTrigger",
+    "MySqlInputBinding", "MySqlOutputBinding", "MySqlTrigger", "QueueTrigger", "RabbitMQTrigger",
+    "ServiceBusQueueTrigger", "ServiceBusTopicTrigger", "SignalRConnectionInfoHttpTrigger", "SqlInputBinding",
+    "SqlTrigger", "TimerTrigger"
   ],
   java: [
-    "BlobTrigger-Java", "DurableFunctions-Java", "EventGridTrigger-Java", "EventHubTrigger-Java",
-    "HttpTrigger-Java", "MCPToolTrigger-Java", "QueueTrigger-Java", "ServiceBusQueueTrigger-Java",
-    "ServiceBusTopicTrigger-Java", "TimerTrigger-Java"
+    "BlobInputBinding", "BlobOutputBinding", "BlobTrigger", "CosmosDBInputBinding", "CosmosDBOutputBinding",
+    "DurableFunctions", "EventGridTrigger", "EventHubTrigger", "HttpTrigger", "MCPToolTrigger",
+    "QueueTrigger", "ServiceBusQueueTrigger", "ServiceBusTopicTrigger", "TimerTrigger"
   ],
   python: [
-    "BlobInputBinding", "BlobOutputBinding", "BlobTrigger", "CosmosDBTrigger",
-    "EventHubTrigger", "HttpTrigger", "McpTrigger", "QueueTrigger", "TimerTrigger"
+    "BlobInputBinding", "BlobOutputBinding", "BlobTrigger", "BlobTriggerWithEventGrid", "CosmosDBInputOutputBinding",
+    "CosmosDBTrigger", "EventHubTrigger", "HttpTrigger", "McpTrigger", "QueueTrigger", "TimerTrigger"
   ],
   typescript: [
-    "AuthenticationEventsTrigger-TypeScript", "BlobTrigger-TypeScript", "CosmosDbTrigger-TypeScript",
-    "DurableFunctionsActivity-TypeScript", "DurableFunctionsEntity-TypeScript", "DurableFunctionsHttpStart-TypeScript",
-    "DurableFunctionsOrchestrator-TypeScript", "EventGridBlobTrigger-TypeScript", "EventGridTrigger-TypeScript", 
-    "EventHubTrigger-TypeScript", "HttpTrigger-TypeScript", "IoTHubTrigger-TypeScript", "KafkaOutput-TypeScript",
-    "MCPToolTrigger-TypeScript", "MySqlInputBinding-Typescript", "MySqlOutputBinding-Typescript", "MySqlTrigger-Typescript",
-    "QueueTrigger-TypeScript", "RabbitMQTrigger-TypeScript", "SendGrid-TypeScript", "ServiceBusQueueTrigger-TypeScript",
-    "ServiceBusTopicTrigger-TypeScript", "SignalRConnectionInfoHttpTrigger-TypeScript", "SqlInputBinding-Typescript",
-    "SqlOutputBinding-Typescript", "SqlTrigger-Typescript", "TimerTrigger-TypeScript"
+    "BlobInputAndOutputBindings", "BlobTrigger", "BlobTriggerWithEventGrid", "CosmosDBInputOutBinding",
+    "CosmosDBTrigger", "EventHubTrigger", "HttpTrigger", "McpTrigger", "QueueTrigger", "TimerTrigger"
   ]
 };
 
 // Shared template descriptions used across multiple tools
 const TEMPLATE_DESCRIPTIONS: Record<string, Record<string, { description: string; category: string; useCase: string }>> = {
   csharp: {
-    "BlobTrigger-CSharp-Isolated": {
-      description: "Triggered by Azure Blob Storage operations (create, update, delete)",
+    "BlobInputOutputBindings": {
+      description: "Combines blob input and output bindings in a single function",
+      category: "Storage Bindings",
+      useCase: "File transformation, data processing pipelines, content conversion"
+    },
+    "BlobTrigger": {
+      description: "Triggered when files are added or modified in Azure Blob Storage",
       category: "Storage Triggers",
-      useCase: "Process files uploaded to blob storage, image processing, document analysis"
+      useCase: "File processing, image resizing, document analysis, automated workflows"
     },
-    "CosmosDbTrigger-CSharp-Isolated": {
-      description: "Triggered by changes in Azure Cosmos DB collections using change feed",
+    "CosmosDBInputBinding": {
+      description: "Reads documents from Azure Cosmos DB collections",
+      category: "Database Bindings",
+      useCase: "Data retrieval, document queries, read-only database operations"
+    },
+    "CosmosDBOutputBinding": {
+      description: "Writes documents to Azure Cosmos DB collections",
+      category: "Database Bindings",
+      useCase: "Data persistence, document updates, write operations to NoSQL databases"
+    },
+    "CosmosDbTrigger": {
+      description: "Triggered by changes in Cosmos DB using the change feed",
       category: "Database Triggers", 
-      useCase: "Real-time data processing, maintaining materialized views, event sourcing"
+      useCase: "Real-time data processing, event sourcing, maintaining materialized views"
     },
-    "DaprPublishOutputBinding-CSharp-Isolated": {
+    "DaprPublishOutputBinding": {
       description: "Publishes messages to Dapr pub/sub components",
-      category: "Integration",
-      useCase: "Microservices communication, event-driven architectures, decoupled messaging"
+      category: "Microservices",
+      useCase: "Event-driven microservices, decoupled messaging, distributed architectures"
     },
-    "DaprServiceInvocationTrigger-CSharp-Isolated": {
-      description: "Handles Dapr service invocation requests",
-      category: "Integration",
-      useCase: "Service-to-service communication in microservices, API gateways, distributed apps"
+    "DaprServiceInvocationTrigger": {
+      description: "Handles Dapr service-to-service invocation requests",
+      category: "Microservices",
+      useCase: "Microservices communication, API gateways, service mesh integration"
     },
-    "DaprTopicTrigger-CSharp-Isolated": {
-      description: "Subscribes to Dapr pub/sub topics for message processing",
-      category: "Integration", 
-      useCase: "Event processing in microservices, asynchronous workflows, message handling"
+    "DaprTopicTrigger": {
+      description: "Subscribes to Dapr pub/sub topics",
+      category: "Microservices", 
+      useCase: "Event processing, asynchronous message handling, distributed workflows"
     },
-    "DurableFunctionsEntityClass-CSharp-Isolated": {
-      description: "Stateful entity class for Durable Functions workflows",
+    "DurableFunctionsEntityClass": {
+      description: "Stateful entity class for managing persistent state",
       category: "Durable Functions",
-      useCase: "Managing stateful objects, counters, accumulators, workflow state management"
+      useCase: "State management, counters, workflow coordination, stateful processing"
     },
-    "DurableFunctionsEntityFunction-CSharp-Isolated": {
-      description: "Entity function for maintaining state in Durable Functions",
+    "DurableFunctionsEntityFunction": {
+      description: "Entity function for Durable Functions state management",
       category: "Durable Functions",
-      useCase: "Stateful processing, maintaining counters, singleton patterns, state machines"
+      useCase: "Singleton patterns, state machines, persistent counters, stateful logic"
     },
-    "DurableFunctionsOrchestration-CSharp-Isolated": {
+    "DurableFunctionsOrchestration": {
       description: "Orchestrator function for complex workflow coordination",
       category: "Durable Functions", 
-      useCase: "Multi-step workflows, saga patterns, long-running processes, business workflows"
+      useCase: "Multi-step workflows, business processes, saga patterns, long-running operations"
     },
-    "EventGridBlobTrigger-CSharp-Isolated": {
-      description: "Triggered by Azure Event Grid blob events with enhanced filtering",
+    "EventGridBlobTrigger": {
+      description: "Enhanced blob trigger using Azure Event Grid for better performance",
       category: "Storage Triggers",
-      useCase: "Advanced blob processing with filtering, metadata-based routing, event-driven processing"
+      useCase: "High-performance file processing, event-driven blob operations, scalable workflows"
     },
-    "EventGridTrigger-CSharp-Isolated": {
-      description: "Handles Azure Event Grid custom events and system events",
-      category: "Messaging",
-      useCase: "Event-driven architectures, system integration, custom event processing"
+    "EventGridTrigger": {
+      description: "Handles Azure Event Grid events from various sources",
+      category: "Event Processing",
+      useCase: "Event-driven architectures, system integration, reactive applications"
     },
-    "EventHubTrigger-CSharp-Isolated": {
-      description: "Processes high-throughput data streams from Azure Event Hubs",
-      category: "Messaging",
-      useCase: "Real-time analytics, telemetry processing, IoT data streams, big data ingestion"
+    "EventHubTrigger": {
+      description: "Processes streaming data from Azure Event Hubs",
+      category: "Streaming",
+      useCase: "Real-time analytics, IoT data processing, telemetry ingestion, big data streams"
     },
-    "HttpTrigger-CSharp-Isolated": {
-      description: "RESTful HTTP API endpoints with GET/POST support",
-      category: "HTTP Triggers",
+    "HttpTrigger": {
+      description: "HTTP-triggered function for REST API endpoints",
+      category: "Web APIs",
       useCase: "REST APIs, webhooks, web services, serverless backends"
     },
-    "KustoInputBinding-CSharp-Isolated": {
-      description: "Reads data from Azure Data Explorer (Kusto) databases",
-      category: "External Services",
-      useCase: "Analytics queries, data exploration, reporting, time-series analysis"
+    "KustoInputBinding": {
+      description: "Queries data from Azure Data Explorer (Kusto)",
+      category: "Analytics",
+      useCase: "Data analytics, time-series queries, telemetry analysis, reporting"
     },
-    "KustoOutputBinding-CSharp-Isolated": {
-      description: "Writes data to Azure Data Explorer (Kusto) databases",
-      category: "External Services", 
+    "KustoOutputBinding": {
+      description: "Ingests data into Azure Data Explorer (Kusto)",
+      category: "Analytics", 
       useCase: "Analytics data ingestion, telemetry storage, time-series data collection"
     },
-    "MCPToolTrigger-CSharp-Isolated": {
-      description: "Model Context Protocol tool integration for AI workflows",
+    "MCPToolTrigger": {
+      description: "Model Context Protocol integration for AI assistant tools",
       category: "AI/ML",
-      useCase: "AI assistant integrations, tool calling workflows, LLM integrations"
+      useCase: "AI assistant integrations, LLM tool calling, intelligent automation"
     },
-    "MySqlInputBinding-CSharp-Isolated": {
+    "MySqlInputBinding": {
       description: "Reads data from MySQL databases",
-      category: "Database Triggers",
-      useCase: "Data synchronization, reporting, database queries, ETL processes"
+      category: "Database Bindings",
+      useCase: "Database queries, data synchronization, reporting, ETL processes"
     },
-    "MySqlOutputBinding-CSharp-Isolated": {
+    "MySqlOutputBinding": {
       description: "Writes data to MySQL databases", 
-      category: "Database Triggers",
-      useCase: "Data persistence, transaction processing, database updates, data migration"
+      category: "Database Bindings",
+      useCase: "Data persistence, database updates, transaction processing"
     },
-    "MySqlTrigger-CSharp-Isolated": {
-      description: "Triggered by MySQL database changes",
+    "MySqlTrigger": {
+      description: "Triggered by changes in MySQL databases",
       category: "Database Triggers",
-      useCase: "Change data capture, real-time sync, audit logging, data replication"
+      useCase: "Change data capture, real-time sync, audit logging"
     },
-    "QueueTrigger-CSharp-Isolated": {
+    "QueueTrigger": {
       description: "Processes messages from Azure Storage Queues",
       category: "Storage Triggers",
-      useCase: "Asynchronous processing, work queues, task scheduling, decoupled architectures"
+      useCase: "Asynchronous processing, background jobs, work queues, task scheduling"
     },
-    "RabbitMQTrigger-CSharp-Isolated": {
+    "RabbitMQTrigger": {
       description: "Consumes messages from RabbitMQ queues",
       category: "Messaging",
-      useCase: "Message processing, distributed systems, event-driven apps, microservices communication"
+      useCase: "Message processing, distributed systems, enterprise messaging"
     },
-    "ServiceBusQueueTrigger-CSharp-Isolated": {
-      description: "Handles Azure Service Bus queue messages with reliability",
+    "ServiceBusQueueTrigger": {
+      description: "Handles messages from Azure Service Bus queues",
       category: "Messaging",
-      useCase: "Reliable messaging, enterprise integration, message processing with transactions"
+      useCase: "Reliable messaging, enterprise integration, transactional processing"
     },
-    "ServiceBusTopicTrigger-CSharp-Isolated": {
-      description: "Subscribes to Azure Service Bus topics for pub/sub messaging",
+    "ServiceBusTopicTrigger": {
+      description: "Subscribes to Azure Service Bus topics",
       category: "Messaging",
-      useCase: "Publish-subscribe patterns, event broadcasting, multi-subscriber scenarios"
+      useCase: "Publish-subscribe patterns, event broadcasting, multi-consumer scenarios"
     },
-    "SignalRConnectionInfoHttpTrigger-CSharp-Isolated": {
-      description: "Provides SignalR connection info for real-time apps",
-      category: "Integration",
-      useCase: "Real-time web applications, chat apps, live notifications, collaborative tools"
+    "SignalRConnectionInfoHttpTrigger": {
+      description: "Provides SignalR connection information via HTTP",
+      category: "Real-time Communication",
+      useCase: "Real-time web applications, chat systems, live notifications"
     },
-    "SqlInputBinding-CSharp-Isolated": {
+    "SqlInputBinding": {
       description: "Reads data from SQL Server/Azure SQL databases",
-      category: "Database Triggers",
-      useCase: "Data queries, reporting, ETL processes, database integration"
+      category: "Database Bindings",
+      useCase: "SQL queries, reporting, data retrieval, database integration"
     },
-    "SqlTrigger-CSharp-Isolated": {
-      description: "Triggered by SQL database changes using change tracking",
+    "SqlTrigger": {
+      description: "Triggered by changes in SQL Server/Azure SQL databases",
       category: "Database Triggers",
-      useCase: "Change data capture, real-time sync, audit trails, data replication"
+      useCase: "Change data capture, real-time sync, audit trails"
     },
-    "TimerTrigger-CSharp-Isolated": {
-      description: "Scheduled execution using CRON expressions",
+    "TimerTrigger": {
+      description: "Scheduled function execution using CRON expressions",
       category: "Scheduling",
-      useCase: "Batch processing, scheduled tasks, maintenance jobs, periodic cleanup"
+      useCase: "Batch processing, scheduled maintenance, periodic cleanup, automated tasks"
     }
   },
   java: {
-    "BlobTrigger-Java": {
-      description: "Triggered by Azure Blob Storage operations with Maven configuration",
-      category: "Storage Triggers",
-      useCase: "File processing, document analysis, image processing, data ingestion"
-    },
-    "DurableFunctions-Java": {
-      description: "Orchestration and activity functions for complex workflows",
-      category: "Durable Functions",
-      useCase: "Multi-step workflows, business processes, saga patterns, long-running operations"
-    },
-    "EventGridTrigger-Java": {
-      description: "Handles Azure Event Grid events in Java runtime",
-      category: "Messaging", 
-      useCase: "Event-driven architectures, system integration, custom event processing"
-    },
-    "EventHubTrigger-Java": {
-      description: "Processes streaming data from Azure Event Hubs",
-      category: "Messaging",
-      useCase: "Real-time analytics, IoT data processing, telemetry ingestion, stream processing"
-    },
-    "HttpTrigger-Java": {
-      description: "RESTful API endpoints with annotation-based configuration",
-      category: "HTTP Triggers",
-      useCase: "REST APIs, web services, webhooks, serverless backends"
-    },
-    "MCPToolTrigger-Java": {
-      description: "Model Context Protocol integration for AI tool workflows",
-      category: "AI/ML",
-      useCase: "AI assistant tools, LLM integrations, intelligent automation"
-    },
-    "QueueTrigger-Java": {
-      description: "Processes Azure Storage Queue messages",
-      category: "Storage Triggers",
-      useCase: "Asynchronous processing, background jobs, task queues, decoupled processing"
-    },
-    "ServiceBusQueueTrigger-Java": {
-      description: "Handles Service Bus queue messages with Java annotations",
-      category: "Messaging",
-      useCase: "Enterprise messaging, reliable message processing, transaction support"
-    },
-    "ServiceBusTopicTrigger-Java": {
-      description: "Subscribes to Service Bus topics for messaging",
-      category: "Messaging", 
-      useCase: "Pub/sub patterns, event broadcasting, multi-consumer scenarios"
-    },
-    "TimerTrigger-Java": {
-      description: "Scheduled functions using CRON expressions with Java",
-      category: "Scheduling",
-      useCase: "Batch processing, scheduled maintenance, periodic data processing"
-    }
-  },
-  python: {
     "BlobInputBinding": {
-      description: "Reads blob data as input binding (v2 programming model)",
-      category: "Storage Triggers",
-      useCase: "File processing, data ingestion, document analysis, content processing"
+      description: "Reads blob data as input binding",
+      category: "Storage Bindings",
+      useCase: "File processing, data ingestion, content reading, document analysis"
     },
     "BlobOutputBinding": {
       description: "Writes data to Azure Blob Storage as output binding",
-      category: "Storage Triggers", 
-      useCase: "File generation, data export, report creation, backup processes"
+      category: "Storage Bindings",
+      useCase: "File generation, data export, report creation, content publishing"
     },
     "BlobTrigger": {
-      description: "Triggered by blob storage events using v2 programming model decorators",
+      description: "Triggered by blob storage events",
       category: "Storage Triggers",
-      useCase: "Automated file processing, image resizing, data transformation, ETL pipelines"
+      useCase: "Automated file processing, image processing, ETL pipelines"
     },
-    "CosmosDBTrigger": {
-      description: "Responds to Cosmos DB document changes via change feed",
-      category: "Database Triggers",
-      useCase: "Real-time data sync, event sourcing, materialized views, change tracking"
+    "CosmosDBInputBinding": {
+      description: "Reads documents from Cosmos DB collections",
+      category: "Database Bindings",
+      useCase: "Document queries, data retrieval, NoSQL database operations"
+    },
+    "CosmosDBOutputBinding": {
+      description: "Writes documents to Cosmos DB collections",
+      category: "Database Bindings",
+      useCase: "Data persistence, document storage, NoSQL write operations"
+    },
+    "DurableFunctions": {
+      description: "Durable Functions orchestration and activities",
+      category: "Durable Functions",
+      useCase: "Complex workflows, business processes, stateful operations, saga patterns"
+    },
+    "EventGridTrigger": {
+      description: "Handles Azure Event Grid events from various sources",
+      category: "Event Processing", 
+      useCase: "Event-driven architectures, reactive systems, system integration"
     },
     "EventHubTrigger": {
-      description: "Processes high-volume event streams from Event Hubs",
-      category: "Messaging",
-      useCase: "IoT telemetry processing, real-time analytics, stream processing, data science workflows"
+      description: "Processes streaming data from Azure Event Hubs",
+      category: "Streaming",
+      useCase: "Real-time analytics, IoT data processing, stream processing, big data ingestion"
     },
     "HttpTrigger": {
-      description: "HTTP API endpoints with request/response handling",
-      category: "HTTP Triggers", 
-      useCase: "REST APIs, webhooks, web services, ML model serving, data science APIs"
+      description: "HTTP API endpoints for web requests",
+      category: "Web APIs",
+      useCase: "REST APIs, web services, serverless backends, webhook handling"
     },
-    "McpTrigger": {
-      description: "Model Context Protocol integration for AI assistant workflows",
+    "MCPToolTrigger": {
+      description: "Model Context Protocol tool integration",
       category: "AI/ML",
-      useCase: "AI tool integration, LLM workflows, intelligent automation, ML pipelines"
+      useCase: "AI assistant tools, LLM integrations, intelligent automation"
     },
     "QueueTrigger": {
-      description: "Processes Azure Storage Queue messages asynchronously",
+      description: "Processes messages from Azure Storage Queues",
       category: "Storage Triggers",
-      useCase: "Background processing, async workflows, task scheduling, data pipeline processing"
+      useCase: "Asynchronous processing, background jobs, task scheduling"
+    },
+    "ServiceBusQueueTrigger": {
+      description: "Handles messages from Azure Service Bus queues",
+      category: "Messaging",
+      useCase: "Enterprise messaging, reliable processing, transactional messaging"
+    },
+    "ServiceBusTopicTrigger": {
+      description: "Subscribes to Azure Service Bus topics",
+      category: "Messaging", 
+      useCase: "Publish-subscribe patterns, event broadcasting, distributed messaging"
     },
     "TimerTrigger": {
       description: "Scheduled execution using CRON expressions",
       category: "Scheduling",
-      useCase: "Data science jobs, model training, batch processing, automated reports"
+      useCase: "Batch processing, scheduled tasks, periodic operations, maintenance jobs"
+    }
+  },
+  python: {
+    "BlobInputBinding": {
+      description: "Reads blob data as input binding",
+      category: "Storage Bindings",
+      useCase: "File processing, data analysis, content reading, ML data preprocessing"
+    },
+    "BlobOutputBinding": {
+      description: "Writes data to Azure Blob Storage as output binding",
+      category: "Storage Bindings", 
+      useCase: "File generation, data export, ML model outputs, report creation"
+    },
+    "BlobTrigger": {
+      description: "Triggered by blob storage events",
+      category: "Storage Triggers",
+      useCase: "Automated file processing, image analysis, data pipelines, ETL workflows"
+    },
+    "BlobTriggerWithEventGrid": {
+      description: "Enhanced blob trigger using Event Grid for improved performance",
+      category: "Storage Triggers",
+      useCase: "High-performance file processing, scalable blob operations, event-driven workflows"
+    },
+    "CosmosDBInputOutputBinding": {
+      description: "Combined Cosmos DB input and output bindings",
+      category: "Database Bindings",
+      useCase: "Document transformation, data migration, NoSQL data processing"
+    },
+    "CosmosDBTrigger": {
+      description: "Triggered by Cosmos DB changes using change feed",
+      category: "Database Triggers",
+      useCase: "Real-time data processing, event sourcing, data synchronization, change tracking"
+    },
+    "EventHubTrigger": {
+      description: "Processes streaming data from Azure Event Hubs",
+      category: "Streaming",
+      useCase: "Real-time analytics, IoT data processing, telemetry analysis, data science workflows"
+    },
+    "HttpTrigger": {
+      description: "HTTP API endpoints for web requests",
+      category: "Web APIs", 
+      useCase: "REST APIs, webhooks, web services, ML model serving, data science APIs"
+    },
+    "McpTrigger": {
+      description: "Model Context Protocol integration for AI workflows",
+      category: "AI/ML",
+      useCase: "AI assistant tools, LLM integrations, ML pipeline automation, intelligent workflows"
+    },
+    "QueueTrigger": {
+      description: "Processes messages from Azure Storage Queues",
+      category: "Storage Triggers",
+      useCase: "Background processing, async data processing, task queues, batch processing"
+    },
+    "TimerTrigger": {
+      description: "Scheduled execution using CRON expressions in Python",
+      category: "Scheduling",
+      useCase: "Data science jobs, ML model training, automated reports, periodic data processing"
     }
   },
   typescript: {
-    "AuthenticationEventsTrigger-TypeScript": {
-      description: "Handles Azure AD B2C authentication events",
-      category: "Integration",
-      useCase: "User authentication workflows, identity management, security events processing"
+    "BlobInputAndOutputBindings": {
+      description: "Combined blob input and output bindings in a single function",
+      category: "Storage Bindings",
+      useCase: "File transformation, data processing pipelines, content conversion"
     },
-    "BlobTrigger-TypeScript": {
-      description: "Triggered by Azure Blob Storage operations",
+    "BlobTrigger": {
+      description: "Triggered when files are added or modified in Azure Blob Storage",
       category: "Storage Triggers",
-      useCase: "File processing, image manipulation, document workflows, content management"
+      useCase: "File processing, image manipulation, document workflows, automated processing"
     },
-    "CosmosDbTrigger-TypeScript": {
-      description: "Responds to Cosmos DB document changes", 
+    "BlobTriggerWithEventGrid": {
+      description: "Enhanced blob trigger using Azure Event Grid for better performance",
+      category: "Storage Triggers",
+      useCase: "High-performance file processing, scalable blob operations, event-driven workflows"
+    },
+    "CosmosDBInputOutBinding": {
+      description: "Combined Cosmos DB input and output bindings",
+      category: "Database Bindings",
+      useCase: "Document transformation, data migration, NoSQL data processing"
+    },
+    "CosmosDBTrigger": {
+      description: "Triggered by changes in Cosmos DB using the change feed", 
       category: "Database Triggers",
       useCase: "Real-time data processing, change notifications, event-driven updates"
     },
-    "DurableFunctionsActivity-TypeScript": {
-      description: "Activity function for Durable Functions workflows",
-      category: "Durable Functions",
-      useCase: "Workflow steps, business logic components, reusable processing units"
+    "EventHubTrigger": {
+      description: "Processes streaming data from Azure Event Hubs",
+      category: "Streaming", 
+      useCase: "Real-time analytics, IoT telemetry processing, streaming data pipelines"
     },
-    "DurableFunctionsEntity-TypeScript": {
-      description: "Stateful entity for maintaining state",
-      category: "Durable Functions", 
-      useCase: "State management, counters, stateful objects, workflow coordination"
+    "HttpTrigger": {
+      description: "HTTP API endpoints for web requests",
+      category: "Web APIs",
+      useCase: "REST APIs, web services, serverless backends, webhook handlers"
     },
-    "DurableFunctionsHttpStart-TypeScript": {
-      description: "HTTP starter for initiating orchestrations",
-      category: "Durable Functions",
-      useCase: "Workflow initiation, orchestration management, process triggers"
-    },
-    "DurableFunctionsOrchestrator-TypeScript": {
-      description: "Orchestrates complex multi-step workflows",
-      category: "Durable Functions",
-      useCase: "Business processes, multi-step operations, workflow coordination, saga patterns"
-    },
-    "EventGridBlobTrigger-TypeScript": {
-      description: "Enhanced blob event handling via Event Grid",
-      category: "Storage Triggers",
-      useCase: "Advanced file processing with filtering, event-driven workflows, metadata processing"
-    },
-    "EventGridTrigger-TypeScript": {
-      description: "Processes Event Grid custom and system events",
-      category: "Messaging",
-      useCase: "Event-driven architectures, system integration, custom event handling"
-    },
-    "EventHubTrigger-TypeScript": {
-      description: "Handles Event Hub streaming data",
-      category: "Messaging", 
-      useCase: "Real-time data processing, IoT telemetry, streaming analytics, live dashboards"
-    },
-    "HttpTrigger-TypeScript": {
-      description: "RESTful API endpoints with TypeScript type safety",
-      category: "HTTP Triggers",
-      useCase: "Type-safe APIs, web services, serverless backends, webhook handlers"
-    },
-    "IoTHubTrigger-TypeScript": {
-      description: "Processes IoT device messages from Azure IoT Hub",
-      category: "Integration",
-      useCase: "IoT data processing, device telemetry, sensor data analysis, device management"
-    },
-    "KafkaOutput-TypeScript": {
-      description: "Produces messages to Apache Kafka topics",
-      category: "Messaging",
-      useCase: "Event streaming, data pipelines, message publishing, distributed systems"
-    },
-    "MCPToolTrigger-TypeScript": {
-      description: "Model Context Protocol tool integration",
+    "McpTrigger": {
+      description: "Model Context Protocol integration for AI workflows",
       category: "AI/ML",
-      useCase: "AI assistant tools, LLM integrations, intelligent workflows, automated assistance"
+      useCase: "AI assistant tools, LLM integrations, intelligent automation workflows"
     },
-    "MySqlInputBinding-Typescript": {
-      description: "Reads data from MySQL databases",
-      category: "Database Triggers",
-      useCase: "Database queries, data retrieval, reporting, ETL processes"
-    },
-    "MySqlOutputBinding-Typescript": {
-      description: "Writes data to MySQL databases",
-      category: "Database Triggers", 
-      useCase: "Data persistence, database updates, transaction processing, data synchronization"
-    },
-    "MySqlTrigger-Typescript": {
-      description: "Responds to MySQL database changes",
-      category: "Database Triggers",
-      useCase: "Change data capture, real-time sync, database monitoring, audit logging"
-    },
-    "QueueTrigger-TypeScript": {
-      description: "Processes Azure Storage Queue messages",
+    "QueueTrigger": {
+      description: "Processes messages from Azure Storage Queues",
       category: "Storage Triggers",
-      useCase: "Async processing, background jobs, task queues, decoupled architectures"
+      useCase: "Asynchronous processing, background jobs, task queues, decoupled architectures"
     },
-    "RabbitMQTrigger-TypeScript": {
-      description: "Consumes RabbitMQ messages",
-      category: "Messaging",
-      useCase: "Message processing, distributed systems, event-driven apps, microservices"
-    },
-    "SendGrid-TypeScript": {
-      description: "Sends emails using SendGrid service",
-      category: "External Services",
-      useCase: "Email notifications, transactional emails, marketing campaigns, automated messaging"
-    },
-    "ServiceBusQueueTrigger-TypeScript": {
-      description: "Handles Service Bus queue messages",
-      category: "Messaging", 
-      useCase: "Enterprise messaging, reliable processing, message transactions, system integration"
-    },
-    "ServiceBusTopicTrigger-TypeScript": {
-      description: "Subscribes to Service Bus topics",
-      category: "Messaging",
-      useCase: "Pub/sub messaging, event broadcasting, multi-subscriber patterns"
-    },
-    "SignalRConnectionInfoHttpTrigger-TypeScript": {
-      description: "Provides SignalR connection info",
-      category: "Integration",
-      useCase: "Real-time web apps, live updates, chat applications, collaborative tools"
-    },
-    "SqlInputBinding-Typescript": {
-      description: "Reads from SQL databases",
-      category: "Database Triggers",
-      useCase: "Database queries, data access, reporting, analytics, ETL processes"
-    },
-    "SqlOutputBinding-Typescript": {
-      description: "Writes to SQL databases",
-      category: "Database Triggers",
-      useCase: "Data persistence, database operations, transaction processing, data updates"
-    },
-    "SqlTrigger-Typescript": {
-      description: "Triggered by SQL database changes",
-      category: "Database Triggers", 
-      useCase: "Change tracking, real-time sync, database monitoring, event processing"
-    },
-    "TimerTrigger-TypeScript": {
-      description: "Scheduled functions with CRON expressions",
+    "TimerTrigger": {
+      description: "Scheduled execution using CRON expressions",
       category: "Scheduling",
       useCase: "Scheduled tasks, batch processing, maintenance jobs, periodic operations"
     }
@@ -483,51 +435,42 @@ server.registerTool(
   "get_azure_functions_templates",
   {
     title: "Get Azure Functions Template",
-    description: `Retrieve a complete Azure Functions template with all its files for rapid development and deployment. 
-    Clients can tweak the business logic as needed. Mix and Match triggers, bindings as needed.
+    description: `Get complete Azure Functions templates with all files for rapid development and deployment.
 
-This tool provides ready-to-use Azure Functions templates across multiple programming languages and trigger types. Each template includes:
+Ready-to-use templates across 4 languages with complete project structure:
 
-File Patterns by Language:
-- Python: function_app.py, host.json, local.settings.json, requirements.txt (Azure Functions v2 programming model with decorators)
-- C#: .cs files with isolated worker model, .template.config/template.json, host.json (minimal configuration files for .NET)
-- Java: pom.xml with Azure Functions Maven plugin, host.json, src/main/java structure (includes complete Maven project setup)  
-- TypeScript: function.json metadata, index.ts with typed interfaces, package.json dependencies (Node.js v4 programming model)
+ **C# (.NET Isolated)**: 29 templates including Durable Functions, Dapr integration, database bindings
+ **Java (Maven)**: 14 templates with annotation-based configuration and Maven project structure  
+ **Python (v2 Model)**: 11 templates using modern decorator-based programming model
+ **TypeScript (Node.js)**: 10 templates with full type safety and modern async patterns
 
-Template Categories:
-- HTTP Triggers: RESTful API endpoints with authentication levels and route handling
-- Storage Triggers: Blob, Queue, and Table storage event processing  
-- Database Triggers: Cosmos DB change feed, SQL triggers, MySQL integration
-- Messaging: Service Bus queues/topics, Event Grid, Event Hub streaming
-- Scheduling: Timer triggers with CRON expressions for batch processing
-- Durable Functions: Orchestrators, activities, entities for stateful workflows
-- Integration: SignalR real-time, IoT Hub, Kafka, RabbitMQ messaging
-- AI/ML: Model Context Protocol (MCP) tool integration for AI assistants
-- External Services: SendGrid email, Dapr microservices, Kusto analytics
+**Template Categories**:
+- **Web APIs**: HTTP triggers for REST APIs and webhooks
+- **Storage**: Blob triggers/bindings, Queue processing
+- **Database**: Cosmos DB, SQL Server, MySQL triggers and bindings  
+- **Streaming**: Event Hubs for real-time data processing
+- **Messaging**: Service Bus, Event Grid, RabbitMQ integration
+- **Scheduling**: Timer triggers with CRON expressions
+- **Durable Functions**: Orchestrators, activities, entities for workflows
+- **Microservices**: Dapr integration, MCP tool integration
+- **Real-time**: SignalR for live updates
+- **Analytics**: Kusto (Azure Data Explorer) integration
 
-Perfect for:
-- Bootstrapping new Azure Functions projects with best practices
-- Learning Azure Functions patterns across different languages  
-- Creating production-ready serverless applications with proper configuration
-- Exploring different trigger types and output bindings
-- Rapid prototyping and development with complete project structure
-- Understanding cross-language Azure Functions implementations
-
-All templates include proper error handling, logging, configuration files, and follow Azure Functions best practices for each runtime.`,
+Each template includes complete project files, configuration, dependencies, and follows Azure Functions best practices. Perfect for learning, prototyping, or production use.`,
     inputSchema: {
       language: z.enum(VALID_LANGUAGES).describe(`Programming language for the Azure Functions template. Valid values: ${VALID_LANGUAGES.join(", ")}`),
       template: z.string().describe(`Template name. Valid templates vary by language:
       
-C# (.NET Isolated): 
+C# (.NET Isolated Worker Model): 
 ${generateTemplateDescriptions('csharp')}
 
-Java: 
+Java (Maven-based with Annotations): 
 ${generateTemplateDescriptions('java')}
 
-Python: 
+Python (v2 Programming Model with Decorators): 
 ${generateTemplateDescriptions('python')}
 
-TypeScript: 
+TypeScript (Node.js v4 Programming Model): 
 ${generateTemplateDescriptions('typescript')}`),
       filePath: z.string().optional().describe("Optional: specific file path within the template to retrieve (e.g., 'function_app.py', 'host.json', 'requirements.txt'). If omitted, returns all files in the template as a structured listing.")
     },
@@ -675,15 +618,16 @@ server.registerTool(
   "get_supported_languages",
   {
     title: "Get Supported Languages",
-    description: `Get all supported programming languages for Azure Functions templates.
-    
-This tool returns a comprehensive list of all programming languages supported by the Azure Functions template server, along with details about each language's runtime, programming model, and the number of available templates.
+    description: `Get overview of all supported programming languages for Azure Functions templates.
 
-Useful for:
-- Discovering what languages are available before requesting templates
-- Understanding the capabilities and characteristics of each runtime
-- Planning multi-language Azure Functions projects
-- Learning about Azure Functions programming models across languages`,
+Returns detailed information about each supported language:
+- **Runtime versions**: Supported language versions and runtimes
+- **Programming models**: Language-specific patterns and frameworks  
+- **Template counts**: Number of available templates per language
+- **Key features**: Unique capabilities and strengths of each runtime
+- **File patterns**: Typical project structure and key files
+
+Perfect for choosing the right language for your Azure Functions project and understanding the development experience across different runtimes.`,
     inputSchema: {},
   },
   async () => {
@@ -792,16 +736,15 @@ server.registerTool(
   "get_templates_by_language",
   {
     title: "Get Templates by Language",
-    description: `Get a detailed list of all available Azure Functions templates for a specific programming language.
-    
-This tool returns a comprehensive list of all templates available for the specified language, including detailed descriptions of what each template does, its use cases, and key features. Perfect for exploring available options before selecting a specific template to implement.
+    description: `Browse all Azure Functions templates available for a specific programming language with detailed descriptions and use cases.
 
-Useful for:
-- Discovering all available templates for a specific language
-- Understanding the purpose and use cases of each template
-- Comparing different trigger types and bindings
-- Choosing the right template for your specific requirements
-- Learning about Azure Functions capabilities in your preferred language`,
+Returns organized categories of templates with:
+- **Template descriptions**: What each template does and how it works
+- **Use cases**: Real-world scenarios where each template is most useful  
+- **Categories**: Grouped by functionality (Storage, Database, Messaging, etc.)
+- **Selection guide**: Quick comparison to help choose the right template
+
+Perfect for exploring available options and understanding Azure Functions capabilities in your preferred language before implementing a specific solution.`,
     inputSchema: {
       language: z.enum(VALID_LANGUAGES).describe(`Programming language to get templates for. Valid values: ${VALID_LANGUAGES.join(", ")}`)
     },
@@ -900,37 +843,23 @@ server.registerTool(
   "get_template_files",
   {
     title: "Get Template Files",
-    description: `Get the complete file listing and structure for a specific Azure Functions template.
-    
-This tool returns all files and their full content for the specified language and template combination. Perfect for getting ready-to-use code that you can immediately deploy or customize.
+    description: `Get all files and complete source code for a specific Azure Functions template.
 
-IMPORTANT - Exact Parameter Values Required:
+Returns complete template with:
+- **Full source code**: All implementation files ready to use
+- **Project structure**: Complete file organization and dependencies
+- **Configuration files**: host.json, local.settings.json, build configs
+- **Documentation**: README and metadata files where available
 
-LANGUAGE must be one of these exact values:
-- "csharp" - for C# .NET Isolated templates
-- "java" - for Java templates with Maven
-- "python" - for Python v2 programming model
-- "typescript" - for TypeScript Node.js templates
+**Languages Available**: csharp, java, python, typescript
 
-TEMPLATE must be an exact template name from the supported list for your chosen language:
+**Template Count by Language**:
+- C#: ${VALID_TEMPLATES.csharp.length} templates (Isolated worker model)
+- Java: ${VALID_TEMPLATES.java.length} templates (Maven with annotations) 
+- Python: ${VALID_TEMPLATES.python.length} templates (v2 decorator model)
+- TypeScript: ${VALID_TEMPLATES.typescript.length} templates (Node.js v4 model)
 
-FOR LANGUAGE "csharp", use exactly one of:
-${VALID_TEMPLATES.csharp.join(', ')}
-
-FOR LANGUAGE "java", use exactly one of:
-${VALID_TEMPLATES.java.join(', ')}
-
-FOR LANGUAGE "python", use exactly one of:
-${VALID_TEMPLATES.python.join(', ')}
-
-FOR LANGUAGE "typescript", use exactly one of:
-${VALID_TEMPLATES.typescript.join(', ')}
-
-Use this tool when you want to:
-- Get all files for immediate use in your project
-- See the complete template structure and code
-- Copy and customize a specific template
-- Understand the full implementation of a template type`,
+Use exact template names as returned by get_templates_by_language. Perfect for getting production-ready code that you can immediately deploy or customize for your specific needs.`,
     inputSchema: {
       language: z.enum(VALID_LANGUAGES).describe(`REQUIRED: Programming language. Must be exactly one of: ${VALID_LANGUAGES.map(l => `"${l}"`).join(", ")}`),
       template: z.string().describe(`REQUIRED: Exact template name. Must be one of the supported templates for the specified language. See description above for complete list of valid values for each language.`)
