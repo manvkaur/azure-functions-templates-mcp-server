@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -41,5 +39,16 @@ namespace SampleApp
             return null;
         }
         //</docsnippet_exponential_backoff_retry_example>
+    }
+
+    public class MyDocument
+    {
+        public string? Id { get; set; }
+
+        public string? Text { get; set; }
+
+        public int Number { get; set; }
+
+        public bool Boolean { get; set; }
     }
 }
