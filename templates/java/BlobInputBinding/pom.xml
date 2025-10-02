@@ -76,7 +76,7 @@
                         <!-- runtime os, could be windows, linux (default) or docker-->
                         <!-- <os>linux</os> -->
                         <!-- runtime Java version, could be 8, 11, 17, 21 (default) -->
-                        <java.version>21</java.version>
+                        <javaVersion>21</javaVersion>
                     </runtime>
                     <appSettings>
                         <property>
