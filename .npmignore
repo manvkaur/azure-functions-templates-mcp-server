@@ -1,0 +1,22 @@
+# Development and build files
+node_modules/
+*.log
+*.tsbuildinfo
+.vscode/
+src/
+tsconfig.json
+tools/
+test-*.mjs
+
+# TypeScript node_modules - these contain massive Azure Functions binaries
+templates/typescript/*/node_modules/
+
+# C# build artifacts
+templates/csharp/*/bin/
+templates/csharp/*/obj/
+
+# Java build artifacts  
+templates/java/*/target/
+
+# Python artifacts
+templates/python/*/__pycache__/
