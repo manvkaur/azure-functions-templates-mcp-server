@@ -1,8 +1,24 @@
 {
-  "name": "templates-mcp-server",
+  "name": "manvir-templates-mcp-server",
   "version": "0.1.0",
-  "private": true,
-  "description": "An MCP server that serves templates from the templates/ folder via tools",
+  "description": "An MCP server that provides ready-to-use Azure Functions templates across 4 programming languages with 64+ templates covering all major Azure services and trigger types",
+  "keywords": [
+    "azure-functions",
+    "mcp-server",
+    "templates",
+    "serverless",
+    "azure",
+    "model-context-protocol"
+  ],
+  "author": "Manvir Kaur",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/manvkaur/azure-functions-templates-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/manvkaur/azure-functions-templates-mcp-server/issues"
+  },
+  "homepage": "https://github.com/manvkaur/azure-functions-templates-mcp-server#readme",
   "type": "module",
   "main": "dist/src/server.js",
   "license": "MIT",

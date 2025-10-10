@@ -15,16 +15,47 @@ A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions
 
 - Node.js 18+ (LTS recommended)
 
-## Install and build
+## Installation
+
+### Option 1: Install from npm (Recommended)
+
+Install the published package globally:
+
+```bash
+npm install -g manvir-templates-mcp-server
+```
+
+Or install locally in your project:
+
+```bash
+npm install manvir-templates-mcp-server
+```
+
+### Option 2: Build from source
 
 ```powershell
-# In the workspace root (d:\PyFx\templatesmcp)
+# Clone and build from source
+git clone https://github.com/manvkaur/azure-functions-templates-mcp-server.git
+cd azure-functions-templates-mcp-server
 npm install
 npm run build
 ```
 
-## Run (local/manual)
+## Quick Start
 
+### Run the server
+
+**If installed globally:**
+```bash
+manvir-templates-mcp-server
+```
+
+**If installed locally:**
+```bash
+npx manvir-templates-mcp-server
+```
+
+**From source build:**
 ```powershell
 node dist/src/server.js
 ```
@@ -43,20 +74,33 @@ Runs a simple test that calls the MCP server tools with sample requests.
 
 The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is a debugging and testing tool for MCP servers. To test this server with MCP Inspector:
 
-### Option 1: Using npx (Recommended)
+### Option 1: Using the npm package (Recommended)
+
+```bash
+# If installed globally
+npx @modelcontextprotocol/inspector manvir-templates-mcp-server
+
+# If installed locally  
+npx @modelcontextprotocol/inspector npx manvir-templates-mcp-server
+```
+
+### Option 2: Using built from source
 
 ```powershell
 # Start the inspector with your built server
 npx @modelcontextprotocol/inspector node dist/src/server.js
 ```
 
-### Option 2: Install Inspector globally
+### Option 3: Install Inspector globally
 
 ```powershell
 # Install MCP Inspector globally
 npm install -g @modelcontextprotocol/inspector
 
-# Run the inspector
+# Run with npm package
+mcp-inspector manvir-templates-mcp-server
+
+# Or run with source build
 mcp-inspector node dist/src/server.js
 ```
 
@@ -70,25 +114,70 @@ The inspector will:
 
 You can use this MCP server with VS Code through GitHub Copilot or other MCP-compatible extensions. Here are several approaches:
 
-### Option 1: GitHub Copilot Chat with MCP Extension
+### Option 1: Using npm package (Recommended)
 
-1. **Install the MCP extension for VS Code** (if available in marketplace)
-2. **Configure the server** in VS Code mcp.json settings:
+1. **Install the package globally:**
 
-- Replace the path in "args" below with the absolute path to your compiled server.js file in the dist folder
+   ```bash
+   npm install -g manvir-templates-mcp-server
+   ```
 
-```json
-{
- "servers": {
-  "azure-functions-template-mcp-server": {
-   "type": "stdio",
-   "command": "node",
-   "args": ["D:\\azure-functions-templates-mcp-server\\dist\\src\\server.js"]
-  }
- },
- "inputs": []
-}
-```
+2. **Configure in VS Code mcp.json settings:**
+
+   ```json
+   {
+     "servers": {
+       "azure-functions-template-mcp-server": {
+         "type": "stdio", 
+         "command": "manvir-templates-mcp-server"
+       }
+     },
+     "inputs": []
+   }
+   ```
+
+### Option 2: Using local npm installation
+
+1. **Install the package locally in your project:**
+
+   ```bash
+   npm install manvir-templates-mcp-server
+   ```
+
+2. **Configure in VS Code mcp.json settings:**
+
+   ```json
+   {
+     "servers": {
+       "azure-functions-template-mcp-server": {
+         "type": "stdio",
+         "command": "npx", 
+         "args": ["manvir-templates-mcp-server"]
+       }
+     },
+     "inputs": []
+   }
+   ```
+
+### Option 3: Using built from source
+
+1. **Build the project from source** (see Installation section)
+2. **Configure in VS Code mcp.json settings:**
+
+   ```json
+   {
+     "servers": {
+       "azure-functions-template-mcp-server": {
+         "type": "stdio",
+         "command": "node",
+         "args": ["D:\\path\\to\\azure-functions-templates-mcp-server\\dist\\src\\server.js"]
+       }
+     },
+     "inputs": []
+   }
+   ```
+
+   Replace `D:\\path\\to\\azure-functions-templates-mcp-server` with the actual path to your cloned repository.
 
 ## What it provides
 
