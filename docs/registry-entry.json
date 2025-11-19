@@ -1,0 +1,10 @@
+{
+  "azure-functions-templates": {
+    "type": "stdio",
+    "command": "manvir-templates-mcp-server",
+    "args": [],
+    "title": "Azure Functions Templates",
+    "description": "Provides ready-to-use Azure Functions templates across 4 programming languages (C#, Java, Python, TypeScript) with 64+ templates covering major Azure services including Blob triggers, CosmosDB bindings, Event Hub processing, HTTP endpoints, Timer functions, Durable Functions, Service Bus messaging, and AI/ML integrations. Templates include complete project structures with dependencies, configuration files, and modern programming patterns following Azure Functions best practices. Accelerates development with production-ready code for Web APIs, Storage operations, Database integrations, Streaming data processing, Messaging systems, Scheduled tasks, Microservices architectures, and Real-time applications.",
+    "installInstructions": "The Azure Functions Templates MCP server is not installed. Install it using: npm install -g manvir-templates-mcp-server"
+  }
+}
