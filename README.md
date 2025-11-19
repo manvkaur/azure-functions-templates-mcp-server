@@ -13,7 +13,10 @@ A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions
 
 ## Prerequisites
 
-- Node.js 18+ (LTS recommended)
+- **Node.js 18+ (LTS recommended)**: Required for running the MCP server
+- **npm**: Package manager (included with Node.js)
+- **MCP Client**: Such as VS Code with Copilot, or MCP Inspector
+- **Git**: For cloning the repository (if building from source)
 
 ## Installation
 
@@ -31,6 +34,16 @@ Or install locally in your project:
 npm install manvir-templates-mcp-server
 ```
 
+**Verify installation:**
+
+```bash
+# Test global installation
+manvir-templates-mcp-server --help
+
+# Or test with npx
+npx manvir-templates-mcp-server --help
+```
+
 ### Option 2: Build from source
 
 ```powershell
@@ -46,16 +59,19 @@ npm run build
 ### Run the server
 
 **If installed globally:**
+
 ```bash
 manvir-templates-mcp-server
 ```
 
 **If installed locally:**
+
 ```bash
 npx manvir-templates-mcp-server
 ```
 
 **From source build:**
+
 ```powershell
 node dist/src/server.js
 ```
@@ -281,7 +297,7 @@ HttpTrigger/
 - `npm run build`: Compile TypeScript to `dist/`
 - `npm start`: Run compiled server (`dist/src/server.js`)
 - `npm run smoke`: Test server with sample template request
-- `npm run dev`: Run with ts-node (for quick iteration; not for Claude config)
+- `npm run dev`: Run with ts-node (for quick iteration)
 - `npm run probe`: Simple health check for the server
 
 ## Directory structure
@@ -389,8 +405,64 @@ FilePath: requirements.txt
 
 ## Troubleshooting
 
-- If the tool doesn't show up in your client, verify paths in the client config are absolute and that `npm run build` succeeded.
-- Ensure no `console.log` statements are added to the server; stdout is reserved for MCP messages.
-- Templates are packaged with the server, so they'll be accessible regardless of where the server is deployed.
-- Use `npm run smoke` to test the server locally before configuring with Claude Desktop.
-- Use MCP Inspector (`npx @modelcontextprotocol/inspector node dist/src/server.js`) for interactive testing and debugging.
+### Common Issues
+
+#### Server Not Starting
+
+- **Problem**: Command not found or server won't start
+- **Solution**:
+  - Verify installation: `npm list -g manvir-templates-mcp-server`
+  - Reinstall if needed: `npm install -g manvir-templates-mcp-server`
+  - Check Node.js version: `node --version` (requires 18+)
+
+#### Tools Not Available in MCP Client
+
+- **Problem**: MCP client doesn't show the Azure Functions tools
+- **Solution**:
+  - Verify server configuration in your MCP client settings
+  - Check that paths in client config are absolute
+  - Ensure `npm run build` succeeded if building from source
+  - Test with MCP Inspector first: `npx @modelcontextprotocol/inspector manvir-templates-mcp-server`
+
+#### Template Retrieval Errors
+
+- **Problem**: Error when requesting templates
+- **Solution**:
+  - Verify language parameter is one of: `csharp`, `java`, `python`, `typescript`
+  - Check template name matches exactly (case-sensitive)
+  - Use `get_templates_by_language` to see valid template names
+
+#### Performance Issues
+
+- **Problem**: Slow response times
+- **Solution**:
+  - Templates are packaged with the server for fast access
+  - Use specific `filePath` parameter to get individual files instead of entire templates
+  - Consider using `get_template_files` for complete template content
+
+### Debug Mode
+
+Run the smoke test to verify functionality:
+
+```bash
+npm run smoke
+```
+
+Use MCP Inspector for interactive debugging:
+
+```bash
+npx @modelcontextprotocol/inspector manvir-templates-mcp-server
+```
+
+### Support
+
+- **Issues**: Report bugs at [GitHub Issues](https://github.com/manvkaur/azure-functions-templates-mcp-server/issues)
+- **Discussions**: Ask questions in [GitHub Discussions](https://github.com/manvkaur/azure-functions-templates-mcp-server/discussions)
+- **Documentation**: Full documentation available in the [repository](https://github.com/manvkaur/azure-functions-templates-mcp-server)
+
+### Development Notes
+
+- **Stdout Reserved**: Never add `console.log` statements; stdout is reserved for MCP protocol messages
+- **Error Handling**: All errors go to stderr, tool errors use `isError: true` flag
+- **Template Packaging**: Templates are embedded in the package for offline usage
+- **Protocol Compliance**: Server implements MCP specification correctly
