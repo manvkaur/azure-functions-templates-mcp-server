@@ -48,7 +48,7 @@ npm install -g manvir-templates-mcp-server
 
 ```bash
 npm install -g manvir-templates-mcp-server
-manvir-templates-mcp-server --help
+npm list -g manvir-templates-mcp-server
 ```
 
 **MCP Protocol Compliance**:

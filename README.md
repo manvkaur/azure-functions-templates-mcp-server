@@ -36,12 +36,34 @@ npm install manvir-templates-mcp-server
 
 **Verify installation:**
 
-```bash
-# Test global installation
-manvir-templates-mcp-server --help
+#### Verify global installation
 
-# Or test with npx
-npx manvir-templates-mcp-server --help
+```bash
+npm list -g manvir-templates-mcp-server
+```
+
+#### Or verify local installation
+
+```bash
+npm list manvir-templates-mcp-server
+```
+
+#### Or check that the executable is available in your PATH
+
+```bash
+which manvir-templates-mcp-server
+```
+
+#### Run a smoke test to verify installation
+
+```bash
+npm run smoke
+```
+
+#### Or run the probe test
+
+```bash
+npm run probe
 ```
 
 ### Option 2: Build from source
