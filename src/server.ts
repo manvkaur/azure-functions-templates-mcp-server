@@ -1069,11 +1069,25 @@ This indicates an internal error. Please verify the template exists.`
       }
     }
     
+    // Add language-specific common files (like .funcignore)
+    const commonFiles = LANGUAGE_COMMON_FILES[language];
+    if (commonFiles && Object.keys(commonFiles).length > 0) {
+      result += `---\n\n`;
+      result += `## Common Files for ${language} (include with any template)\n\n`;
+      result += `The following files should be created alongside your template for production deployments:\n\n`;
+      let fileNum = relativeFiles.length;
+      for (const [fileName, fileContent] of Object.entries(commonFiles)) {
+        fileNum++;
+        result += `## File ${fileNum}: \`${fileName}\`\n\n`;
+        result += `\`\`\`text\n${fileContent}\`\`\`\n\n`;
+      }
+    }
+    
     result += `---\n\n`;
     result += `**Template Ready for Use**\n`;
     result += `- Language: ${language}\n`;
     result += `- Template: ${template}\n`;
-    result += `- Files: ${relativeFiles.length}\n`;
+    result += `- Files: ${relativeFiles.length + (commonFiles ? Object.keys(commonFiles).length : 0)}\n`;
     result += `- You can copy and customize these files for your Azure Functions project\n`;
     
     return { 

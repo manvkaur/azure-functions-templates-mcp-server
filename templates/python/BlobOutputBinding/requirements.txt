@@ -3,4 +3,3 @@
 # azure-monitor-opentelemetry 
 
 azure-functions
-azurefunctions-extensions-bindings-blob
