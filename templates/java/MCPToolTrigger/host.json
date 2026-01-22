@@ -1,14 +1,7 @@
 {
   "version": "2.0",
-  "extensions": {
-    "mcp": {
-      "instructions": "Tools for managing text snippets",
-      "serverName": "SnippetsServer",
-      "serverVersion": "0.1.0"
-    }
-  },
   "extensionBundle": {
-    "id": "Microsoft.Azure.Functions.ExtensionBundle.Preview",
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
     "version": "[4.*, 5.0.0)"
   }
 }
