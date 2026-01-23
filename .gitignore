@@ -1,54 +1,62 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
-*.log
 *.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Lock files (regenerated on install)
 package-lock.json
+
+# Test coverage
+coverage/
+
+# IDE and editors
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# =============================================================================
+# Template-specific ignores (for templates included in the package)
+# =============================================================================
 
 # .NET build output
 bin/
 obj/
 **/bin/
 **/obj/
-
-# C# template build artifacts
 templates/csharp/*/bin/
 templates/csharp/*/obj/
-
-# VS Code temporary settings
-.vscode/
-**/obj/*
-**/bin/*
-
-bin
-obj
+*.Cache
+project.lock.json
 csx
 .vs
 edge
 Publish
-
-*.user
-*.suo
 *.cscfg
-*.Cache
-project.lock.json
 
-/packages
-/TestResults
+# Java build output
+target/
+*.jar
+templates/java/*/target/
 
-/tools/NuGet.exe
-/App_Data
-/secrets
-/data
-.secrets
-appsettings.json
-
-node_modules
-dist
-
-# Local python packages
+# Python artifacts
 .python_packages/
-
-# Python Environments
+__pycache__/
+*.py[cod]
+*$py.class
 .env
 .venv
 env/
@@ -57,15 +65,21 @@ ENV/
 env.bak/
 venv.bak/
 
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+# Azure Functions local development
+local.settings.json
+appsettings.json
+.secrets
+secrets/
+App_Data/
 
-# Azurite artifacts
-__blobstorage__
-__queuestorage__
+# Azurite emulator artifacts
+__blobstorage__/
+__queuestorage__/
 __azurite_db*__.json
 
-target/
-*.jar
+# Test and tools
+/packages
+/TestResults
+/tools/NuGet.exe
+/data
+

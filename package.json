@@ -35,7 +35,10 @@
     "start": "node dist/src/server.js",
     "dev": "ts-node-esm src/server.ts",
     "probe": "node -e \"process.stderr.write('probe ok\\n')\"",
-    "smoke": "node tools/smoke.mjs"
+    "smoke": "node tools/smoke.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.5",
@@ -43,7 +46,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.2",
+    "@vitest/coverage-v8": "^2.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.0"
   }
 }
