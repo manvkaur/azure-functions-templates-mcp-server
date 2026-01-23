@@ -6,6 +6,7 @@
 
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import { logger } from './logger.js';
 import {
   VALID_LANGUAGES,
   VALID_TEMPLATES,
@@ -242,6 +243,12 @@ export async function handleGetTemplates(args: GetTemplatesArgs, templatesRoot: 
   // If specific file requested, return that file
   if (filePath) {
     if (!isPathSafe(templateDir, filePath)) {
+      logger.security('Path traversal attempt detected', {
+        language,
+        template,
+        filePath,
+        templateDir,
+      });
       return createErrorResult('Invalid filePath: path traversal detected');
     }
 

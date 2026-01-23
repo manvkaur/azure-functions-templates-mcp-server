@@ -7,6 +7,7 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { logger } from './logger.js';
 import {
   validateTemplatesExist,
   discoverTemplates,
@@ -45,6 +46,8 @@ export interface ValidationResult {
  * @returns Configured McpServer instance ready for connection
  */
 export function createServer(config: ServerConfig): McpServer {
+  logger.info('Creating MCP server', { name: config.name, version: config.version });
+
   const server = new McpServer({
     name: config.name,
     version: config.version,
@@ -52,6 +55,7 @@ export function createServer(config: ServerConfig): McpServer {
 
   registerTools(server, config.templatesRoot);
 
+  logger.info('Server created successfully');
   return server;
 }
 
