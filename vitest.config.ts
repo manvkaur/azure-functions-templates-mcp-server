@@ -11,7 +11,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: [
         'src/**/*.test.ts',
-        'src/server.ts', // Server file has side effects, handlers are tested separately
+        'src/server.ts', // Entry point with side effects (process.exit, signal handlers)
       ],
       thresholds: {
         statements: 85,
