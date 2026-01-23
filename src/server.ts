@@ -216,6 +216,22 @@ async function main() {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
+
+  // Graceful shutdown handlers
+  const shutdown = async (signal: string) => {
+    console.error(`[INFO] Received ${signal}, shutting down gracefully...`);
+    try {
+      await server.close();
+      console.error('[INFO] Server closed successfully');
+      process.exit(0);
+    } catch (err) {
+      console.error('[ERROR] Error during shutdown:', err);
+      process.exit(1);
+    }
+  };
+
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
 main().catch((err) => {
