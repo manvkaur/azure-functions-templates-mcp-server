@@ -5,15 +5,20 @@ import { z } from "zod";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 
 // Templates are packaged with this server
 // When running from dist/, templates folder is at package root
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_ROOT = path.resolve(__dirname, "..", "..", "templates");
 
+// Read version from package.json to keep it in sync
+const require = createRequire(import.meta.url);
+const packageJson = require("../../package.json");
+
 const server = new McpServer({
   name: "azure-functions-templates",
-  version: "1.0.0",
+  version: packageJson.version,
 });
 
 // Valid languages and their templates (embedded as part of package)
