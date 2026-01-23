@@ -24,7 +24,7 @@ public class DocByIdFromQueryString {
               containerName = "Items",
               id = "{Query.id}",
               partitionKey = "{Query.partitionKeyValue}",
-              connection = "Cosmos_DB_Connection_String")
+              connection = "CosmosDbConnection")
             Optional<String> item,
             final ExecutionContext context) {
 

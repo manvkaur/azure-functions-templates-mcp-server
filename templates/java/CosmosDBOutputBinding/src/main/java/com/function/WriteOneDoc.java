@@ -16,7 +16,7 @@ import java.util.Random;
 public class WriteOneDoc {
 
   @FunctionName("WriteOneDoc")
-  @CosmosDBOutput(name = "database", databaseName = "ToDoList", containerName = "Items", connection = "Cosmos_DB_Connection_String")
+  @CosmosDBOutput(name = "database", databaseName = "ToDoList", containerName = "Items", connection = "CosmosDbConnection")
   public String run(
       @HttpTrigger(name = "req", methods = { HttpMethod.GET,
           HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS) HttpRequestMessage<Optional<String>> request,

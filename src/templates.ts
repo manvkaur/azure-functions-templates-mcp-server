@@ -14,7 +14,7 @@ export const VALID_TEMPLATES: Record<string, string[]> = {
     'BlobTrigger',
     'CosmosDBInputBinding',
     'CosmosDBOutputBinding',
-    'CosmosDbTrigger',
+    'CosmosDBTrigger',
     'DaprPublishOutputBinding',
     'DaprServiceInvocationTrigger',
     'DaprTopicTrigger',
@@ -65,7 +65,7 @@ export const VALID_TEMPLATES: Record<string, string[]> = {
     'CosmosDBTrigger',
     'EventHubTrigger',
     'HttpTrigger',
-    'McpTrigger',
+    'MCPToolTrigger',
     'QueueTrigger',
     'TimerTrigger',
   ],
@@ -73,11 +73,11 @@ export const VALID_TEMPLATES: Record<string, string[]> = {
     'BlobInputAndOutputBindings',
     'BlobTrigger',
     'BlobTriggerWithEventGrid',
-    'CosmosDBInputOutBinding',
+    'CosmosDBInputOutputBinding',
     'CosmosDBTrigger',
     'EventHubTrigger',
     'HttpTrigger',
-    'McpTrigger',
+    'MCPToolTrigger',
     'QueueTrigger',
     'TimerTrigger',
   ],
@@ -109,7 +109,7 @@ export const TEMPLATE_DESCRIPTIONS: Record<
       category: 'Database Bindings',
       useCase: 'Data persistence, document updates, write operations to NoSQL databases',
     },
-    CosmosDbTrigger: {
+    CosmosDBTrigger: {
       description: 'Triggered by changes in Cosmos DB using the change feed',
       category: 'Database Triggers',
       useCase: 'Real-time data processing, event sourcing, maintaining materialized views',
@@ -348,7 +348,7 @@ export const TEMPLATE_DESCRIPTIONS: Record<
       category: 'Web APIs',
       useCase: 'REST APIs, webhooks, web services, ML model serving, data science APIs',
     },
-    McpTrigger: {
+    MCPToolTrigger: {
       description: 'Model Context Protocol integration for AI workflows',
       category: 'AI/ML',
       useCase: 'AI assistant tools, LLM integrations, ML pipeline automation, intelligent workflows',
@@ -380,7 +380,7 @@ export const TEMPLATE_DESCRIPTIONS: Record<
       category: 'Storage Triggers',
       useCase: 'High-performance file processing, scalable blob operations, event-driven workflows',
     },
-    CosmosDBInputOutBinding: {
+    CosmosDBInputOutputBinding: {
       description: 'Combined Cosmos DB input and output bindings',
       category: 'Database Bindings',
       useCase: 'Document transformation, data migration, NoSQL data processing',
@@ -400,7 +400,7 @@ export const TEMPLATE_DESCRIPTIONS: Record<
       category: 'Web APIs',
       useCase: 'REST APIs, web services, serverless backends, webhook handlers',
     },
-    McpTrigger: {
+    MCPToolTrigger: {
       description: 'Model Context Protocol integration for AI workflows',
       category: 'AI/ML',
       useCase: 'AI assistant tools, LLM integrations, intelligent automation workflows',
