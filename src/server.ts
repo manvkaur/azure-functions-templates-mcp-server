@@ -40,12 +40,12 @@ server.registerTool(
     title: 'Get Azure Functions Template',
     description: `Get complete Azure Functions templates with all files for rapid development and deployment.
 
-Ready-to-use templates across 4 languages with complete project structure:
+Ready-to-use templates across ${VALID_LANGUAGES.length} languages with complete project structure:
 
- **C# (.NET Isolated)**: 29 templates including Durable Functions, Dapr integration, database bindings
- **Java (Maven)**: 14 templates with annotation-based configuration and Maven project structure  
- **Python (v2 Model)**: 11 templates using modern decorator-based programming model
- **TypeScript (Node.js)**: 10 templates with full type safety and modern async patterns
+ **C# (.NET Isolated)**: ${VALID_TEMPLATES.csharp.length} templates including Durable Functions, Dapr integration, database bindings
+ **Java (Maven)**: ${VALID_TEMPLATES.java.length} templates with annotation-based configuration and Maven project structure  
+ **Python (v2 Model)**: ${VALID_TEMPLATES.python.length} templates using modern decorator-based programming model
+ **TypeScript (Node.js)**: ${VALID_TEMPLATES.typescript.length} templates with full type safety and modern async patterns
 
 **Template Categories**:
 - **Web APIs**: HTTP triggers for REST APIs and webhooks
