@@ -508,6 +508,173 @@ export async function exists(p: string): Promise<boolean> {
 }
 
 /**
+ * Validate that all templates in VALID_TEMPLATES exist on disk
+ * @param templatesRoot The root directory containing template folders
+ * @returns Object with validation results
+ */
+export async function validateTemplatesExist(templatesRoot: string): Promise<{
+  valid: boolean;
+  missing: Array<{ language: string; template: string }>;
+  checked: number;
+}> {
+  const missing: Array<{ language: string; template: string }> = [];
+  let checked = 0;
+
+  for (const language of VALID_LANGUAGES) {
+    const templates = VALID_TEMPLATES[language];
+    for (const template of templates) {
+      checked++;
+      const templatePath = path.join(templatesRoot, language, template);
+      if (!(await exists(templatePath))) {
+        missing.push({ language, template });
+      }
+    }
+  }
+
+  return {
+    valid: missing.length === 0,
+    missing,
+    checked
+  };
+}
+
+/**
+ * Result of template discovery from filesystem
+ */
+export interface DiscoveredTemplates {
+  /** Templates discovered on disk, organized by language */
+  templates: Record<string, string[]>;
+  /** Languages found in the templates directory */
+  languages: string[];
+  /** Total number of templates discovered */
+  totalTemplates: number;
+  /** Templates in VALID_TEMPLATES but not found on disk */
+  missingFromDisk: Array<{ language: string; template: string }>;
+  /** Templates found on disk but not in VALID_TEMPLATES (new/undocumented) */
+  extraOnDisk: Array<{ language: string; template: string }>;
+}
+
+/**
+ * Discover templates from the filesystem by scanning the templates directory.
+ * Compares discovered templates against VALID_TEMPLATES to find discrepancies.
+ * 
+ * @param templatesRoot The root directory containing template folders
+ * @returns Object with discovered templates and comparison results
+ */
+export async function discoverTemplates(templatesRoot: string): Promise<DiscoveredTemplates> {
+  const templates: Record<string, string[]> = {};
+  const languages: string[] = [];
+  let totalTemplates = 0;
+  const missingFromDisk: Array<{ language: string; template: string }> = [];
+  const extraOnDisk: Array<{ language: string; template: string }> = [];
+
+  // Check if templates root exists
+  if (!(await exists(templatesRoot))) {
+    return {
+      templates,
+      languages,
+      totalTemplates,
+      missingFromDisk: VALID_LANGUAGES.flatMap(lang => 
+        VALID_TEMPLATES[lang].map(t => ({ language: lang, template: t }))
+      ),
+      extraOnDisk
+    };
+  }
+
+  // Scan for language directories
+  try {
+    const entries = await fs.readdir(templatesRoot, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const langName = entry.name;
+        const langPath = path.join(templatesRoot, langName);
+        
+        // Scan for template directories within this language
+        const templateEntries = await fs.readdir(langPath, { withFileTypes: true });
+        const discoveredTemplates: string[] = [];
+        
+        for (const templateEntry of templateEntries) {
+          if (templateEntry.isDirectory()) {
+            discoveredTemplates.push(templateEntry.name);
+            totalTemplates++;
+          }
+        }
+        
+        if (discoveredTemplates.length > 0) {
+          templates[langName] = discoveredTemplates.sort();
+          languages.push(langName);
+        }
+      }
+    }
+  } catch {
+    // Error reading directory
+  }
+
+  // Compare with VALID_TEMPLATES to find discrepancies
+  for (const lang of VALID_LANGUAGES) {
+    const expected = new Set(VALID_TEMPLATES[lang]);
+    const discovered = new Set(templates[lang] ?? []);
+
+    // Find templates in VALID_TEMPLATES but not on disk
+    for (const template of expected) {
+      if (!discovered.has(template)) {
+        missingFromDisk.push({ language: lang, template });
+      }
+    }
+
+    // Find templates on disk but not in VALID_TEMPLATES
+    for (const template of discovered) {
+      if (!expected.has(template)) {
+        extraOnDisk.push({ language: lang, template });
+      }
+    }
+  }
+
+  // Also check for unexpected language directories
+  for (const lang of languages) {
+    if (!VALID_LANGUAGES.includes(lang as ValidLanguage)) {
+      const langTemplates = templates[lang] ?? [];
+      for (const template of langTemplates) {
+        extraOnDisk.push({ language: lang, template });
+      }
+    }
+  }
+
+  return {
+    templates,
+    languages: languages.sort(),
+    totalTemplates,
+    missingFromDisk,
+    extraOnDisk
+  };
+}
+
+/**
+ * Get the effective templates list - uses discovered templates if available,
+ * falls back to VALID_TEMPLATES if discovery fails or returns empty.
+ * 
+ * @param templatesRoot The root directory containing template folders
+ * @returns Templates organized by language
+ */
+export async function getEffectiveTemplates(templatesRoot: string): Promise<Record<string, string[]>> {
+  const discovered = await discoverTemplates(templatesRoot);
+  
+  // If discovery found templates, use them (merged with VALID_TEMPLATES for descriptions)
+  if (discovered.totalTemplates > 0) {
+    // Return discovered templates, but only for known languages
+    const result: Record<string, string[]> = {};
+    for (const lang of VALID_LANGUAGES) {
+      result[lang] = discovered.templates[lang] ?? [];
+    }
+    return result;
+  }
+  
+  // Fall back to hardcoded list
+  return VALID_TEMPLATES;
+}
+
+/**
  * Recursively list all files in a directory
  */
 export async function listFilesRecursive(dir: string): Promise<string[]> {

@@ -6,6 +6,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { validateTemplatesExist, discoverTemplates } from "./templates.js";
 
 // Templates are packaged with this server
 // When running from dist/, templates folder is at package root
@@ -1110,7 +1111,41 @@ function getFileExtension(filePath: string): string {
   return FILE_EXTENSION_MAP[ext] || 'text';
 }
 
+/**
+ * Validate that all declared templates exist on disk
+ * Logs warnings to stderr if any templates are missing
+ */
+async function validateTemplates(): Promise<void> {
+  const result = await validateTemplatesExist(TEMPLATES_ROOT);
+  
+  if (!result.valid) {
+    console.error(`[WARNING] Template validation found ${result.missing.length} missing template(s):`);
+    for (const { language, template } of result.missing) {
+      console.error(`  - ${language}/${template}`);
+    }
+    console.error(`Templates root: ${TEMPLATES_ROOT}`);
+  }
+
+  // Discover templates from filesystem and report discrepancies
+  const discovered = await discoverTemplates(TEMPLATES_ROOT);
+  
+  if (discovered.extraOnDisk.length > 0) {
+    console.error(`[INFO] Found ${discovered.extraOnDisk.length} undocumented template(s) on disk:`);
+    for (const { language, template } of discovered.extraOnDisk) {
+      console.error(`  + ${language}/${template} (consider adding to VALID_TEMPLATES)`);
+    }
+  }
+
+  // Log discovery summary in verbose mode (can be enabled via environment variable)
+  if (process.env.MCP_VERBOSE) {
+    console.error(`[INFO] Template discovery: ${discovered.totalTemplates} templates found across ${discovered.languages.length} languages`);
+  }
+}
+
 async function main() {
+  // Validate templates exist before starting server
+  await validateTemplates();
+  
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
