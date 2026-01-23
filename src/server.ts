@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+
+// Check Node.js version before any other imports
+const nodeVersion = parseInt(process.versions.node.split('.')[0], 10);
+if (nodeVersion < 18) {
+  console.error(`Error: Node.js 18 or higher is required. Current version: ${process.versions.node}`);
+  process.exit(1);
+}
+
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
@@ -11,6 +19,7 @@ import {
   VALID_LANGUAGES,
   VALID_TEMPLATES,
   generateTemplateDescriptions,
+  type ValidLanguage,
 } from './templates.js';
 import {
   handleGetTemplates,
@@ -29,7 +38,7 @@ const require = createRequire(import.meta.url);
 const packageJson = require('../../package.json');
 
 const server = new McpServer({
-  name: 'azure-functions-templates',
+  name: packageJson.name,
   version: packageJson.version,
 });
 
@@ -85,7 +94,7 @@ ${generateTemplateDescriptions('typescript')}`),
         ),
     },
   },
-  async (args: { language: string; template: string; filePath?: string }) => {
+  async (args: { language: ValidLanguage; template: string; filePath?: string }) => {
     return handleGetTemplates(args, TEMPLATES_ROOT);
   }
 );
@@ -132,7 +141,7 @@ Perfect for exploring available options and understanding Azure Functions capabi
         .describe(`Programming language to get templates for. Valid values: ${VALID_LANGUAGES.join(', ')}`),
     },
   },
-  async (args: { language: string }) => {
+  async (args: { language: ValidLanguage }) => {
     return handleGetTemplatesByLanguage(args);
   }
 );
@@ -172,7 +181,7 @@ Use exact template names as returned by get_templates_by_language. Perfect for g
         ),
     },
   },
-  async (args: { language: string; template: string }) => {
+  async (args: { language: ValidLanguage; template: string }) => {
     return handleGetTemplateFiles(args, TEMPLATES_ROOT);
   }
 );

@@ -16,7 +16,6 @@ package-lock.json
 coverage/
 
 # IDE and editors
-.vscode/
 .idea/
 *.suo
 *.user
