@@ -11,14 +11,14 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: [
         'src/**/*.test.ts',
-        'src/server.ts' // Server file has side effects, test templates.ts separately
+        'src/server.ts', // Server file has side effects, handlers are tested separately
       ],
       thresholds: {
-        statements: 80,
+        statements: 85,
         branches: 80,
-        functions: 80,
-        lines: 80
-      }
-    }
-  }
+        functions: 85,
+        lines: 85,
+      },
+    },
+  },
 });

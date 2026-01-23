@@ -1,5 +1,10 @@
 # Azure Functions Templates MCP Server
 
+[![CI](https://github.com/manvkaur/azure-functions-templates-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/manvkaur/azure-functions-templates-mcp-server/actions/workflows/ci.yml)
+[![npm version](https://badge.fury.io/js/manvir-templates-mcp-server.svg)](https://www.npmjs.com/package/manvir-templates-mcp-server)
+[![codecov](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 64+ templates covering all major Azure services and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
 
 ## Features
@@ -482,9 +487,27 @@ npx @modelcontextprotocol/inspector manvir-templates-mcp-server
 - **Discussions**: Ask questions in [GitHub Discussions](https://github.com/manvkaur/azure-functions-templates-mcp-server/discussions)
 - **Documentation**: Full documentation available in the [repository](https://github.com/manvkaur/azure-functions-templates-mcp-server)
 
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Quick Start for Contributors
+
+```bash
+git clone https://github.com/manvkaur/azure-functions-templates-mcp-server.git
+cd azure-functions-templates-mcp-server
+npm install
+npm run build
+npm test
+```
+
 ### Development Notes
 
 - **Stdout Reserved**: Never add `console.log` statements; stdout is reserved for MCP protocol messages
 - **Error Handling**: All errors go to stderr, tool errors use `isError: true` flag
 - **Template Packaging**: Templates are embedded in the package for offline usage
 - **Protocol Compliance**: Server implements MCP specification correctly
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
