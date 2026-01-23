@@ -21,10 +21,10 @@ public class DocByIdFromQueryString {
             HttpRequestMessage<Optional<String>> request,
             @CosmosDBInput(name = "database",
               databaseName = "ToDoList",
-              collectionName = "Items",
+              containerName = "Items",
               id = "{Query.id}",
               partitionKey = "{Query.partitionKeyValue}",
-              connectionStringSetting = "Cosmos_DB_Connection_String")
+              connection = "Cosmos_DB_Connection_String")
             Optional<String> item,
             final ExecutionContext context) {
 
