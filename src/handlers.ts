@@ -11,10 +11,17 @@ import {
   VALID_TEMPLATES,
   TEMPLATE_DESCRIPTIONS,
   LANGUAGE_COMMON_FILES,
-  FILE_EXTENSION_MAP,
   exists,
   listFilesRecursive,
+  getFileExtension,
+  getKeyFilesForLanguage,
+  isValidLanguage,
+  isValidTemplate,
+  getLanguageDetails,
 } from './templates.js';
+
+// Re-export for use by other modules
+export { getFileExtension, getKeyFilesForLanguage, isValidLanguage as validateLanguage } from './templates.js';
 
 // Re-export types for convenience
 export type ValidLanguage = (typeof VALID_LANGUAGES)[number];
@@ -29,93 +36,8 @@ export interface HandlerResult {
   isError?: boolean;
 }
 
-/**
- * Language details for the get_supported_languages tool
- */
-export interface LanguageDetails {
-  name: string;
-  runtime: string;
-  programmingModel: string;
-  templateCount: number;
-  keyFeatures: string[];
-  filePatterns: string[];
-}
-
-/**
- * Static language details configuration
- */
-export const LANGUAGE_DETAILS: Record<ValidLanguage, LanguageDetails> = {
-  csharp: {
-    name: 'C#',
-    runtime: '.NET Isolated Worker',
-    programmingModel: 'Isolated worker process with dependency injection',
-    templateCount: VALID_TEMPLATES.csharp.length,
-    keyFeatures: [
-      'Strong typing with C# language features',
-      'Isolated worker process for better performance and reliability',
-      'Built-in dependency injection support',
-      'Support for .NET Core and .NET Framework',
-      'Rich ecosystem of NuGet packages',
-    ],
-    filePatterns: ['.cs files', '.template.config/template.json', 'host.json', 'local.settings.json'],
-  },
-  java: {
-    name: 'Java',
-    runtime: 'Java SE 8, 11, 17, 21',
-    programmingModel: 'Annotation-based with Maven build system',
-    templateCount: VALID_TEMPLATES.java.length,
-    keyFeatures: [
-      'Annotation-based function definitions',
-      'Maven project structure and dependency management',
-      'Support for multiple Java versions',
-      'Enterprise-ready with extensive libraries',
-      'Cross-platform compatibility',
-    ],
-    filePatterns: ['pom.xml', 'src/main/java/**/*.java', 'host.json', 'local.settings.json'],
-  },
-  python: {
-    name: 'Python',
-    runtime: 'Python 3.8, 3.9, 3.10, 3.11',
-    programmingModel: 'v2 programming model with decorators',
-    templateCount: VALID_TEMPLATES.python.length,
-    keyFeatures: [
-      'Modern v2 programming model with @app decorators',
-      'Single function_app.py file for multiple functions',
-      'Rich ecosystem of Python packages',
-      'Built-in support for data science and ML libraries',
-      'Simplified development and testing experience',
-    ],
-    filePatterns: ['function_app.py', 'requirements.txt', 'host.json', 'local.settings.json'],
-  },
-  typescript: {
-    name: 'TypeScript',
-    runtime: 'Node.js 18, 20',
-    programmingModel: 'Node.js v4 programming model with TypeScript support',
-    templateCount: VALID_TEMPLATES.typescript.length,
-    keyFeatures: [
-      'Strong typing with TypeScript language features',
-      'Modern async/await patterns',
-      'Rich npm ecosystem integration',
-      'Built-in JSON and HTTP handling',
-      'Excellent tooling and IDE support',
-    ],
-    filePatterns: ['index.ts', 'function.json', 'package.json', 'metadata.json'],
-  },
-};
-
-/**
- * Validates that a language is one of the supported languages
- */
-export function validateLanguage(language: string): language is ValidLanguage {
-  return VALID_LANGUAGES.includes(language as ValidLanguage);
-}
-
-/**
- * Validates that a template exists for the given language
- */
-export function validateTemplate(language: ValidLanguage, template: string): boolean {
-  return VALID_TEMPLATES[language].includes(template);
-}
+// Re-export validateTemplate for convenience
+export { isValidTemplate as validateTemplate } from './templates.js';
 
 /**
  * Checks for path traversal attack attempts.
@@ -134,53 +56,6 @@ export function isPathSafe(templateDir: string, requestedPath: string): boolean 
   // We need to ensure it starts with templateDir + separator to prevent
   // matching /templates/csharp against /templates/csharp-evil
   return fullPath.startsWith(resolvedTemplateDir + path.sep);
-}
-
-/**
- * Gets the file extension for syntax highlighting
- */
-export function getFileExtension(filePath: string): string {
-  const ext = path.extname(filePath).toLowerCase();
-  return FILE_EXTENSION_MAP[ext] || 'text';
-}
-
-/**
- * Gets the key files to include for a given language
- */
-export function getKeyFilesForLanguage(language: ValidLanguage, allFiles: string[]): string[] {
-  let keyFiles: string[] = [];
-
-  switch (language) {
-    case 'python':
-      keyFiles = ['function_app.py', 'host.json', 'local.settings.json', 'requirements.txt'];
-      break;
-    case 'csharp': {
-      keyFiles = [
-        '.template.config/template.json',
-        '.template.config/vs-2017.3.host.json',
-        'host.json',
-        'local.settings.json',
-      ];
-      // Also include .cs files
-      const csFiles = allFiles.filter((f) => f.endsWith('.cs'));
-      keyFiles.push(...csFiles.slice(0, 2));
-      break;
-    }
-    case 'java': {
-      keyFiles = ['pom.xml', 'host.json', 'local.settings.json'];
-      // Include Java source files from src/main/java subdirectory
-      const javaSourceFiles = allFiles.filter((f) => f.includes('src/main/java') && f.endsWith('.java'));
-      keyFiles.push(...javaSourceFiles.slice(0, 2));
-      break;
-    }
-    case 'typescript':
-      keyFiles = ['function.json', 'index.ts', 'metadata.json', 'package.json', 'host.json', 'readme.md'];
-      break;
-    default:
-      keyFiles = ['README.md', 'package.json', 'host.json'];
-  }
-
-  return keyFiles;
 }
 
 /**
@@ -234,11 +109,12 @@ export function categorizeTemplates(language: ValidLanguage): {
  * Formats the supported languages response
  */
 export function formatSupportedLanguagesResponse(): string {
+  const languageDetails = getLanguageDetails();
   let result = `=== Azure Functions Supported Languages ===\n\n`;
   result += `Total Languages: ${VALID_LANGUAGES.length}\n\n`;
 
   for (const lang of VALID_LANGUAGES) {
-    const details = LANGUAGE_DETAILS[lang];
+    const details = languageDetails[lang];
     result += `## ${details.name} (${lang})\n`;
     result += `- **Runtime**: ${details.runtime}\n`;
     result += `- **Programming Model**: ${details.programmingModel}\n`;
@@ -252,7 +128,7 @@ export function formatSupportedLanguagesResponse(): string {
 
   result += `## Template Distribution by Language:\n`;
   for (const lang of VALID_LANGUAGES) {
-    const details = LANGUAGE_DETAILS[lang];
+    const details = languageDetails[lang];
     result += `- ${details.name}: ${details.templateCount} templates\n`;
   }
 
@@ -346,12 +222,12 @@ export async function handleGetTemplates(args: GetTemplatesArgs, templatesRoot: 
   const { language, template, filePath } = args;
 
   // Validate language
-  if (!validateLanguage(language)) {
+  if (!isValidLanguage(language)) {
     return createErrorResult(`Invalid language: ${language}. Valid languages are: ${VALID_LANGUAGES.join(', ')}`);
   }
 
   // Validate template for the given language
-  if (!validateTemplate(language, template)) {
+  if (!isValidTemplate(language, template)) {
     const validTemplatesForLang = VALID_TEMPLATES[language];
     return createErrorResult(
       `Invalid template '${template}' for language '${language}'. Valid templates for ${language} are: ${validTemplatesForLang.join(', ')}`
@@ -434,7 +310,7 @@ export async function handleGetSupportedLanguages(): Promise<HandlerResult> {
 export async function handleGetTemplatesByLanguage(args: { language: string }): Promise<HandlerResult> {
   const { language } = args;
 
-  if (!validateLanguage(language)) {
+  if (!isValidLanguage(language)) {
     return createErrorResult(`Invalid language: ${language}. Valid languages are: ${VALID_LANGUAGES.join(', ')}`);
   }
 
@@ -459,7 +335,7 @@ export async function handleGetTemplateFiles(
   const { language, template } = args;
 
   // Validate language with detailed error message
-  if (!validateLanguage(language)) {
+  if (!isValidLanguage(language)) {
     return createErrorResult(`INVALID LANGUAGE: "${language}"
 
 VALID LANGUAGES (use exactly as shown):
@@ -469,7 +345,7 @@ Please use one of the exact values above.`);
   }
 
   // Validate template for the given language with detailed error message
-  if (!validateTemplate(language, template)) {
+  if (!isValidTemplate(language, template)) {
     const validTemplatesForLang = VALID_TEMPLATES[language];
     return createErrorResult(`INVALID TEMPLATE: "${template}" for language "${language}"
 

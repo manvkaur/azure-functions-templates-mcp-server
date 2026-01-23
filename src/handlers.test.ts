@@ -15,13 +15,12 @@ import {
   categorizeTemplates,
   formatSupportedLanguagesResponse,
   formatTemplatesByLanguageResponse,
-  LANGUAGE_DETAILS,
   handleGetTemplates,
   handleGetSupportedLanguages,
   handleGetTemplatesByLanguage,
   handleGetTemplateFiles,
 } from './handlers.js';
-import { VALID_LANGUAGES, VALID_TEMPLATES } from './templates.js';
+import { VALID_LANGUAGES, VALID_TEMPLATES, getLanguageDetails } from './templates.js';
 
 const TEMPLATES_ROOT = path.join(import.meta.dirname, '..', 'templates');
 
@@ -239,20 +238,22 @@ describe('categorizeTemplates', () => {
   });
 });
 
-describe('LANGUAGE_DETAILS', () => {
+describe('getLanguageDetails', () => {
   it('should have details for all valid languages', () => {
+    const languageDetails = getLanguageDetails();
     for (const lang of VALID_LANGUAGES) {
-      expect(LANGUAGE_DETAILS[lang]).toBeDefined();
-      expect(LANGUAGE_DETAILS[lang].name).toBeDefined();
-      expect(LANGUAGE_DETAILS[lang].runtime).toBeDefined();
-      expect(LANGUAGE_DETAILS[lang].templateCount).toBeGreaterThan(0);
-      expect(LANGUAGE_DETAILS[lang].keyFeatures.length).toBeGreaterThan(0);
+      expect(languageDetails[lang]).toBeDefined();
+      expect(languageDetails[lang].name).toBeDefined();
+      expect(languageDetails[lang].runtime).toBeDefined();
+      expect(languageDetails[lang].templateCount).toBeGreaterThan(0);
+      expect(languageDetails[lang].keyFeatures.length).toBeGreaterThan(0);
     }
   });
 
   it('should have correct template counts', () => {
+    const languageDetails = getLanguageDetails();
     for (const lang of VALID_LANGUAGES) {
-      expect(LANGUAGE_DETAILS[lang].templateCount).toBe(VALID_TEMPLATES[lang].length);
+      expect(languageDetails[lang].templateCount).toBe(VALID_TEMPLATES[lang].length);
     }
   });
 });
