@@ -36,6 +36,10 @@
     "dev": "ts-node-esm src/server.ts",
     "probe": "node -e \"process.stderr.write('probe ok\\n')\"",
     "smoke": "node tools/smoke.mjs",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -46,9 +50,16 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.2",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
     "@vitest/coverage-v8": "^2.1.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
+    "typescript-eslint": "^8.53.1",
     "vitest": "^2.1.0"
   }
 }

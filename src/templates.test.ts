@@ -26,7 +26,7 @@ import {
   getLanguageDetails,
   validateTemplatesExist,
   discoverTemplates,
-  getEffectiveTemplates
+  getEffectiveTemplates,
 } from './templates.js';
 
 // ============================================================================
@@ -110,7 +110,7 @@ describe('TEMPLATE_DESCRIPTIONS', () => {
   it('should have description, category, and useCase for each template', () => {
     for (const lang of VALID_LANGUAGES) {
       const descriptions = TEMPLATE_DESCRIPTIONS[lang];
-      for (const [templateName, desc] of Object.entries(descriptions)) {
+      for (const desc of Object.values(descriptions)) {
         expect(desc.description).toBeDefined();
         expect(desc.description.length).toBeGreaterThan(0);
         expect(desc.category).toBeDefined();
@@ -216,12 +216,12 @@ describe('listFilesRecursive()', () => {
 
   beforeAll(async () => {
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'test-list-'));
-    
+
     // Create nested structure
     await fs.mkdir(path.join(tempDir, 'subdir1'));
     await fs.mkdir(path.join(tempDir, 'subdir2'));
     await fs.mkdir(path.join(tempDir, 'subdir1', 'nested'));
-    
+
     await fs.writeFile(path.join(tempDir, 'root-file.txt'), 'root');
     await fs.writeFile(path.join(tempDir, 'subdir1', 'file1.txt'), 'sub1');
     await fs.writeFile(path.join(tempDir, 'subdir2', 'file2.txt'), 'sub2');
@@ -239,7 +239,7 @@ describe('listFilesRecursive()', () => {
 
   it('should include files from nested directories', async () => {
     const files = await listFilesRecursive(tempDir);
-    const fileNames = files.map(f => path.basename(f));
+    const fileNames = files.map((f) => path.basename(f));
     expect(fileNames).toContain('root-file.txt');
     expect(fileNames).toContain('file1.txt');
     expect(fileNames).toContain('file2.txt');
@@ -567,7 +567,7 @@ describe('Data Consistency', () => {
     for (const lang of VALID_LANGUAGES) {
       const templates = VALID_TEMPLATES[lang];
       const descriptions = TEMPLATE_DESCRIPTIONS[lang];
-      
+
       for (const template of templates) {
         expect(descriptions[template]).toBeDefined();
       }
@@ -578,7 +578,7 @@ describe('Data Consistency', () => {
     for (const lang of VALID_LANGUAGES) {
       const templates = new Set(VALID_TEMPLATES[lang]);
       const descriptions = Object.keys(TEMPLATE_DESCRIPTIONS[lang]);
-      
+
       for (const descTemplate of descriptions) {
         expect(templates.has(descTemplate)).toBe(true);
       }
@@ -601,7 +601,7 @@ describe('validateTemplatesExist()', () => {
 
   beforeAll(async () => {
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'test-validate-'));
-    
+
     // Create a minimal valid template structure for testing
     await fs.mkdir(path.join(tempDir, 'python', 'HttpTrigger'), { recursive: true });
     await fs.mkdir(path.join(tempDir, 'python', 'TimerTrigger'), { recursive: true });
@@ -614,46 +614,46 @@ describe('validateTemplatesExist()', () => {
   it('should report missing templates when directory is empty', async () => {
     const emptyDir = path.join(tempDir, 'empty');
     await fs.mkdir(emptyDir, { recursive: true });
-    
+
     const result = await validateTemplatesExist(emptyDir);
-    
+
     expect(result.valid).toBe(false);
     expect(result.missing.length).toBeGreaterThan(0);
     expect(result.checked).toBe(
-      VALID_TEMPLATES.csharp.length + 
-      VALID_TEMPLATES.java.length + 
-      VALID_TEMPLATES.python.length + 
-      VALID_TEMPLATES.typescript.length
+      VALID_TEMPLATES.csharp.length +
+        VALID_TEMPLATES.java.length +
+        VALID_TEMPLATES.python.length +
+        VALID_TEMPLATES.typescript.length
     );
   });
 
   it('should report specific missing templates', async () => {
     const result = await validateTemplatesExist(tempDir);
-    
+
     expect(result.valid).toBe(false);
     // Python HttpTrigger and TimerTrigger exist, so they should NOT be in missing
-    const pythonMissing = result.missing.filter(m => m.language === 'python');
-    expect(pythonMissing.some(m => m.template === 'HttpTrigger')).toBe(false);
-    expect(pythonMissing.some(m => m.template === 'TimerTrigger')).toBe(false);
+    const pythonMissing = result.missing.filter((m) => m.language === 'python');
+    expect(pythonMissing.some((m) => m.template === 'HttpTrigger')).toBe(false);
+    expect(pythonMissing.some((m) => m.template === 'TimerTrigger')).toBe(false);
     // But other Python templates should be missing
-    expect(pythonMissing.some(m => m.template === 'BlobTrigger')).toBe(true);
+    expect(pythonMissing.some((m) => m.template === 'BlobTrigger')).toBe(true);
   });
 
   it('should return correct checked count', async () => {
     const result = await validateTemplatesExist(tempDir);
-    
-    const expectedTotal = 
-      VALID_TEMPLATES.csharp.length + 
-      VALID_TEMPLATES.java.length + 
-      VALID_TEMPLATES.python.length + 
+
+    const expectedTotal =
+      VALID_TEMPLATES.csharp.length +
+      VALID_TEMPLATES.java.length +
+      VALID_TEMPLATES.python.length +
       VALID_TEMPLATES.typescript.length;
-    
+
     expect(result.checked).toBe(expectedTotal);
   });
 
   it('should include language and template in missing items', async () => {
     const result = await validateTemplatesExist(tempDir);
-    
+
     for (const missing of result.missing) {
       expect(missing.language).toBeDefined();
       expect(missing.template).toBeDefined();
@@ -672,12 +672,12 @@ describe('discoverTemplates', () => {
   beforeAll(async () => {
     // Create a temp directory with some mock templates
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'discover-templates-test-'));
-    
+
     // Create python language folder with 2 templates
     await fs.mkdir(path.join(tempDir, 'python', 'HttpTrigger'), { recursive: true });
     await fs.mkdir(path.join(tempDir, 'python', 'TimerTrigger'), { recursive: true });
     await fs.mkdir(path.join(tempDir, 'python', 'NewUndocumentedTemplate'), { recursive: true });
-    
+
     // Create typescript language folder with 1 template
     await fs.mkdir(path.join(tempDir, 'typescript', 'HttpTrigger'), { recursive: true });
   });
@@ -688,7 +688,7 @@ describe('discoverTemplates', () => {
 
   it('should discover templates from filesystem', async () => {
     const result = await discoverTemplates(tempDir);
-    
+
     expect(result.languages).toContain('python');
     expect(result.languages).toContain('typescript');
     expect(result.templates.python).toContain('HttpTrigger');
@@ -698,20 +698,20 @@ describe('discoverTemplates', () => {
 
   it('should count total templates correctly', async () => {
     const result = await discoverTemplates(tempDir);
-    
+
     // 3 python + 1 typescript = 4 total
     expect(result.totalTemplates).toBe(4);
   });
 
   it('should sort discovered languages', async () => {
     const result = await discoverTemplates(tempDir);
-    
+
     expect(result.languages).toEqual([...result.languages].sort());
   });
 
   it('should sort discovered templates within each language', async () => {
     const result = await discoverTemplates(tempDir);
-    
+
     for (const lang of result.languages) {
       const templates = result.templates[lang];
       expect(templates).toEqual([...templates].sort());
@@ -720,53 +720,51 @@ describe('discoverTemplates', () => {
 
   it('should identify templates missing from disk', async () => {
     const result = await discoverTemplates(tempDir);
-    
+
     // Most templates should be missing since we only created a few
     expect(result.missingFromDisk.length).toBeGreaterThan(0);
-    
+
     // Python BlobTrigger should be missing (we didn't create it)
     expect(result.missingFromDisk).toContainEqual({
       language: 'python',
-      template: 'BlobTrigger'
+      template: 'BlobTrigger',
     });
-    
+
     // All csharp templates should be missing (we didn't create any)
-    const csharpMissing = result.missingFromDisk.filter(m => m.language === 'csharp');
+    const csharpMissing = result.missingFromDisk.filter((m) => m.language === 'csharp');
     expect(csharpMissing.length).toBe(VALID_TEMPLATES.csharp.length);
   });
 
   it('should identify extra templates on disk not in VALID_TEMPLATES', async () => {
     const result = await discoverTemplates(tempDir);
-    
+
     // NewUndocumentedTemplate should be in extraOnDisk
     expect(result.extraOnDisk).toContainEqual({
       language: 'python',
-      template: 'NewUndocumentedTemplate'
+      template: 'NewUndocumentedTemplate',
     });
   });
 
   it('should handle non-existent directory gracefully', async () => {
     const result = await discoverTemplates('/non/existent/path');
-    
+
     expect(result.templates).toEqual({});
     expect(result.languages).toEqual([]);
     expect(result.totalTemplates).toBe(0);
     // All VALID_TEMPLATES should be reported as missing
-    const expectedMissingCount = VALID_LANGUAGES.reduce(
-      (sum, lang) => sum + VALID_TEMPLATES[lang].length, 0
-    );
+    const expectedMissingCount = VALID_LANGUAGES.reduce((sum, lang) => sum + VALID_TEMPLATES[lang].length, 0);
     expect(result.missingFromDisk.length).toBe(expectedMissingCount);
   });
 
   it('should ignore files in template directories (only folders)', async () => {
     // Create a file in the python directory (not a template folder)
     await fs.writeFile(path.join(tempDir, 'python', 'README.md'), 'test');
-    
+
     const result = await discoverTemplates(tempDir);
-    
+
     // README.md should not be treated as a template
     expect(result.templates.python).not.toContain('README.md');
-    
+
     // Clean up
     await fs.unlink(path.join(tempDir, 'python', 'README.md'));
   });
@@ -774,14 +772,14 @@ describe('discoverTemplates', () => {
   it('should return empty extraOnDisk when all discovered templates are in VALID_TEMPLATES', async () => {
     // Create a temp dir with only known templates
     const cleanTempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'discover-clean-test-'));
-    
+
     try {
       await fs.mkdir(path.join(cleanTempDir, 'python', 'HttpTrigger'), { recursive: true });
-      
+
       const result = await discoverTemplates(cleanTempDir);
-      
+
       // HttpTrigger is a known template, so no extras
-      expect(result.extraOnDisk.filter(e => e.template === 'HttpTrigger')).toEqual([]);
+      expect(result.extraOnDisk.filter((e) => e.template === 'HttpTrigger')).toEqual([]);
     } finally {
       await fs.rm(cleanTempDir, { recursive: true, force: true });
     }
@@ -790,16 +788,16 @@ describe('discoverTemplates', () => {
   it('should detect unknown language directories as extra', async () => {
     // Create a temp dir with an unknown language
     const unknownLangDir = await fs.mkdtemp(path.join(os.tmpdir(), 'discover-unknown-lang-'));
-    
+
     try {
       await fs.mkdir(path.join(unknownLangDir, 'rust', 'HttpTrigger'), { recursive: true });
-      
+
       const result = await discoverTemplates(unknownLangDir);
-      
+
       expect(result.languages).toContain('rust');
       expect(result.extraOnDisk).toContainEqual({
         language: 'rust',
-        template: 'HttpTrigger'
+        template: 'HttpTrigger',
       });
     } finally {
       await fs.rm(unknownLangDir, { recursive: true, force: true });
@@ -815,7 +813,7 @@ describe('getEffectiveTemplates', () => {
 
   beforeAll(async () => {
     tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'effective-templates-test-'));
-    
+
     // Create some templates
     await fs.mkdir(path.join(tempDir, 'python', 'HttpTrigger'), { recursive: true });
     await fs.mkdir(path.join(tempDir, 'python', 'CustomTemplate'), { recursive: true });
@@ -828,7 +826,7 @@ describe('getEffectiveTemplates', () => {
 
   it('should return discovered templates when they exist', async () => {
     const result = await getEffectiveTemplates(tempDir);
-    
+
     expect(result.python).toContain('HttpTrigger');
     expect(result.python).toContain('CustomTemplate');
     expect(result.csharp).toContain('BlobTrigger');
@@ -836,7 +834,7 @@ describe('getEffectiveTemplates', () => {
 
   it('should return all valid languages in result', async () => {
     const result = await getEffectiveTemplates(tempDir);
-    
+
     for (const lang of VALID_LANGUAGES) {
       expect(result[lang]).toBeDefined();
       expect(Array.isArray(result[lang])).toBe(true);
@@ -845,23 +843,23 @@ describe('getEffectiveTemplates', () => {
 
   it('should return empty array for languages without templates on disk', async () => {
     const result = await getEffectiveTemplates(tempDir);
-    
+
     // typescript has no templates in our test directory
     expect(result.typescript).toEqual([]);
-    // java has no templates in our test directory  
+    // java has no templates in our test directory
     expect(result.java).toEqual([]);
   });
 
   it('should fall back to VALID_TEMPLATES when directory does not exist', async () => {
     const result = await getEffectiveTemplates('/non/existent/path');
-    
+
     // Should return VALID_TEMPLATES exactly
     expect(result).toEqual(VALID_TEMPLATES);
   });
 
   it('should fall back to VALID_TEMPLATES when directory is empty', async () => {
     const emptyDir = await fs.mkdtemp(path.join(os.tmpdir(), 'empty-templates-test-'));
-    
+
     try {
       const result = await getEffectiveTemplates(emptyDir);
       expect(result).toEqual(VALID_TEMPLATES);
