@@ -1,93 +1,30 @@
 /**
  * Core template logic extracted for testability
+ *
+ * ARCHITECTURE NOTE:
+ * TEMPLATE_DESCRIPTIONS is the single source of truth for template metadata.
+ * VALID_TEMPLATES is derived from TEMPLATE_DESCRIPTIONS keys to avoid duplication.
+ * This ensures template lists and their descriptions always stay in sync.
  */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-// Valid languages and their templates (embedded as part of package)
+// Valid languages (embedded as part of package)
 export const VALID_LANGUAGES = ['csharp', 'java', 'python', 'typescript'] as const;
 export type ValidLanguage = (typeof VALID_LANGUAGES)[number];
 
-export const VALID_TEMPLATES: Record<string, string[]> = {
-  csharp: [
-    'BlobInputOutputBindings',
-    'BlobTrigger',
-    'CosmosDBInputBinding',
-    'CosmosDBOutputBinding',
-    'CosmosDBTrigger',
-    'DaprPublishOutputBinding',
-    'DaprServiceInvocationTrigger',
-    'DaprTopicTrigger',
-    'DurableFunctionsEntityClass',
-    'DurableFunctionsEntityFunction',
-    'DurableFunctionsOrchestration',
-    'EventGridBlobTrigger',
-    'EventGridTrigger',
-    'EventHubTrigger',
-    'HttpTrigger',
-    'KustoInputBinding',
-    'KustoOutputBinding',
-    'MCPToolTrigger',
-    'MySqlInputBinding',
-    'MySqlOutputBinding',
-    'MySqlTrigger',
-    'QueueTrigger',
-    'RabbitMQTrigger',
-    'ServiceBusQueueTrigger',
-    'ServiceBusTopicTrigger',
-    'SignalRConnectionInfoHttpTrigger',
-    'SqlInputBinding',
-    'SqlTrigger',
-    'TimerTrigger',
-  ],
-  java: [
-    'BlobInputBinding',
-    'BlobOutputBinding',
-    'BlobTrigger',
-    'CosmosDBInputBinding',
-    'CosmosDBOutputBinding',
-    'DurableFunctions',
-    'EventGridTrigger',
-    'EventHubTrigger',
-    'HttpTrigger',
-    'MCPToolTrigger',
-    'QueueTrigger',
-    'ServiceBusQueueTrigger',
-    'ServiceBusTopicTrigger',
-    'TimerTrigger',
-  ],
-  python: [
-    'BlobInputBinding',
-    'BlobOutputBinding',
-    'BlobTrigger',
-    'BlobTriggerWithEventGrid',
-    'CosmosDBInputOutputBinding',
-    'CosmosDBTrigger',
-    'EventHubTrigger',
-    'HttpTrigger',
-    'MCPToolTrigger',
-    'QueueTrigger',
-    'TimerTrigger',
-  ],
-  typescript: [
-    'BlobInputAndOutputBindings',
-    'BlobTrigger',
-    'BlobTriggerWithEventGrid',
-    'CosmosDBInputOutputBinding',
-    'CosmosDBTrigger',
-    'EventHubTrigger',
-    'HttpTrigger',
-    'MCPToolTrigger',
-    'QueueTrigger',
-    'TimerTrigger',
-  ],
-};
+/** Template metadata structure */
+export interface TemplateMetadata {
+  description: string;
+  category: string;
+  useCase: string;
+}
 
-// Shared template descriptions used across multiple tools
-export const TEMPLATE_DESCRIPTIONS: Record<
-  string,
-  Record<string, { description: string; category: string; useCase: string }>
-> = {
+/**
+ * TEMPLATE_DESCRIPTIONS is the single source of truth for all template metadata.
+ * Template names are derived from the keys of this object.
+ */
+export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, TemplateMetadata>> = {
   csharp: {
     BlobInputOutputBindings: {
       description: 'Combines blob input and output bindings in a single function',
@@ -418,6 +355,21 @@ export const TEMPLATE_DESCRIPTIONS: Record<
   },
 };
 
+/**
+ * VALID_TEMPLATES is derived from TEMPLATE_DESCRIPTIONS keys.
+ * This ensures template lists and descriptions always stay in sync.
+ * Templates are sorted alphabetically for consistent ordering.
+ */
+function deriveValidTemplates(): Record<ValidLanguage, string[]> {
+  const result = {} as Record<ValidLanguage, string[]>;
+  for (const lang of VALID_LANGUAGES) {
+    result[lang] = Object.keys(TEMPLATE_DESCRIPTIONS[lang]).sort();
+  }
+  return result;
+}
+
+export const VALID_TEMPLATES: Record<ValidLanguage, string[]> = deriveValidTemplates();
+
 // File extension to language mapping for syntax highlighting
 export const FILE_EXTENSION_MAP: Record<string, string> = {
   '.cs': 'csharp',
@@ -707,6 +659,10 @@ export async function discoverTemplates(templatesRoot: string): Promise<Discover
  * Get the effective templates list - uses discovered templates if available,
  * falls back to VALID_TEMPLATES if discovery fails or returns empty.
  *
+ * @deprecated Since build-time validation ensures VALID_TEMPLATES matches the filesystem,
+ * you can use VALID_TEMPLATES directly. This function is kept for backward compatibility
+ * and edge cases where runtime discovery is needed.
+ *
  * @param templatesRoot The root directory containing template folders
  * @returns Templates organized by language
  */
@@ -723,8 +679,12 @@ export async function getEffectiveTemplates(templatesRoot: string): Promise<Reco
     return result;
   }
 
-  // Fall back to hardcoded list
-  return VALID_TEMPLATES;
+  // Fall back to hardcoded list - spread to create mutable copy
+  const result: Record<string, string[]> = {};
+  for (const lang of VALID_LANGUAGES) {
+    result[lang] = [...VALID_TEMPLATES[lang]];
+  }
+  return result;
 }
 
 /**
@@ -760,17 +720,13 @@ export function getFileExtension(filePath: string): string {
 /**
  * Generate template descriptions for tool schema
  */
-export function generateTemplateDescriptions(language: string): string {
+export function generateTemplateDescriptions(language: ValidLanguage): string {
   const templates = VALID_TEMPLATES[language];
   const descriptions = TEMPLATE_DESCRIPTIONS[language];
 
-  if (!templates) {
-    return '';
-  }
-
   return templates
     .map((template) => {
-      const desc = descriptions?.[template];
+      const desc = descriptions[template];
       const description = desc?.description ?? 'No description available';
       return `- ${template}: ${description}`;
     })
@@ -797,7 +753,7 @@ export function isValidTemplate(language: string, template: string): boolean {
 /**
  * Get templates for a language
  */
-export function getTemplatesForLanguage(language: string): string[] | null {
+export function getTemplatesForLanguage(language: string): readonly string[] | null {
   if (!isValidLanguage(language)) {
     return null;
   }
@@ -870,12 +826,12 @@ export function getKeyFilesForLanguage(language: string, allFiles: string[]): st
 /**
  * Group templates by category for a language
  */
-export function groupTemplatesByCategory(language: string): {
+export function groupTemplatesByCategory(language: ValidLanguage): {
   categories: Record<string, string[]>;
   uncategorized: string[];
 } {
-  const templates = VALID_TEMPLATES[language] ?? [];
-  const descriptions = TEMPLATE_DESCRIPTIONS[language] ?? {};
+  const templates = VALID_TEMPLATES[language];
+  const descriptions = TEMPLATE_DESCRIPTIONS[language];
 
   const categories: Record<string, string[]> = {};
   const uncategorized: string[] = [];

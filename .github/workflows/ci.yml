@@ -102,23 +102,14 @@ jobs:
           node-version: '20.x'
           cache: 'npm'
 
+      - name: Validate templates match TEMPLATE_DESCRIPTIONS
+        run: node tools/validate-templates.mjs
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build (includes template validation)
         run: npm run build
-
-      - name: Validate template structure
-        run: |
-          echo "Checking template directories exist..."
-          for lang in csharp java python typescript; do
-            if [ ! -d "templates/$lang" ]; then
-              echo "ERROR: Missing templates/$lang directory"
-              exit 1
-            fi
-            echo "✓ templates/$lang exists"
-          done
-          echo "All template directories validated!"
 
   publish-dry-run:
     runs-on: ubuntu-latest

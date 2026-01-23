@@ -187,28 +187,34 @@ Use exact template names as returned by get_templates_by_language. Perfect for g
 );
 
 /**
- * Validate that all declared templates exist on disk
- * Logs warnings to stderr if any templates are missing
+ * Validate that all declared templates exist on disk at runtime.
+ *
+ * NOTE: Primary validation happens at build time via `npm run validate:templates`.
+ * This runtime check provides additional safety and verbose logging.
  */
 async function validateTemplates(): Promise<void> {
   const result = await validateTemplatesExist(TEMPLATES_ROOT);
 
   if (!result.valid) {
-    console.error(`[WARNING] Template validation found ${result.missing.length} missing template(s):`);
+    // This should not happen if build-time validation passed
+    console.error(`[ERROR] Template validation failed - ${result.missing.length} missing template(s):`);
     for (const { language, template } of result.missing) {
       console.error(`  - ${language}/${template}`);
     }
     console.error(`Templates root: ${TEMPLATES_ROOT}`);
+    console.error(`[HINT] Run 'npm run validate:templates' for detailed diagnostics`);
   }
 
   // Discover templates from filesystem and report discrepancies
   const discovered = await discoverTemplates(TEMPLATES_ROOT);
 
   if (discovered.extraOnDisk.length > 0) {
-    console.error(`[INFO] Found ${discovered.extraOnDisk.length} undocumented template(s) on disk:`);
+    // This should not happen if build-time validation passed
+    console.error(`[WARNING] Found ${discovered.extraOnDisk.length} undocumented template(s) on disk:`);
     for (const { language, template } of discovered.extraOnDisk) {
-      console.error(`  + ${language}/${template} (consider adding to VALID_TEMPLATES)`);
+      console.error(`  + ${language}/${template}`);
     }
+    console.error(`[HINT] Add to TEMPLATE_DESCRIPTIONS in src/templates.ts or run 'npm run validate:templates'`);
   }
 
   // Log discovery summary in verbose mode (can be enabled via environment variable)

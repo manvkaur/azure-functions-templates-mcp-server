@@ -316,10 +316,7 @@ describe('generateTemplateDescriptions()', () => {
     expect(descriptions).toContain('HTTP-triggered function');
   });
 
-  it('should return empty string for invalid language', () => {
-    const descriptions = generateTemplateDescriptions('invalid');
-    expect(descriptions).toBe('');
-  });
+  // Note: Invalid language test removed - TypeScript now enforces ValidLanguage type at compile time
 });
 
 // ============================================================================
@@ -503,11 +500,7 @@ describe('groupTemplatesByCategory()', () => {
     expect(result.categories['Web APIs']).toContain('HttpTrigger');
   });
 
-  it('should return empty for invalid language', () => {
-    const result = groupTemplatesByCategory('invalid');
-    expect(Object.keys(result.categories)).toHaveLength(0);
-    expect(result.uncategorized).toHaveLength(0);
-  });
+  // Note: Invalid language test removed - TypeScript now enforces ValidLanguage type at compile time
 
   it('should handle templates without descriptions', () => {
     // All current templates have descriptions, so uncategorized should be empty
