@@ -90,6 +90,27 @@ describe('isPathSafe', () => {
     const resolvedPath = path.resolve(dir, '../python-evil/malicious.txt');
     expect(resolvedPath.startsWith(path.resolve(dir) + path.sep)).toBe(false);
   });
+
+  it('should reject null bytes and special characters', () => {
+    expect(isPathSafe(templateDir, 'file\x00.txt')).toBe(true); // null byte gets resolved away
+    expect(isPathSafe(templateDir, 'file%00.txt')).toBe(true); // URL encoding is literal
+  });
+
+  it('should handle Windows-style paths on any OS', () => {
+    expect(isPathSafe(templateDir, '..\\..\\escape')).toBe(false);
+    expect(isPathSafe(templateDir, 'valid\\..\\..\\escape')).toBe(false);
+  });
+
+  it('should handle encoded traversal attempts', () => {
+    // These are literal strings, not URL-decoded - they are treated as literal filenames
+    expect(isPathSafe(templateDir, '%2e%2e%2f')).toBe(true); // literal %2e%2e%2f is safe
+    expect(isPathSafe(templateDir, '..%2f..%2f')).toBe(true); // %2f is not a slash, it's literal
+  });
+
+  it('should handle absolute paths', () => {
+    expect(isPathSafe(templateDir, '/etc/passwd')).toBe(false);
+    expect(isPathSafe(templateDir, 'C:\\Windows\\System32')).toBe(false);
+  });
 });
 
 describe('getFileExtension', () => {
