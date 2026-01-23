@@ -1,15 +1,10 @@
 /**
- * Core template logic extracted for testability
- *
- * ARCHITECTURE NOTE:
- * TEMPLATE_DESCRIPTIONS is the single source of truth for template metadata.
- * VALID_TEMPLATES is derived from TEMPLATE_DESCRIPTIONS keys to avoid duplication.
- * This ensures template lists and their descriptions always stay in sync.
+ * Template definitions and utilities.
+ * TEMPLATE_DESCRIPTIONS is the single source of truth; VALID_TEMPLATES is derived from it.
  */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-// Valid languages (embedded as part of package)
 export const VALID_LANGUAGES = ['csharp', 'java', 'python', 'typescript'] as const;
 export type ValidLanguage = (typeof VALID_LANGUAGES)[number];
 
@@ -355,11 +350,6 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
   },
 };
 
-/**
- * VALID_TEMPLATES is derived from TEMPLATE_DESCRIPTIONS keys.
- * This ensures template lists and descriptions always stay in sync.
- * Templates are sorted alphabetically for consistent ordering.
- */
 function deriveValidTemplates(): Record<ValidLanguage, string[]> {
   const result = {} as Record<ValidLanguage, string[]>;
   for (const lang of VALID_LANGUAGES) {
@@ -370,7 +360,6 @@ function deriveValidTemplates(): Record<ValidLanguage, string[]> {
 
 export const VALID_TEMPLATES: Record<ValidLanguage, string[]> = deriveValidTemplates();
 
-// File extension to language mapping for syntax highlighting
 export const FILE_EXTENSION_MAP: Record<string, string> = {
   '.cs': 'csharp',
   '.java': 'java',
@@ -385,7 +374,6 @@ export const FILE_EXTENSION_MAP: Record<string, string> = {
   '.yaml': 'yaml',
 };
 
-// Common files that apply to all templates per language
 export const LANGUAGE_COMMON_FILES: Record<string, Record<string, string>> = {
   csharp: {
     '.funcignore': `# Azure Functions deployment exclusions for C#
@@ -653,38 +641,6 @@ export async function discoverTemplates(templatesRoot: string): Promise<Discover
     missingFromDisk,
     extraOnDisk,
   };
-}
-
-/**
- * Get the effective templates list - uses discovered templates if available,
- * falls back to VALID_TEMPLATES if discovery fails or returns empty.
- *
- * @deprecated Since build-time validation ensures VALID_TEMPLATES matches the filesystem,
- * you can use VALID_TEMPLATES directly. This function is kept for backward compatibility
- * and edge cases where runtime discovery is needed.
- *
- * @param templatesRoot The root directory containing template folders
- * @returns Templates organized by language
- */
-export async function getEffectiveTemplates(templatesRoot: string): Promise<Record<string, string[]>> {
-  const discovered = await discoverTemplates(templatesRoot);
-
-  // If discovery found templates, use them (merged with VALID_TEMPLATES for descriptions)
-  if (discovered.totalTemplates > 0) {
-    // Return discovered templates, but only for known languages
-    const result: Record<string, string[]> = {};
-    for (const lang of VALID_LANGUAGES) {
-      result[lang] = discovered.templates[lang] ?? [];
-    }
-    return result;
-  }
-
-  // Fall back to hardcoded list - spread to create mutable copy
-  const result: Record<string, string[]> = {};
-  for (const lang of VALID_LANGUAGES) {
-    result[lang] = [...VALID_TEMPLATES[lang]];
-  }
-  return result;
 }
 
 /**

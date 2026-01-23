@@ -1,13 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Build-time validation script to ensure templates on disk match TEMPLATE_DESCRIPTIONS.
- * 
- * This script fails the build if:
- * - A template exists in TEMPLATE_DESCRIPTIONS but not on disk (missing)
- * - A template exists on disk but not in TEMPLATE_DESCRIPTIONS (undocumented)
- * 
- * Run: npm run validate:templates
+ * Build-time template validation. Fails if templates on disk don't match TEMPLATE_DESCRIPTIONS.
  */
 
 import fs from 'node:fs/promises';
@@ -17,8 +11,6 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_ROOT = path.resolve(__dirname, '..', 'templates');
 
-// Define expected templates - must match TEMPLATE_DESCRIPTIONS in src/templates.ts
-// This is the source of truth for what templates should exist
 const EXPECTED_TEMPLATES = {
   csharp: [
     'BlobInputOutputBindings',
@@ -96,9 +88,6 @@ const EXPECTED_TEMPLATES = {
 
 const VALID_LANGUAGES = ['csharp', 'java', 'python', 'typescript'];
 
-/**
- * Discover templates from filesystem
- */
 async function discoverTemplatesOnDisk() {
   const discovered = {};
   
@@ -125,9 +114,6 @@ async function discoverTemplatesOnDisk() {
   return discovered;
 }
 
-/**
- * Compare expected vs discovered templates
- */
 function compareTemplates(expected, discovered) {
   const errors = [];
   const warnings = [];
@@ -155,9 +141,6 @@ function compareTemplates(expected, discovered) {
   return { errors, warnings };
 }
 
-/**
- * Main validation function
- */
 async function main() {
   console.log('Validating templates...\n');
   console.log(`Templates root: ${TEMPLATES_ROOT}\n`);

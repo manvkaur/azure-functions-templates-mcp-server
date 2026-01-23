@@ -26,7 +26,6 @@ import {
   getLanguageDetails,
   validateTemplatesExist,
   discoverTemplates,
-  getEffectiveTemplates,
 } from './templates.js';
 
 // ============================================================================
@@ -794,70 +793,6 @@ describe('discoverTemplates', () => {
       });
     } finally {
       await fs.rm(unknownLangDir, { recursive: true, force: true });
-    }
-  });
-});
-
-// ============================================================================
-// getEffectiveTemplates Tests
-// ============================================================================
-describe('getEffectiveTemplates', () => {
-  let tempDir: string;
-
-  beforeAll(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'effective-templates-test-'));
-
-    // Create some templates
-    await fs.mkdir(path.join(tempDir, 'python', 'HttpTrigger'), { recursive: true });
-    await fs.mkdir(path.join(tempDir, 'python', 'CustomTemplate'), { recursive: true });
-    await fs.mkdir(path.join(tempDir, 'csharp', 'BlobTrigger'), { recursive: true });
-  });
-
-  afterAll(async () => {
-    await fs.rm(tempDir, { recursive: true, force: true });
-  });
-
-  it('should return discovered templates when they exist', async () => {
-    const result = await getEffectiveTemplates(tempDir);
-
-    expect(result.python).toContain('HttpTrigger');
-    expect(result.python).toContain('CustomTemplate');
-    expect(result.csharp).toContain('BlobTrigger');
-  });
-
-  it('should return all valid languages in result', async () => {
-    const result = await getEffectiveTemplates(tempDir);
-
-    for (const lang of VALID_LANGUAGES) {
-      expect(result[lang]).toBeDefined();
-      expect(Array.isArray(result[lang])).toBe(true);
-    }
-  });
-
-  it('should return empty array for languages without templates on disk', async () => {
-    const result = await getEffectiveTemplates(tempDir);
-
-    // typescript has no templates in our test directory
-    expect(result.typescript).toEqual([]);
-    // java has no templates in our test directory
-    expect(result.java).toEqual([]);
-  });
-
-  it('should fall back to VALID_TEMPLATES when directory does not exist', async () => {
-    const result = await getEffectiveTemplates('/non/existent/path');
-
-    // Should return VALID_TEMPLATES exactly
-    expect(result).toEqual(VALID_TEMPLATES);
-  });
-
-  it('should fall back to VALID_TEMPLATES when directory is empty', async () => {
-    const emptyDir = await fs.mkdtemp(path.join(os.tmpdir(), 'empty-templates-test-'));
-
-    try {
-      const result = await getEffectiveTemplates(emptyDir);
-      expect(result).toEqual(VALID_TEMPLATES);
-    } finally {
-      await fs.rm(emptyDir, { recursive: true, force: true });
     }
   });
 });

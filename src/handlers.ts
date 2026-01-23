@@ -1,7 +1,5 @@
 /**
- * Handler logic extracted from server.ts for better testability.
- * These functions contain the core business logic that can be unit tested
- * independently of the MCP server framework.
+ * MCP tool handler implementations.
  */
 
 import * as fs from 'node:fs/promises';
@@ -21,10 +19,7 @@ import {
   getLanguageDetails,
 } from './templates.js';
 
-// Re-export for use by other modules
 export { getFileExtension, getKeyFilesForLanguage, isValidLanguage as validateLanguage } from './templates.js';
-
-// Re-export types for convenience
 export type ValidLanguage = (typeof VALID_LANGUAGES)[number];
 
 /**
@@ -37,25 +32,16 @@ export interface HandlerResult {
   isError?: boolean;
 }
 
-// Re-export validateTemplate for convenience
 export { isValidTemplate as validateTemplate } from './templates.js';
 
-/**
- * Checks for path traversal attack attempts.
- * Returns true if the path is safe, false if traversal was detected.
- */
+/** Returns true if the path is safe (no path traversal). */
 export function isPathSafe(templateDir: string, requestedPath: string): boolean {
-  // Handle empty or dot-only paths
   if (!requestedPath || requestedPath === '.' || requestedPath === '..') {
     return false;
   }
 
   const resolvedTemplateDir = path.resolve(templateDir);
   const fullPath = path.resolve(templateDir, requestedPath);
-
-  // The file must be inside the template directory
-  // We need to ensure it starts with templateDir + separator to prevent
-  // matching /templates/csharp against /templates/csharp-evil
   return fullPath.startsWith(resolvedTemplateDir + path.sep);
 }
 

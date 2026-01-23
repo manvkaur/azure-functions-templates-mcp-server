@@ -1,8 +1,5 @@
 /**
- * Server factory module - Creates and configures the MCP server.
- *
- * This module is separated from server.ts to enable testing of server
- * configuration and tool registration without triggering side effects.
+ * Server factory - Creates and configures the MCP server.
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -66,7 +63,6 @@ export function createServer(config: ServerConfig): McpServer {
  * @param templatesRoot Path to the templates directory
  */
 export function registerTools(server: McpServer, templatesRoot: string): void {
-  // Tool 1: Get Azure Functions templates
   server.registerTool(
     'get_azure_functions_templates',
     {
@@ -125,7 +121,6 @@ ${generateTemplateDescriptions('typescript')}`),
     }
   );
 
-  // Tool 2: Get supported languages
   server.registerTool(
     'get_supported_languages',
     {
@@ -147,7 +142,6 @@ Perfect for choosing the right language for your Azure Functions project and und
     }
   );
 
-  // Tool 3: Get templates by language
   server.registerTool(
     'get_templates_by_language',
     {
@@ -172,7 +166,6 @@ Perfect for exploring available options and understanding Azure Functions capabi
     }
   );
 
-  // Tool 4: Get template files
   server.registerTool(
     'get_template_files',
     {

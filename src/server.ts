@@ -2,9 +2,6 @@
 
 /**
  * Azure Functions Templates MCP Server - Entry Point
- *
- * This is the main entry point that starts the MCP server.
- * Server configuration and tool registration are in server-factory.ts for testability.
  */
 
 // Check Node.js version before any other imports
@@ -20,12 +17,9 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { createServer, validateTemplates, logValidationResult } from './server-factory.js';
 
-// Templates are packaged with this server
-// When running from dist/, templates folder is at package root
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_ROOT = path.resolve(__dirname, '..', '..', 'templates');
 
-// Read version from package.json to keep it in sync
 const require = createRequire(import.meta.url);
 const packageJson = require('../../package.json');
 
