@@ -45,14 +45,19 @@ describe('logger', () => {
   });
 
   describe('logging functions', () => {
-    it('should not log when debug is disabled', () => {
+    it('should not log debug/info when debug is disabled', () => {
       delete process.env.MCP_DEBUG;
       logger.debug('test message');
       logger.info('test message');
-      logger.warn('test message');
-      logger.error('test message');
-      logger.security('test message');
       expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
+
+    it('should always log warn/error/security even when debug is disabled', () => {
+      delete process.env.MCP_DEBUG;
+      logger.warn('test warning');
+      logger.error('test error');
+      logger.security('test security');
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(3);
     });
 
     it('should log debug messages when enabled', () => {
@@ -70,22 +75,22 @@ describe('logger', () => {
       expect(consoleErrorSpy.mock.calls[0][0]).toContain('INFO');
     });
 
-    it('should log warn messages when enabled', () => {
-      process.env.MCP_DEBUG = '1';
+    it('should always log warn messages', () => {
+      delete process.env.MCP_DEBUG;
       logger.warn('test warning');
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
       expect(consoleErrorSpy.mock.calls[0][0]).toContain('WARN');
     });
 
-    it('should log error messages when enabled', () => {
-      process.env.MCP_DEBUG = '1';
+    it('should always log error messages', () => {
+      delete process.env.MCP_DEBUG;
       logger.error('test error');
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
       expect(consoleErrorSpy.mock.calls[0][0]).toContain('ERROR');
     });
 
-    it('should log security events when enabled', () => {
-      process.env.MCP_DEBUG = '1';
+    it('should always log security events', () => {
+      delete process.env.MCP_DEBUG;
       logger.security('path traversal attempt');
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
       expect(consoleErrorSpy.mock.calls[0][0]).toContain('SECURITY');

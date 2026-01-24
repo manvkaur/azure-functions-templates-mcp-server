@@ -21,6 +21,20 @@
   "homepage": "https://github.com/manvkaur/azure-functions-templates-mcp-server#readme",
   "type": "module",
   "main": "dist/src/server.js",
+  "exports": {
+    ".": {
+      "import": "./dist/src/server.js",
+      "types": "./dist/src/server.d.ts"
+    },
+    "./templates": {
+      "import": "./dist/src/templates.js",
+      "types": "./dist/src/templates.d.ts"
+    },
+    "./handlers": {
+      "import": "./dist/src/handlers.js",
+      "types": "./dist/src/handlers.d.ts"
+    }
+  },
   "bin": {
     "manvir-templates-mcp-server": "dist/src/server.js"
   },

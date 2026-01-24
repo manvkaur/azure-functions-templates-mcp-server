@@ -17,10 +17,17 @@ import {
   isValidLanguage,
   isValidTemplate,
   getLanguageDetails,
+  groupTemplatesByCategory,
 } from './templates.js';
 
 export { getFileExtension, getKeyFilesForLanguage, isValidLanguage as validateLanguage } from './templates.js';
 export type ValidLanguage = (typeof VALID_LANGUAGES)[number];
+
+/** Maximum file size to read (1 MB) */
+export const MAX_FILE_SIZE_BYTES = 1024 * 1024;
+
+/** Maximum total response size (5 MB) */
+export const MAX_RESPONSE_SIZE_BYTES = 5 * 1024 * 1024;
 
 /**
  * Result type for handler operations.
@@ -62,34 +69,6 @@ export function createSuccessResult(text: string): HandlerResult {
   return {
     content: [{ type: 'text', text }],
   };
-}
-
-/**
- * Categorizes templates by their category for display
- */
-export function categorizeTemplates(language: ValidLanguage): {
-  categories: Record<string, string[]>;
-  uncategorized: string[];
-} {
-  const templates = VALID_TEMPLATES[language];
-  const descriptions = TEMPLATE_DESCRIPTIONS[language];
-
-  const categories: Record<string, string[]> = {};
-  const uncategorized: string[] = [];
-
-  templates.forEach((template) => {
-    const desc = descriptions[template];
-    if (desc) {
-      if (!categories[desc.category]) {
-        categories[desc.category] = [];
-      }
-      categories[desc.category].push(template);
-    } else {
-      uncategorized.push(template);
-    }
-  });
-
-  return { categories, uncategorized };
 }
 
 /**
@@ -138,7 +117,7 @@ export function formatSupportedLanguagesResponse(): string {
 export function formatTemplatesByLanguageResponse(language: ValidLanguage): string {
   const templates = VALID_TEMPLATES[language];
   const descriptions = TEMPLATE_DESCRIPTIONS[language];
-  const { categories, uncategorized } = categorizeTemplates(language);
+  const { categories, uncategorized } = groupTemplatesByCategory(language);
 
   // Add uncategorized to categories if any exist
   if (uncategorized.length > 0) {
@@ -247,6 +226,13 @@ export async function handleGetTemplates(args: GetTemplatesArgs, templatesRoot: 
     const stat = await fs.lstat(fullPath);
     if (!stat.isFile()) {
       return createErrorResult(`Path is not a file: ${filePath}`);
+    }
+
+    if (stat.size > MAX_FILE_SIZE_BYTES) {
+      logger.warn('File size exceeds limit', { filePath, size: stat.size, limit: MAX_FILE_SIZE_BYTES });
+      return createErrorResult(
+        `File too large: ${filePath} (${(stat.size / 1024).toFixed(1)} KB). Maximum allowed: ${MAX_FILE_SIZE_BYTES / 1024} KB`
+      );
     }
 
     const content = await fs.readFile(fullPath, 'utf8');
@@ -366,6 +352,7 @@ This indicates an internal error. Please verify the template exists.`);
   result += `**Complete Template Files**:\n\n`;
 
   // Include all files with their content
+  let totalSize = 0;
   for (let i = 0; i < relativeFiles.length; i++) {
     const filePath = relativeFiles[i];
     const fullPath = path.join(templateDir, filePath);
@@ -373,9 +360,25 @@ This indicates an internal error. Please verify the template exists.`);
     try {
       const stat = await fs.lstat(fullPath);
       if (stat.isFile()) {
+        // Check individual file size
+        if (stat.size > MAX_FILE_SIZE_BYTES) {
+          result += `## File ${i + 1}: \`${filePath}\`\n\n`;
+          result += `*File too large (${(stat.size / 1024).toFixed(1)} KB). Use get_azure_functions_templates with filePath parameter to retrieve.*\n\n`;
+          continue;
+        }
+
         const content = await fs.readFile(fullPath, 'utf8');
-        result += `## File ${i + 1}: \`${filePath}\`\n\n`;
-        result += `\`\`\`${getFileExtension(filePath)}\n${content}\n\`\`\`\n\n`;
+
+        // Check if adding this file would exceed total response size
+        const fileSection = `## File ${i + 1}: \`${filePath}\`\n\n\`\`\`${getFileExtension(filePath)}\n${content}\n\`\`\`\n\n`;
+        if (totalSize + fileSection.length > MAX_RESPONSE_SIZE_BYTES) {
+          result += `## File ${i + 1}: \`${filePath}\`\n\n`;
+          result += `*Response size limit reached. Use get_azure_functions_templates with filePath parameter to retrieve remaining files.*\n\n`;
+          break;
+        }
+
+        result += fileSection;
+        totalSize += fileSection.length;
       }
     } catch (error) {
       result += `## File ${i + 1}: \`${filePath}\`\n`;

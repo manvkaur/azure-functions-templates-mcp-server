@@ -24,9 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.2] - 2026-01-23
 
-### Added
+### Initial Release
 
-- Initial public release
 - 4 MCP tools: get_azure_functions_templates, get_template_files, get_supported_languages, get_template_description
 - Support for 4 languages: C#, Java, Python, TypeScript
 - 64+ templates covering major Azure services and trigger types

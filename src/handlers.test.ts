@@ -12,15 +12,16 @@ import {
   getKeyFilesForLanguage,
   createErrorResult,
   createSuccessResult,
-  categorizeTemplates,
   formatSupportedLanguagesResponse,
   formatTemplatesByLanguageResponse,
   handleGetTemplates,
   handleGetSupportedLanguages,
   handleGetTemplatesByLanguage,
   handleGetTemplateFiles,
+  MAX_FILE_SIZE_BYTES,
+  MAX_RESPONSE_SIZE_BYTES,
 } from './handlers.js';
-import { VALID_LANGUAGES, VALID_TEMPLATES, getLanguageDetails } from './templates.js';
+import { VALID_LANGUAGES, VALID_TEMPLATES, getLanguageDetails, groupTemplatesByCategory } from './templates.js';
 
 const TEMPLATES_ROOT = path.join(import.meta.dirname, '..', 'templates');
 
@@ -216,21 +217,21 @@ describe('createSuccessResult', () => {
   });
 });
 
-describe('categorizeTemplates', () => {
+describe('groupTemplatesByCategory', () => {
   it('should categorize templates by category', () => {
-    const { categories } = categorizeTemplates('python');
+    const { categories } = groupTemplatesByCategory('python');
     expect(Object.keys(categories).length).toBeGreaterThan(0);
   });
 
   it('should group related templates together', () => {
-    const { categories } = categorizeTemplates('csharp');
+    const { categories } = groupTemplatesByCategory('csharp');
     // Check that categories exist
     expect(Object.keys(categories).some((c) => c.includes('Storage') || c.includes('HTTP'))).toBe(true);
   });
 
   it('should handle all valid languages', () => {
     for (const lang of VALID_LANGUAGES) {
-      const { categories, uncategorized } = categorizeTemplates(lang);
+      const { categories, uncategorized } = groupTemplatesByCategory(lang);
       const totalCategorized = Object.values(categories).reduce((sum, arr) => sum + arr.length, 0);
       const totalTemplates = VALID_TEMPLATES[lang].length;
       expect(totalCategorized + uncategorized.length).toBe(totalTemplates);
@@ -387,5 +388,21 @@ describe('handleGetTemplateFiles', () => {
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain('Azure Functions Template: java/HttpTrigger');
     expect(result.content[0].text).toContain('pom.xml');
+  });
+});
+
+describe('file size limits', () => {
+  it('should have sensible size limits defined', () => {
+    expect(MAX_FILE_SIZE_BYTES).toBe(1024 * 1024); // 1 MB
+    expect(MAX_RESPONSE_SIZE_BYTES).toBe(5 * 1024 * 1024); // 5 MB
+  });
+
+  it('should handle normal-sized template files', async () => {
+    const result = await handleGetTemplates(
+      { language: 'python', template: 'HttpTrigger', filePath: 'function_app.py' },
+      TEMPLATES_ROOT
+    );
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toContain('function_app.py');
   });
 });

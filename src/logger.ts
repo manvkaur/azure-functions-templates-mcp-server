@@ -1,5 +1,7 @@
 /**
- * Debug logger. Enable with MCP_DEBUG=1 or MCP_DEBUG=true.
+ * Logger for MCP server.
+ * - debug/info: Only logged when MCP_DEBUG=1 or MCP_DEBUG=true
+ * - warn/error/security: Always logged to stderr
  */
 
 const DEBUG_ENV_VAR = 'MCP_DEBUG';
@@ -30,23 +32,19 @@ export function info(message: string, context?: Record<string, unknown>): void {
   }
 }
 
+/** Warning messages - always logged to stderr */
 export function warn(message: string, context?: Record<string, unknown>): void {
-  if (isDebugEnabled()) {
-    console.error(formatMessage('warn', message, context));
-  }
+  console.error(formatMessage('warn', message, context));
 }
 
+/** Error messages - always logged to stderr */
 export function error(message: string, context?: Record<string, unknown>): void {
-  if (isDebugEnabled()) {
-    console.error(formatMessage('error', message, context));
-  }
+  console.error(formatMessage('error', message, context));
 }
 
-/** Log security events (path traversal attempts, invalid inputs). */
+/** Security events (path traversal attempts, invalid inputs) - always logged to stderr */
 export function security(message: string, context?: Record<string, unknown>): void {
-  if (isDebugEnabled()) {
-    console.error(formatMessage('security', message, context));
-  }
+  console.error(formatMessage('security', message, context));
 }
 
 export const logger = {
