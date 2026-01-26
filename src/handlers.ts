@@ -47,8 +47,17 @@ export function isPathSafe(templateDir: string, requestedPath: string): boolean 
     return false;
   }
 
+  // Normalize backslashes to forward slashes for cross-platform security
+  // This prevents attacks using Windows-style paths on Linux
+  const normalizedPath = requestedPath.replace(/\\/g, '/');
+
+  // Reject absolute paths (Unix or Windows style)
+  if (normalizedPath.startsWith('/') || /^[A-Za-z]:/.test(normalizedPath)) {
+    return false;
+  }
+
   const resolvedTemplateDir = path.resolve(templateDir);
-  const fullPath = path.resolve(templateDir, requestedPath);
+  const fullPath = path.resolve(templateDir, normalizedPath);
   return fullPath.startsWith(resolvedTemplateDir + path.sep);
 }
 
