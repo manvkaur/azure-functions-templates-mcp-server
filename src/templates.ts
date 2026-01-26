@@ -226,6 +226,11 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       category: 'Database Bindings',
       useCase: 'Data persistence, document storage, NoSQL write operations',
     },
+    CosmosDBTrigger: {
+      description: 'Triggered by changes in Cosmos DB using the change feed',
+      category: 'Database Triggers',
+      useCase: 'Real-time data processing, event sourcing, maintaining materialized views',
+    },
     DurableFunctions: {
       description: 'Durable Functions orchestration and activities',
       category: 'Durable Functions',

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- README.md documentation for all 62 templates with Host Storage Configuration guidance
+- README.md documentation for all 63 templates with Host Storage Configuration guidance
 - Zod schema validation for template metadata (`TemplateMetadataSchema`, `validateTemplateDescriptions()`)
 - JSON structured logging for log aggregation tools
 - Integration tests for template validation (25 tests)
@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 4 MCP tools: get_azure_functions_templates, get_template_files, get_supported_languages, get_template_description
 - Support for 4 languages: C#, Java, Python, TypeScript
-- 62 templates covering major Azure services and trigger types
+- 63 templates covering major Azure services and trigger types
 
 ### Templates
 
