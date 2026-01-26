@@ -1,6 +1,6 @@
-# Cosmos DB Input Binding - Java
+# Cosmos DB Trigger - Java
 
-This template demonstrates an Azure Function that reads documents from Azure Cosmos DB.
+This template demonstrates an Azure Function triggered by Cosmos DB changes using the change feed.
 
 ## Configuration
 
@@ -18,9 +18,9 @@ For production, configure identity-based connections:
 
 ### Cosmos DB Connection Configuration
 
-The Cosmos DB binding requires a connection to your Cosmos DB account. Configure the connection in your settings:
+The Cosmos DB trigger requires a connection to your Cosmos DB account. Configure the connection in your settings:
 
-- [Cosmos DB connections](https://learn.microsoft.com/azure/azure-functions/functions-bindings-cosmosdb-v2-input?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv4&pivots=programming-language-java#connections)
+- [Cosmos DB connections](https://learn.microsoft.com/azure/azure-functions/functions-bindings-cosmosdb-v2-trigger?tabs=python-v2%2Cisolated-process%2Cextensionv4%2Cnodejs-v4&pivots=programming-language-java#connections)
 
 ## Local Development
 

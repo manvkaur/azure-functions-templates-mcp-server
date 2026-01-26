@@ -6,7 +6,7 @@ This template demonstrates an Azure Function triggered by Azure Blob Storage eve
 
 ### Identity-Based Connections (Recommended)
 
-For production deployments, use identity-based connections instead of connection strings:
+For production deployments, use identity-based connections instead of connection strings for `BlobConnection`:
 
 - [Identity-based connections for Blob Storage](https://learn.microsoft.com/azure/azure-functions/functions-bindings-storage-blob-trigger?pivots=programming-language-java&tabs=in-process%2Cextensionv5#identity-based-connections)
 
