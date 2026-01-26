@@ -14,7 +14,7 @@ The `AzureWebJobsStorage` setting is used by the Azure Functions runtime. By def
 
 For production, configure identity-based connections:
 
-- [Connecting to host storage with an identity](<https://learn.microsoft.com/azure/azure-functions/functions-reference?tabs=blob&pivots=programming-language-csharp#connectin> g-to-host-storage-with-an-identity)
+- [Connecting to host storage with an identity](https://learn.microsoft.com/azure/azure-functions/functions-reference?tabs=blob&pivots=programming-language-csharp#connecting-to-host-storage-with-an-identity)
 
 ## Local Development
 
