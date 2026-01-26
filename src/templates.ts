@@ -4,15 +4,58 @@
  */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { z } from 'zod';
 
 export const VALID_LANGUAGES = ['csharp', 'java', 'python', 'typescript'] as const;
 export type ValidLanguage = (typeof VALID_LANGUAGES)[number];
 
-/** Template metadata structure */
-export interface TemplateMetadata {
-  description: string;
-  category: string;
-  useCase: string;
+/**
+ * Zod schema for template metadata validation.
+ * Ensures all templates have required fields with meaningful content.
+ */
+export const TemplateMetadataSchema = z.object({
+  description: z
+    .string()
+    .min(10, 'Description must be at least 10 characters')
+    .max(200, 'Description must not exceed 200 characters'),
+  category: z
+    .string()
+    .min(3, 'Category must be at least 3 characters')
+    .max(50, 'Category must not exceed 50 characters'),
+  useCase: z
+    .string()
+    .min(10, 'Use case must be at least 10 characters')
+    .max(200, 'Use case must not exceed 200 characters'),
+});
+
+/** Template metadata structure (inferred from Zod schema) */
+export type TemplateMetadata = z.infer<typeof TemplateMetadataSchema>;
+
+/** Schema for a language's template collection */
+export const LanguageTemplatesSchema = z.record(z.string(), TemplateMetadataSchema);
+
+/** Schema for all template descriptions */
+export const AllTemplateDescriptionsSchema = z.object({
+  csharp: LanguageTemplatesSchema,
+  java: LanguageTemplatesSchema,
+  python: LanguageTemplatesSchema,
+  typescript: LanguageTemplatesSchema,
+});
+
+/**
+ * Validates TEMPLATE_DESCRIPTIONS against the schema.
+ * Returns validation result with errors if any.
+ */
+export function validateTemplateDescriptions(): {
+  valid: boolean;
+  errors: string[];
+} {
+  const result = AllTemplateDescriptionsSchema.safeParse(TEMPLATE_DESCRIPTIONS);
+  if (result.success) {
+    return { valid: true, errors: [] };
+  }
+  const errors = result.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`);
+  return { valid: false, errors };
 }
 
 /**

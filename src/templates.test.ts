@@ -26,6 +26,10 @@ import {
   getLanguageDetails,
   validateTemplatesExist,
   discoverTemplates,
+  TemplateMetadataSchema,
+  LanguageTemplatesSchema,
+  AllTemplateDescriptionsSchema,
+  validateTemplateDescriptions,
 } from './templates.js';
 
 // ============================================================================
@@ -793,6 +797,134 @@ describe('discoverTemplates', () => {
       });
     } finally {
       await fs.rm(unknownLangDir, { recursive: true, force: true });
+    }
+  });
+});
+
+// ============================================================================
+// Zod Schema Validation Tests
+// ============================================================================
+describe('TemplateMetadataSchema', () => {
+  it('should validate correct metadata', () => {
+    const validMetadata = {
+      description: 'A valid description for the template',
+      category: 'Web APIs',
+      useCase: 'REST APIs, webhooks, web services',
+    };
+    const result = TemplateMetadataSchema.safeParse(validMetadata);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject description shorter than 10 characters', () => {
+    const invalidMetadata = {
+      description: 'Short',
+      category: 'Web APIs',
+      useCase: 'REST APIs, webhooks, web services',
+    };
+    const result = TemplateMetadataSchema.safeParse(invalidMetadata);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.errors[0].message).toContain('at least 10 characters');
+    }
+  });
+
+  it('should reject category shorter than 3 characters', () => {
+    const invalidMetadata = {
+      description: 'A valid description for the template',
+      category: 'AB',
+      useCase: 'REST APIs, webhooks, web services',
+    };
+    const result = TemplateMetadataSchema.safeParse(invalidMetadata);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject useCase shorter than 10 characters', () => {
+    const invalidMetadata = {
+      description: 'A valid description for the template',
+      category: 'Web APIs',
+      useCase: 'Short',
+    };
+    const result = TemplateMetadataSchema.safeParse(invalidMetadata);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject missing fields', () => {
+    const invalidMetadata = {
+      description: 'A valid description for the template',
+    };
+    const result = TemplateMetadataSchema.safeParse(invalidMetadata);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('LanguageTemplatesSchema', () => {
+  it('should validate a collection of templates', () => {
+    const validTemplates = {
+      HttpTrigger: {
+        description: 'HTTP-triggered function for REST API endpoints',
+        category: 'Web APIs',
+        useCase: 'REST APIs, webhooks, web services, serverless backends',
+      },
+      TimerTrigger: {
+        description: 'Scheduled function execution using CRON expressions',
+        category: 'Scheduling',
+        useCase: 'Scheduled tasks, batch processing, maintenance jobs',
+      },
+    };
+    const result = LanguageTemplatesSchema.safeParse(validTemplates);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject templates with invalid metadata', () => {
+    const invalidTemplates = {
+      HttpTrigger: {
+        description: 'Short', // Too short
+        category: 'Web APIs',
+        useCase: 'REST APIs, webhooks',
+      },
+    };
+    const result = LanguageTemplatesSchema.safeParse(invalidTemplates);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('AllTemplateDescriptionsSchema', () => {
+  it('should validate the full TEMPLATE_DESCRIPTIONS structure', () => {
+    const result = AllTemplateDescriptionsSchema.safeParse(TEMPLATE_DESCRIPTIONS);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject structure missing a language', () => {
+    const invalidStructure = {
+      csharp: {},
+      java: {},
+      python: {},
+      // missing typescript
+    };
+    const result = AllTemplateDescriptionsSchema.safeParse(invalidStructure);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('validateTemplateDescriptions()', () => {
+  it('should return valid for current TEMPLATE_DESCRIPTIONS', () => {
+    const result = validateTemplateDescriptions();
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('should validate all templates have meaningful descriptions', () => {
+    const result = validateTemplateDescriptions();
+    expect(result.valid).toBe(true);
+
+    // Verify each template has all required fields
+    for (const lang of VALID_LANGUAGES) {
+      for (const template of Object.keys(TEMPLATE_DESCRIPTIONS[lang])) {
+        const meta = TEMPLATE_DESCRIPTIONS[lang][template];
+        expect(meta.description.length).toBeGreaterThanOrEqual(10);
+        expect(meta.category.length).toBeGreaterThanOrEqual(3);
+        expect(meta.useCase.length).toBeGreaterThanOrEqual(10);
+      }
     }
   });
 });
