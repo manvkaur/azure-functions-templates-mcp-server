@@ -2,6 +2,7 @@
  * Logger for MCP server.
  * - debug/info: Only logged when MCP_DEBUG=1 or MCP_DEBUG=true
  * - warn/error/security: Always logged to stderr
+ * - All output is structured JSON for log aggregation tools
  */
 
 const DEBUG_ENV_VAR = 'MCP_DEBUG';
@@ -13,11 +14,23 @@ export function isDebugEnabled(): boolean {
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'security';
 
+interface LogEntry {
+  timestamp: string;
+  level: LogLevel;
+  message: string;
+  context?: Record<string, unknown>;
+}
+
 function formatMessage(level: LogLevel, message: string, context?: Record<string, unknown>): string {
-  const timestamp = new Date().toISOString();
-  const levelStr = level.toUpperCase().padEnd(8);
-  const contextStr = context ? ` ${JSON.stringify(context)}` : '';
-  return `[${timestamp}] [${levelStr}] ${message}${contextStr}`;
+  const entry: LogEntry = {
+    timestamp: new Date().toISOString(),
+    level,
+    message,
+  };
+  if (context) {
+    entry.context = context;
+  }
+  return JSON.stringify(entry);
 }
 
 export function debug(message: string, context?: Record<string, unknown>): void {
