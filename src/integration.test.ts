@@ -289,4 +289,121 @@ describe('MCP Server Integration', () => {
       expect(text).toContain('tsconfig.json');
     });
   });
+
+  describe('README.md in templates', () => {
+    it('should include README.md for Python HttpTrigger', async () => {
+      const result = await client.callTool({
+        name: 'get_template_files',
+        arguments: { language: 'python', template: 'HttpTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('README.md');
+      expect(text).toContain('Host Storage Configuration');
+      expect(text).toContain('AzureWebJobsStorage');
+    });
+
+    it('should include README.md for C# HttpTrigger', async () => {
+      const result = await client.callTool({
+        name: 'get_template_files',
+        arguments: { language: 'csharp', template: 'HttpTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('README.md');
+      expect(text).toContain('Host Storage Configuration');
+      expect(text).toContain('identity-based connections');
+    });
+
+    it('should include README.md for Java HttpTrigger', async () => {
+      const result = await client.callTool({
+        name: 'get_template_files',
+        arguments: { language: 'java', template: 'HttpTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('README.md');
+      expect(text).toContain('Host Storage Configuration');
+      expect(text).toContain('mvn azure-functions:run');
+    });
+
+    it('should include README.md for TypeScript HttpTrigger', async () => {
+      const result = await client.callTool({
+        name: 'get_template_files',
+        arguments: { language: 'typescript', template: 'HttpTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('README.md');
+      expect(text).toContain('Host Storage Configuration');
+      expect(text).toContain('npm start');
+    });
+
+    it('should include identity-based connection docs for Blob templates', async () => {
+      const result = await client.callTool({
+        name: 'get_template_files',
+        arguments: { language: 'python', template: 'BlobTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('README.md');
+      expect(text).toContain('Identity-Based Connections');
+      expect(text).toContain('functions-bindings-storage-blob-trigger');
+    });
+
+    it('should include identity-based connection docs for Queue templates', async () => {
+      const result = await client.callTool({
+        name: 'get_template_files',
+        arguments: { language: 'csharp', template: 'QueueTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('README.md');
+      expect(text).toContain('Identity-Based Connections');
+      expect(text).toContain('functions-bindings-storage-queue-trigger');
+    });
+
+    it('should include README.md via get_azure_functions_templates', async () => {
+      const result = await client.callTool({
+        name: 'get_azure_functions_templates',
+        arguments: { language: 'python', template: 'TimerTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('README.md');
+    });
+
+    it('should return README.md content when requested directly', async () => {
+      const result = await client.callTool({
+        name: 'get_azure_functions_templates',
+        arguments: {
+          language: 'java',
+          template: 'BlobTrigger',
+          filePath: 'README.md',
+        },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('# Blob Trigger - Java');
+      expect(text).toContain('Identity-Based Connections');
+      expect(text).toContain('Host Storage Configuration');
+      expect(text).toContain('Azurite');
+    });
+  });
 });

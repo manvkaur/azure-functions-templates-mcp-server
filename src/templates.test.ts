@@ -61,8 +61,8 @@ describe('VALID_TEMPLATES', () => {
     }
   });
 
-  it('should have 29 templates for csharp', () => {
-    expect(VALID_TEMPLATES.csharp).toHaveLength(29);
+  it('should have 27 templates for csharp', () => {
+    expect(VALID_TEMPLATES.csharp).toHaveLength(27);
   });
 
   it('should have 14 templates for java', () => {
@@ -381,7 +381,7 @@ describe('getTemplatesForLanguage()', () => {
   });
 
   it('should return correct number of templates', () => {
-    expect(getTemplatesForLanguage('csharp')?.length).toBe(29);
+    expect(getTemplatesForLanguage('csharp')?.length).toBe(27);
     expect(getTemplatesForLanguage('java')?.length).toBe(14);
     expect(getTemplatesForLanguage('python')?.length).toBe(11);
     expect(getTemplatesForLanguage('typescript')?.length).toBe(10);
@@ -536,7 +536,7 @@ describe('getLanguageDetails()', () => {
 
   it('should have correct template counts', () => {
     const details = getLanguageDetails();
-    expect(details.csharp.templateCount).toBe(29);
+    expect(details.csharp.templateCount).toBe(27);
     expect(details.java.templateCount).toBe(14);
     expect(details.python.templateCount).toBe(11);
     expect(details.typescript.templateCount).toBe(10);

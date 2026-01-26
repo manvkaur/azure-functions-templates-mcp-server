@@ -15,7 +15,7 @@ public class EventGridBlobTriggerCSharp
     }
 
     [Function(nameof(EventGridBlobTriggerCSharp))]
-    public async Task Run([BlobTrigger("PathValue/{name}", Source = BlobTriggerSource.EventGrid, Connection = "ConnectionValue")] Stream stream, string name)
+    public async Task Run([BlobTrigger("PathValue/{name}", Source = BlobTriggerSource.EventGrid, Connection = "BlobStore")] Stream stream, string name)
     {
         using var blobStreamReader = new StreamReader(stream);
         var content = await blobStreamReader.ReadToEndAsync();

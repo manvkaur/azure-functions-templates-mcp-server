@@ -96,16 +96,6 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       category: 'Web APIs',
       useCase: 'REST APIs, webhooks, web services, serverless backends',
     },
-    KustoInputBinding: {
-      description: 'Queries data from Azure Data Explorer (Kusto)',
-      category: 'Analytics',
-      useCase: 'Data analytics, time-series queries, telemetry analysis, reporting',
-    },
-    KustoOutputBinding: {
-      description: 'Ingests data into Azure Data Explorer (Kusto)',
-      category: 'Analytics',
-      useCase: 'Analytics data ingestion, telemetry storage, time-series data collection',
-    },
     MCPToolTrigger: {
       description: 'Model Context Protocol integration for AI assistant tools',
       category: 'AI/ML',

@@ -14,12 +14,12 @@ const SNIPPET_PROPERTY_DESCRIPTION = "The code snippet.";
 
 // Define blob input and output bindings
 const blobInputBinding = input.storageBlob({
-  connection: "AzureWebJobsStorage",
+  connection: "BlobConnection",
   path: `snippets/{mcptoolargs.${SNIPPET_NAME_PROPERTY_NAME}}.json`,
 });
 
 const blobOutputBinding = output.storageBlob({
-  connection: "AzureWebJobsStorage",
+  connection: "BlobConnection",
   path: `snippets/{mcptoolargs.${SNIPPET_NAME_PROPERTY_NAME}}.json`,
 });
 

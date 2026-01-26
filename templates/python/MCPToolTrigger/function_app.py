@@ -65,7 +65,7 @@ def hello_mcp(context) -> None:
     description="Retrieve a snippet by name.",
     toolProperties=tool_properties_get_snippets_json,
 )
-@app.generic_input_binding(arg_name="file", type="blob", connection="AzureWebJobsStorage", path=_BLOB_PATH)
+@app.generic_input_binding(arg_name="file", type="blob", connection="BlobConnection", path=_BLOB_PATH)
 def get_snippet(file: func.InputStream, context) -> str:
     """
     Retrieves a snippet by name from Azure Blob Storage.
@@ -89,7 +89,7 @@ def get_snippet(file: func.InputStream, context) -> str:
     description="Save a snippet with a name.",
     toolProperties=tool_properties_save_snippets_json,
 )
-@app.generic_output_binding(arg_name="file", type="blob", connection="AzureWebJobsStorage", path=_BLOB_PATH)
+@app.generic_output_binding(arg_name="file", type="blob", connection="BlobConnection", path=_BLOB_PATH)
 def save_snippet(file: func.Out[str], context) -> str:
     content = json.loads(context)
     snippet_name_from_args = content["arguments"][_SNIPPET_NAME_PROPERTY_NAME]
