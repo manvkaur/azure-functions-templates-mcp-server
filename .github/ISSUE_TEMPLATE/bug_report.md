@@ -34,7 +34,7 @@ add code files
 
 - **OS:** [e.g., Windows 11, macOS 14, Ubuntu 22.04]
 - **Node.js version:** [e.g., 20.10.0]
-- **MCP Server version:** [e.g., 0.1.2]
+- **MCP Server version:** [e.g., 0.1.3]
 - **MCP Client:** [e.g., Claude Desktop, VS Code Copilot]
 
 ## Error Output
