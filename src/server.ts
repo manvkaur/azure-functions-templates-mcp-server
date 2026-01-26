@@ -59,6 +59,14 @@ async function main() {
 
 main().catch((err) => {
   // Write errors to stderr only. Never write to stdout in stdio servers.
-  console.error(err);
+  console.error('[FATAL] Server failed to start');
+  if (err instanceof Error) {
+    console.error(`[FATAL] ${err.name}: ${err.message}`);
+    if (err.stack) {
+      console.error(err.stack);
+    }
+  } else {
+    console.error('[FATAL] Unknown error:', err);
+  }
   process.exit(1);
 });

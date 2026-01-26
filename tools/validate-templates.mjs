@@ -90,6 +90,45 @@ function compareTemplates(expected, discovered, languages) {
   return { errors };
 }
 
+/**
+ * Validates that the template count in package.json matches the actual count.
+ * Extracts the number from patterns like "64+ templates" or "64 templates".
+ */
+async function validatePackageJsonCount(actualCount) {
+  const packageJsonPath = path.resolve(__dirname, '..', 'package.json');
+  const warnings = [];
+
+  try {
+    const content = await fs.readFile(packageJsonPath, 'utf-8');
+    const pkg = JSON.parse(content);
+
+    // Check description field for template count
+    const description = pkg.description || '';
+    const match = description.match(/(\d+)\+?\s*templates/i);
+
+    if (match) {
+      const claimedCount = parseInt(match[1], 10);
+      if (claimedCount > actualCount) {
+        warnings.push(
+          `PACKAGE.JSON: Claims "${claimedCount}+ templates" but only ${actualCount} exist. ` +
+          `Update the description in package.json.`
+        );
+      } else if (actualCount > claimedCount + 10) {
+        // Warn if actual count is significantly higher (suggest updating marketing)
+        warnings.push(
+          `PACKAGE.JSON: Claims "${claimedCount}+ templates" but ${actualCount} now exist. ` +
+          `Consider updating the description in package.json to reflect growth.`
+        );
+      }
+    }
+  } catch (err) {
+    // Non-fatal: just skip this validation
+    console.log(`  [SKIP] Could not validate package.json count: ${err.message}`);
+  }
+
+  return warnings;
+}
+
 async function main() {
   console.log('Validating templates...\n');
   console.log(`Templates root: ${TEMPLATES_ROOT}\n`);
@@ -138,6 +177,16 @@ async function main() {
       console.log('  - UNDOCUMENTED: Add the template to TEMPLATE_DESCRIPTIONS in src/templates.ts');
       console.log('                  OR remove the directory if it should not be included\n');
       process.exit(1);
+    }
+
+    // Validate package.json count matches actual templates
+    const countWarnings = await validatePackageJsonCount(totalDiscovered);
+    if (countWarnings.length > 0) {
+      console.log('WARNINGS:\n');
+      for (const warning of countWarnings) {
+        console.log(`  ${warning}`);
+      }
+      console.log('');
     }
   }
 
