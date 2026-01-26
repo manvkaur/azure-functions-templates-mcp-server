@@ -14,7 +14,7 @@ public class EventHubTriggerCSharp
     }
 
     [Function(nameof(EventHubTriggerCSharp))]
-    public void Run([EventHubTrigger("eventHubNameValue", Connection = "ConnectionValue")] EventData[] events)
+    public void Run([EventHubTrigger("eventHubNameValue", Connection = "EventHubConnection")] EventData[] events)
     {
         foreach (EventData @event in events)
         {

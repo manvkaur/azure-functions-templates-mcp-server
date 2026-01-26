@@ -1,0 +1,19 @@
+{
+  "java.project.sourcePaths": [],
+  "java.project.referencedLibraries": [],
+  "java.autobuild.enabled": false,
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.import.generatesMetadataFilesAtProjectRoot": false,
+  "[java]": {
+    "editor.defaultFormatter": null
+  },
+  "files.exclude": {
+    "**/templates/java/**/target": true
+  },
+  "search.exclude": {
+    "**/templates/java/**/target": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "python-envs.defaultEnvManager": "ms-python.python:system",
+  "python-envs.pythonProjects": []
+}

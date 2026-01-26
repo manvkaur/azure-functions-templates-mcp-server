@@ -6,7 +6,6 @@ import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
 import com.microsoft.azure.functions.OutputBinding;
-import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.BlobInput;
 import com.microsoft.azure.functions.annotation.BlobOutput;
 import com.microsoft.azure.functions.annotation.FunctionName;

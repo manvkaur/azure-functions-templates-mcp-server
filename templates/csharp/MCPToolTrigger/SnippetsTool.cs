@@ -13,14 +13,14 @@ public class SnippetsTool()
     public object GetSnippet(
         [McpToolTrigger(GetSnippetToolName, GetSnippetToolDescription)]
             ToolInvocationContext context,
-        [BlobInput(BlobPath)] string snippetContent
+        [BlobInput(BlobPath, Connection = "BlobStoreConnection")] string snippetContent
     )
     {
         return snippetContent;
     }
 
     [Function(nameof(SaveSnippet))]
-    [BlobOutput(BlobPath)]
+    [BlobOutput(BlobPath, Connection = "BlobStoreConnection")]
     public string SaveSnippet(
         [McpToolTrigger(SaveSnippetToolName, SaveSnippetToolDescription)]
             ToolInvocationContext context,

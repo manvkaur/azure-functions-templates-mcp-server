@@ -47,7 +47,7 @@ public class Snippets {
      * @param functionExecutionContext       The execution context for logging.
      */
     @FunctionName("SaveSnippets")
-    @StorageAccount("AzureWebJobsStorage")
+    @StorageAccount("BlobConnection")
     public String saveSnippet(
             @McpToolTrigger(
                     name = "saveSnippets",
@@ -95,7 +95,7 @@ public class Snippets {
      * @param functionExecutionContext       The execution context for logging.
      */
     @FunctionName("GetSnippets")
-    @StorageAccount("AzureWebJobsStorage")
+    @StorageAccount("BlobConnection")
     public String getSnippet(
             @McpToolTrigger(
                 name = "getSnippets",

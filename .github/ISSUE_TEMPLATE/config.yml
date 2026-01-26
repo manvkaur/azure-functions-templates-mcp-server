@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Azure Functions Documentation
+    url: https://learn.microsoft.com/azure/azure-functions/
+    about: Official Azure Functions documentation
+  - name: MCP Protocol Specification
+    url: https://modelcontextprotocol.io/
+    about: Model Context Protocol documentation

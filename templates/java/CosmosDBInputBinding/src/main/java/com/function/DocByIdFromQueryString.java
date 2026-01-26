@@ -5,7 +5,6 @@ import com.microsoft.azure.functions.HttpMethod;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
-import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.CosmosDBInput;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
@@ -21,10 +20,10 @@ public class DocByIdFromQueryString {
             HttpRequestMessage<Optional<String>> request,
             @CosmosDBInput(name = "database",
               databaseName = "ToDoList",
-              collectionName = "Items",
+              containerName = "Items",
               id = "{Query.id}",
               partitionKey = "{Query.partitionKeyValue}",
-              connectionStringSetting = "Cosmos_DB_Connection_String")
+              connection = "CosmosDbConnection")
             Optional<String> item,
             final ExecutionContext context) {
 

@@ -1,7 +1,7 @@
 {
   "name": "manvir-templates-mcp-server",
-  "version": "0.1.1",
-  "description": "An MCP server that provides ready-to-use Azure Functions templates across 4 programming languages with 64+ templates covering all major Azure services and trigger types",
+  "version": "0.1.2",
+  "description": "An MCP server that provides ready-to-use Azure Functions templates across 4 programming languages with 63+ templates covering all major Azure services and trigger types",
   "keywords": [
     "azure-functions",
     "mcp-server",
@@ -21,10 +21,27 @@
   "homepage": "https://github.com/manvkaur/azure-functions-templates-mcp-server#readme",
   "type": "module",
   "main": "dist/src/server.js",
+  "exports": {
+    ".": {
+      "import": "./dist/src/server.js",
+      "types": "./dist/src/server.d.ts"
+    },
+    "./templates": {
+      "import": "./dist/src/templates.js",
+      "types": "./dist/src/templates.d.ts"
+    },
+    "./handlers": {
+      "import": "./dist/src/handlers.js",
+      "types": "./dist/src/handlers.d.ts"
+    }
+  },
   "bin": {
     "manvir-templates-mcp-server": "dist/src/server.js"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=20.17.0"
+  },
   "files": [
     "dist/",
     "templates/",
@@ -35,7 +52,18 @@
     "start": "node dist/src/server.js",
     "dev": "ts-node-esm src/server.ts",
     "probe": "node -e \"process.stderr.write('probe ok\\n')\"",
-    "smoke": "node tools/smoke.mjs"
+    "smoke": "node tools/smoke.mjs",
+    "validate:templates": "node tools/validate-templates.mjs",
+    "prebuild": "node tools/validate-templates.mjs",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "prepare": "husky"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.5",
@@ -43,7 +71,24 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.2",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.53.1",
+    "vitest": "^4.0.18"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
