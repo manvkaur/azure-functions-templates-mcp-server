@@ -234,7 +234,7 @@ You can use this MCP server with VS Code through GitHub Copilot or other MCP-com
 **Supported languages and templates:**
 
 - **C# (.NET Isolated Worker)**: 29 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, Dapr integration, MySQL/SQL bindings, Kusto analytics, and MCP tool integration
-- **Java (Maven-based)**: 14 templates covering core triggers, bindings, and Durable Functions with annotation-based configuration
+- **Java (Maven-based)**: 15 templates covering core triggers, bindings, and Durable Functions with annotation-based configuration
 - **Python (v2 Programming Model)**: 11 templates using modern decorator-based patterns including blob processing, database triggers, streaming, and AI/ML integrations
 - **TypeScript (Node.js v4)**: 10 templates with full type safety covering storage, database, streaming, and real-time communication scenarios
 
