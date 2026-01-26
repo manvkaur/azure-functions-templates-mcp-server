@@ -10,12 +10,13 @@ dist/
 npm-debug.log*
 
 # Lock files (regenerated on install)
-package-lock.json
+templates/**/package-lock.json
 
 # Test coverage
 coverage/
 
 # IDE and editors
+.vscode/
 .idea/
 *.suo
 *.user
