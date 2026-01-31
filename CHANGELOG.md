@@ -5,7 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.3] - Unreleased
+## [0.1.4] - 2026-01-30
+
+### Added
+
+- New `get_project_template` tool for project scaffolding with host.json, local.settings.json, and language-specific config files
+- `SUPPORTED_RUNTIMES` configuration with version info for Python, TypeScript, Java, and C#
+- Runtime version helper `formatRuntimeVersions()` for human-readable version strings
+- MCP prompt resource documentation (`docs/workitem-mcp-prompts.md`)
+
+### Changed
+
+- Updated Java templates with latest Maven plugin versions (azure-functions-maven-plugin 1.37.0, azure-functions-java-library 3.2.2)
+- Updated TypeScript template package.json dependencies
+- Enhanced handler responses with project structure and prerequisites
+- Refactored tests for improved coverage
+
+## [0.1.3] - 2026-01-30
 
 ### Changed
 
