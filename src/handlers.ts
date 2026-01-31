@@ -4,24 +4,28 @@
 
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { logger } from './logger.js';
 import {
   VALID_LANGUAGES,
   VALID_TEMPLATES,
   TEMPLATE_DESCRIPTIONS,
-  LANGUAGE_COMMON_FILES,
+  LANGUAGE_INFO,
+  PROJECT_TEMPLATES,
+  BINDING_CONFIGS,
+  SUPPORTED_RUNTIMES,
   exists,
   listFilesRecursive,
   getFileExtension,
-  getKeyFilesForLanguage,
   isValidLanguage,
   isValidTemplate,
-  getLanguageDetails,
-  groupTemplatesByCategory,
+  groupTemplatesByBindingType,
 } from './templates.js';
 
-export { getFileExtension, getKeyFilesForLanguage, isValidLanguage as validateLanguage } from './templates.js';
-export type ValidLanguage = (typeof VALID_LANGUAGES)[number];
+export {
+  getFileExtension,
+  isValidLanguage as validateLanguage,
+  isValidTemplate as validateTemplate,
+} from './templates.js';
+export type { ValidLanguage } from './templates.js';
 
 /** Maximum file size to read (1 MB) */
 export const MAX_FILE_SIZE_BYTES = 1024 * 1024;
@@ -39,8 +43,6 @@ export interface HandlerResult {
   isError?: boolean;
 }
 
-export { isValidTemplate as validateTemplate } from './templates.js';
-
 /** Returns true if the path is safe (no path traversal). */
 export function isPathSafe(templateDir: string, requestedPath: string): boolean {
   if (!requestedPath || requestedPath === '.' || requestedPath === '..') {
@@ -48,7 +50,6 @@ export function isPathSafe(templateDir: string, requestedPath: string): boolean 
   }
 
   // Normalize backslashes to forward slashes for cross-platform security
-  // This prevents attacks using Windows-style paths on Linux
   const normalizedPath = requestedPath.replace(/\\/g, '/');
 
   // Reject absolute paths (Unix or Windows style)
@@ -81,132 +82,283 @@ export function createSuccessResult(text: string): HandlerResult {
 }
 
 /**
- * Formats the supported languages response
+ * Replaces template placeholders with the provided runtime version.
+ * For Java: replaces {{javaVersion}} with the provided version (converts "8" to "1.8" for Maven compatibility)
+ * For TypeScript: replaces {{nodeVersion}} with the provided version
  */
-export function formatSupportedLanguagesResponse(): string {
-  const languageDetails = getLanguageDetails();
-  let result = `=== Azure Functions Supported Languages ===\n\n`;
-  result += `Total Languages: ${VALID_LANGUAGES.length}\n\n`;
+export function replaceRuntimeVersion(content: string, language: string, runtimeVersion: string): string {
+  if (language === 'java') {
+    // Java 8 uses "1.8" format in Maven, while Java 11+ uses just the version number
+    const mavenVersion = runtimeVersion === '8' ? '1.8' : runtimeVersion;
+    return content.replace(/\{\{javaVersion\}\}/g, mavenVersion);
+  } else if (language === 'typescript') {
+    return content.replace(/\{\{nodeVersion\}\}/g, runtimeVersion);
+  }
+  return content;
+}
+
+/**
+ * Validates if the provided runtime version is supported for the given language.
+ * Returns null if valid, or an error message if invalid.
+ */
+export function validateRuntimeVersion(
+  language: string,
+  runtimeVersion: string
+): { valid: true } | { valid: false; error: string; validVersions: string[] } {
+  if (!isValidLanguage(language)) {
+    return { valid: false, error: `Invalid language: "${language}"`, validVersions: [] };
+  }
+
+  const runtime = SUPPORTED_RUNTIMES[language];
+  const allVersions = [...runtime.supported, ...runtime.preview];
+
+  if (!allVersions.includes(runtimeVersion)) {
+    const previewNote = runtime.preview.length > 0 ? ` (preview: ${runtime.preview.join(', ')})` : '';
+    return {
+      valid: false,
+      error: `Invalid runtime version "${runtimeVersion}" for ${language}. Supported versions: ${runtime.supported.join(', ')}${previewNote}. Recommended: ${runtime.recommended}`,
+      validVersions: allVersions,
+    };
+  }
+
+  return { valid: true };
+}
+
+// ============================================================================
+// COMPOSABLE TOOL HANDLERS
+// ============================================================================
+
+/**
+ * Handler for get_languages_list tool.
+ * Returns a list of supported languages with useful development information.
+ */
+export async function handleGetLanguagesList(): Promise<HandlerResult> {
+  let result = `# Azure Functions Supported Languages\n\n`;
+  result += `Total Languages: ${VALID_LANGUAGES.length}\n`;
+  result += `*Runtime info last updated: ${SUPPORTED_RUNTIMES.lastUpdated}*\n\n`;
 
   for (const lang of VALID_LANGUAGES) {
-    const details = languageDetails[lang];
-    result += `## ${details.name} (${lang})\n`;
-    result += `- **Runtime**: ${details.runtime}\n`;
-    result += `- **Programming Model**: ${details.programmingModel}\n`;
-    result += `- **Available Templates**: ${details.templateCount}\n`;
-    result += `- **Key Features**:\n`;
-    for (const feature of details.keyFeatures) {
-      result += `  - ${feature}\n`;
+    const info = LANGUAGE_INFO[lang];
+    result += `## ${info.name} (\`${lang}\`)\n\n`;
+    result += `**Runtime**: ${info.runtime}\n`;
+    result += `**Programming Model**: ${info.programmingModel}\n`;
+    result += `**Templates Available**: ${VALID_TEMPLATES[lang].length}\n\n`;
+
+    result += `### Prerequisites\n`;
+    for (const prereq of info.prerequisites) {
+      result += `- ${prereq}\n`;
     }
-    result += `- **File Patterns**: ${details.filePatterns.join(', ')}\n\n`;
+    result += `\n`;
+
+    result += `### Development Tools\n`;
+    for (const tool of info.developmentTools) {
+      result += `- ${tool}\n`;
+    }
+    result += `\n`;
+
+    result += `### Quick Commands\n`;
+    result += `- **Initialize**: \`${info.initCommand}\`\n`;
+    result += `- **Run locally**: \`${info.runCommand}\`\n`;
+    if (info.buildCommand) {
+      result += `- **Build**: \`${info.buildCommand}\`\n`;
+    }
+    result += `\n---\n\n`;
   }
 
-  result += `## Template Distribution by Language:\n`;
-  for (const lang of VALID_LANGUAGES) {
-    const details = languageDetails[lang];
-    result += `- ${details.name}: ${details.templateCount} templates\n`;
-  }
-
-  result += `\n## Usage:\n`;
-  result += `Use the 'get_azure_functions_templates' tool with any of these languages:\n`;
-  result += `${VALID_LANGUAGES.map((lang) => `- ${lang}`).join('\n')}\n\n`;
-
-  result += `Each language offers different strengths:\n`;
-  result += `- **C#**: Best for enterprise applications with strong typing and .NET ecosystem\n`;
-  result += `- **Java**: Ideal for enterprise Java developers with existing Maven infrastructure\n`;
-  result += `- **Python**: Perfect for data processing, ML/AI workloads, and rapid prototyping\n`;
-  result += `- **TypeScript**: Excellent for web developers familiar with Node.js and modern JavaScript\n`;
-
-  return result;
+  return createSuccessResult(result);
 }
 
 /**
- * Formats the templates by language response
+ * Arguments for the get_project_template handler
  */
-export function formatTemplatesByLanguageResponse(language: ValidLanguage): string {
-  const templates = VALID_TEMPLATES[language];
+export interface GetProjectTemplateArgs {
+  language: string;
+  runtimeVersion?: string;
+}
+
+/**
+ * Handler for get_project_template tool.
+ * Returns files for initializing a new Azure Functions project.
+ */
+export async function handleGetProjectTemplate(args: GetProjectTemplateArgs): Promise<HandlerResult> {
+  const { language, runtimeVersion } = args;
+
+  if (!isValidLanguage(language)) {
+    return createErrorResult(`Invalid language: "${language}". Valid languages are: ${VALID_LANGUAGES.join(', ')}`);
+  }
+
+  // Validate runtimeVersion if provided
+  if (runtimeVersion !== undefined) {
+    const validation = validateRuntimeVersion(language, runtimeVersion);
+    if (!validation.valid) {
+      return createErrorResult(validation.error);
+    }
+  }
+
+  const projectTemplate = PROJECT_TEMPLATES[language];
+  const languageInfo = LANGUAGE_INFO[language];
+
+  let result = `# Azure Functions Project Template: ${languageInfo.name}\n\n`;
+
+  // Project structure overview
+  result += `## Project Structure\n\n`;
+  result += `\`\`\`\n`;
+  for (const item of projectTemplate.projectStructure) {
+    result += `${item}\n`;
+  }
+  result += `\`\`\`\n\n`;
+
+  // Prerequisites
+  result += `## Prerequisites\n\n`;
+  for (const prereq of languageInfo.prerequisites) {
+    result += `- ${prereq}\n`;
+  }
+  result += `\n`;
+
+  // Determine if we should apply runtime version replacement
+  const shouldReplaceVersion = runtimeVersion && (language === 'java' || language === 'typescript');
+
+  // Project files
+  result += `## Project Files\n\n`;
+  const fileNames = Object.keys(projectTemplate.files);
+  result += `This template includes ${fileNames.length} file(s):\n\n`;
+
+  for (const [fileName, rawContent] of Object.entries(projectTemplate.files)) {
+    const content = shouldReplaceVersion ? replaceRuntimeVersion(rawContent, language, runtimeVersion) : rawContent;
+    const ext = getFileExtension(fileName);
+    result += `### \`${fileName}\`\n\n`;
+    result += `\`\`\`${ext}\n${content}\`\`\`\n\n`;
+  }
+
+  // Init instructions
+  result += `## Setup Instructions\n\n`;
+  result += projectTemplate.initInstructions;
+  result += `\n`;
+
+  // Template parameters (only show if not already replaced)
+  if (!shouldReplaceVersion && projectTemplate.parameters && projectTemplate.parameters.length > 0) {
+    result += `## Template Parameters\n\n`;
+    result += `**Important**: The files above contain placeholders that must be replaced before use.\n\n`;
+    result += `| Placeholder | Description | Default | Valid Values |\n`;
+    result += `|-------------|-------------|---------|--------------|\n`;
+    for (const param of projectTemplate.parameters) {
+      const validValues = param.validValues ? param.validValues.join(', ') : 'Any';
+      result += `| \`{{${param.name}}}\` | ${param.description} | \`${param.defaultValue}\` | ${validValues} |\n`;
+    }
+    result += `\n`;
+    result += `**How to replace**: Detect the user's installed runtime version or ask their preference, then replace all occurrences of \`{{paramName}}\` with the actual value.\n\n`;
+  }
+
+  // Quick commands
+  result += `## Quick Commands\n\n`;
+  result += `| Action | Command |\n`;
+  result += `|--------|--------|\n`;
+  result += `| Initialize | \`${languageInfo.initCommand}\` |\n`;
+  result += `| Run locally | \`${languageInfo.runCommand}\` |\n`;
+  if (languageInfo.buildCommand) {
+    result += `| Build | \`${languageInfo.buildCommand}\` |\n`;
+  }
+
+  return createSuccessResult(result);
+}
+
+/**
+ * Handler for get_azure_functions_templates_list tool.
+ * Returns a list of available function templates for a given language,
+ * grouped by binding type to show composable parts.
+ */
+export async function handleGetFunctionTemplatesList(args: { language: string }): Promise<HandlerResult> {
+  const { language } = args;
+
+  if (!isValidLanguage(language)) {
+    return createErrorResult(`Invalid language: "${language}". Valid languages are: ${VALID_LANGUAGES.join(', ')}`);
+  }
+
   const descriptions = TEMPLATE_DESCRIPTIONS[language];
-  const { categories, uncategorized } = groupTemplatesByCategory(language);
+  const { triggers, inputBindings, outputBindings } = groupTemplatesByBindingType(language);
+  const languageInfo = LANGUAGE_INFO[language];
 
-  // Add uncategorized to categories if any exist
-  if (uncategorized.length > 0) {
-    categories['Uncategorized'] = uncategorized;
+  let result = `# Function Templates for ${languageInfo.name}\n\n`;
+  result += `**Usage**: Select 1 trigger (required) + 0 or more bindings (optional)\n\n`;
+
+  // Triggers section
+  result += `## Triggers (pick one)\n\n`;
+  result += `| Template | Description | Resource |\n`;
+  result += `|----------|-------------|----------|\n`;
+  for (const template of triggers) {
+    const desc = descriptions[template];
+    result += `| \`${template}\` | ${desc?.description ?? 'Template available'} | ${desc?.resource ?? '-'} |\n`;
+  }
+  result += `\n`;
+
+  // Input Bindings section
+  if (inputBindings.length > 0) {
+    result += `## Input Bindings (optional, reads data)\n\n`;
+    result += `| Template | Description | Resource |\n`;
+    result += `|----------|-------------|----------|\n`;
+    for (const template of inputBindings) {
+      const desc = descriptions[template];
+      result += `| \`${template}\` | ${desc?.description ?? 'Template available'} | ${desc?.resource ?? '-'} |\n`;
+    }
+    result += `\n`;
   }
 
-  let result = `=== Azure Functions Templates for ${language.toUpperCase()} ===\n\n`;
-  result += `Total Templates: ${templates.length}\n\n`;
+  // Output Bindings section
+  if (outputBindings.length > 0) {
+    result += `## Output Bindings (optional, writes data)\n\n`;
+    result += `| Template | Description | Resource |\n`;
+    result += `|----------|-------------|----------|\n`;
+    for (const template of outputBindings) {
+      const desc = descriptions[template];
+      result += `| \`${template}\` | ${desc?.description ?? 'Template available'} | ${desc?.resource ?? '-'} |\n`;
+    }
+    result += `\n`;
+  }
 
-  // Display templates by category
-  Object.keys(categories)
-    .sort()
-    .forEach((category) => {
-      result += `## ${category}\n\n`;
-      categories[category].forEach((template) => {
-        const desc = descriptions[template];
-        result += `### ${template}\n`;
-        if (desc) {
-          result += `**Description**: ${desc.description}\n`;
-          result += `**Use Case**: ${desc.useCase}\n\n`;
-        } else {
-          result += `**Description**: Template available (description not yet provided)\n`;
-          result += `**Use Case**: See template files for implementation details\n\n`;
-        }
-      });
-    });
+  // Next step hint
+  result += `---\n\n`;
+  result += `**Next Step**: Call \`get_azure_functions_template\` for each template you need (1 trigger + desired bindings), then merge the bindings into one function.\n`;
 
-  result += `## Quick Template Selection Guide\n\n`;
-  result += `Choose templates based on your needs:\n\n`;
-
-  Object.keys(categories)
-    .sort()
-    .forEach((category) => {
-      result += `**${category}**:\n`;
-      categories[category].forEach((template) => {
-        const desc = descriptions[template];
-        if (desc) {
-          result += `- \`${template}\`: ${desc.description}\n`;
-        } else {
-          result += `- \`${template}\`: Template available (description not yet provided)\n`;
-        }
-      });
-      result += `\n`;
-    });
-
-  result += `## Next Steps\n`;
-  result += `Use the 'get_azure_functions_templates' tool with:\n`;
-  result += `- language: "${language}"\n`;
-  result += `- template: [one of the template names above]\n\n`;
-  result += `Example: get_azure_functions_templates(language="${language}", template="${templates[0]}")\n`;
-
-  return result;
+  return createSuccessResult(result);
 }
 
 /**
- * Arguments for the get_azure_functions_templates handler
+ * Arguments for the get_azure_functions_template handler
  */
-export interface GetTemplatesArgs {
+export interface GetFunctionTemplateArgs {
   language: string;
   template: string;
-  filePath?: string;
+  runtimeVersion?: string;
 }
 
 /**
- * Handler logic for get_azure_functions_templates tool
+ * Handler for get_azure_functions_template tool.
+ * Returns files and information for adding a new function to an existing project.
  */
-export async function handleGetTemplates(args: GetTemplatesArgs, templatesRoot: string): Promise<HandlerResult> {
-  const { language, template, filePath } = args;
+export async function handleGetFunctionTemplate(
+  args: GetFunctionTemplateArgs,
+  templatesRoot: string
+): Promise<HandlerResult> {
+  const { language, template, runtimeVersion } = args;
 
   // Validate language
   if (!isValidLanguage(language)) {
-    return createErrorResult(`Invalid language: ${language}. Valid languages are: ${VALID_LANGUAGES.join(', ')}`);
+    return createErrorResult(`Invalid language: "${language}"
+
+Valid languages: ${VALID_LANGUAGES.map((l) => `"${l}"`).join(', ')}
+
+Use \`get_languages_list\` to see all available languages with details.`);
   }
 
-  // Validate template for the given language
+  // Validate template
   if (!isValidTemplate(language, template)) {
     const validTemplatesForLang = VALID_TEMPLATES[language];
-    return createErrorResult(
-      `Invalid template '${template}' for language '${language}'. Valid templates for ${language} are: ${validTemplatesForLang.join(', ')}`
-    );
+    return createErrorResult(`Invalid template: "${template}" for language "${language}"
+
+Valid templates for ${language}:
+${validTemplatesForLang.map((t) => `- "${t}"`).join('\n')}
+
+Use \`get_azure_functions_templates_list\` to see all templates with descriptions.`);
   }
 
   const templateDir = path.join(templatesRoot, language, template);
@@ -214,207 +366,115 @@ export async function handleGetTemplates(args: GetTemplatesArgs, templatesRoot: 
     return createErrorResult(`Template directory not found: ${language}/${template}`);
   }
 
-  // If specific file requested, return that file
-  if (filePath) {
-    if (!isPathSafe(templateDir, filePath)) {
-      logger.security('Path traversal attempt detected', {
-        language,
-        template,
-        filePath,
-        templateDir,
-      });
-      return createErrorResult('Invalid filePath: path traversal detected');
-    }
-
-    const fullPath = path.resolve(templateDir, filePath);
-
-    if (!(await exists(fullPath))) {
-      return createErrorResult(`File not found: ${filePath}`);
-    }
-
-    const stat = await fs.lstat(fullPath);
-    if (!stat.isFile()) {
-      return createErrorResult(`Path is not a file: ${filePath}`);
-    }
-
-    if (stat.size > MAX_FILE_SIZE_BYTES) {
-      logger.warn('File size exceeds limit', { filePath, size: stat.size, limit: MAX_FILE_SIZE_BYTES });
-      return createErrorResult(
-        `File too large: ${filePath} (${(stat.size / 1024).toFixed(1)} KB). Maximum allowed: ${MAX_FILE_SIZE_BYTES / 1024} KB`
-      );
-    }
-
-    const content = await fs.readFile(fullPath, 'utf8');
-    return createSuccessResult(`=== ${filePath} ===\n${content}`);
-  }
-
-  // Return all files in the template
-  const allFiles = await listFilesRecursive(templateDir);
-  const relativeFiles = allFiles.map((f) => path.relative(templateDir, f));
-
-  let result = `=== Azure Functions Template: ${language}/${template} ===\n\n`;
-  result += `Files in this template:\n${relativeFiles.join('\n')}\n\n`;
-
-  // Include content of key files based on language patterns
-  const keyFiles = getKeyFilesForLanguage(language, relativeFiles);
-
-  for (const keyFile of keyFiles) {
-    const keyPath = path.join(templateDir, keyFile);
-    if (await exists(keyPath)) {
-      try {
-        const content = await fs.readFile(keyPath, 'utf8');
-        result += `=== ${keyFile} ===\n${content}\n\n`;
-      } catch {
-        // Skip files that can't be read
-      }
-    }
-  }
-
-  result += `\nTo get a specific file, call this tool again with the 'filePath' parameter set to one of the files listed above.`;
-
-  // Add language-specific common files
-  const commonFiles = LANGUAGE_COMMON_FILES[language];
-  if (commonFiles && Object.keys(commonFiles).length > 0) {
-    result += `\n\n=== Common Files for ${language} (include with any template) ===\n`;
-    result += `The following files should be created alongside your template for production deployments:\n\n`;
-    for (const [fileName, fileContent] of Object.entries(commonFiles)) {
-      result += `=== ${fileName} ===\n${fileContent}\n`;
-    }
-  }
-
-  return createSuccessResult(result);
-}
-
-/**
- * Handler logic for get_supported_languages tool
- */
-export async function handleGetSupportedLanguages(): Promise<HandlerResult> {
-  return createSuccessResult(formatSupportedLanguagesResponse());
-}
-
-/**
- * Handler logic for get_templates_by_language tool
- */
-export async function handleGetTemplatesByLanguage(args: { language: string }): Promise<HandlerResult> {
-  const { language } = args;
-
-  if (!isValidLanguage(language)) {
-    return createErrorResult(`Invalid language: ${language}. Valid languages are: ${VALID_LANGUAGES.join(', ')}`);
-  }
-
-  return createSuccessResult(formatTemplatesByLanguageResponse(language));
-}
-
-/**
- * Arguments for the get_template_files handler
- */
-export interface GetTemplateFilesArgs {
-  language: string;
-  template: string;
-}
-
-/**
- * Handler logic for get_template_files tool
- */
-export async function handleGetTemplateFiles(
-  args: GetTemplateFilesArgs,
-  templatesRoot: string
-): Promise<HandlerResult> {
-  const { language, template } = args;
-
-  // Validate language with detailed error message
-  if (!isValidLanguage(language)) {
-    return createErrorResult(`INVALID LANGUAGE: "${language}"
-
-VALID LANGUAGES (use exactly as shown):
-${VALID_LANGUAGES.map((l) => `- "${l}"`).join('\n')}
-
-Please use one of the exact values above.`);
-  }
-
-  // Validate template for the given language with detailed error message
-  if (!isValidTemplate(language, template)) {
-    const validTemplatesForLang = VALID_TEMPLATES[language];
-    return createErrorResult(`INVALID TEMPLATE: "${template}" for language "${language}"
-
-VALID TEMPLATES FOR "${language}" (use exactly as shown):
-${validTemplatesForLang.map((t) => `- "${t}"`).join('\n')}
-
-Please use one of the exact template names above.`);
-  }
-
-  const templateDir = path.join(templatesRoot, language, template);
-  if (!(await exists(templateDir))) {
-    return createErrorResult(`ERROR: Template directory not found: ${language}/${template}
-
-This indicates an internal error. Please verify the template exists.`);
-  }
+  const description = TEMPLATE_DESCRIPTIONS[language]?.[template];
+  const bindingConfig = BINDING_CONFIGS[template];
 
   // Get all files in the template
   const allFiles = await listFilesRecursive(templateDir);
   const relativeFiles = allFiles.map((f) => path.relative(templateDir, f));
 
-  let result = `# Azure Functions Template: ${language}/${template}\n\n`;
-  result += `**Template Structure** (${relativeFiles.length} files):\n`;
-  result += `${relativeFiles.map((f) => `- ${f}`).join('\n')}\n\n`;
+  // Identify function-specific files vs project files
+  const projectFiles = [
+    'host.json',
+    'local.settings.json',
+    'requirements.txt',
+    'package.json',
+    'pom.xml',
+    'tsconfig.json',
+    '.funcignore',
+  ];
+  const functionFiles = relativeFiles.filter((f) => !projectFiles.includes(f) && !f.startsWith('.template.config'));
 
-  result += `**Complete Template Files**:\n\n`;
+  let result = `# Function Template: ${template}\n\n`;
 
-  // Include all files with their content
+  // Template info
+  if (description) {
+    result += `**Description**: ${description.description}\n`;
+    result += `**Category**: ${description.category}\n`;
+    result += `**Use Case**: ${description.useCase}\n\n`;
+  }
+
+  // Binding configuration (if any)
+  if (bindingConfig && Object.keys(bindingConfig.appSettings).length > 0) {
+    result += `## Configuration Requirements\n\n`;
+
+    result += `### Required App Settings\n`;
+    result += `Add to \`local.settings.json\` under "Values":\n\n`;
+    result += `\`\`\`json\n`;
+    for (const [settingName, settingConfig] of Object.entries(bindingConfig.appSettings)) {
+      const value = settingConfig.defaultLocalValue || '<your-connection-string>';
+      result += `"${settingName}": "${value}"\n`;
+    }
+    result += `\`\`\`\n\n`;
+
+    result += `| Setting | Description | Required |\n`;
+    result += `|---------|-------------|----------|\n`;
+    for (const [settingName, settingConfig] of Object.entries(bindingConfig.appSettings)) {
+      result += `| \`${settingName}\` | ${settingConfig.description} | ${settingConfig.required ? 'Yes' : 'No'} |\n`;
+    }
+    result += `\n`;
+  }
+
+  if (bindingConfig?.extensionBundle) {
+    result += `### Extension Bundle\n`;
+    result += `Ensure \`host.json\` includes the extension bundle (should be present if you used \`get_project_template\`):\n`;
+    result += `\`\`\`json\n"extensionBundle": {\n  "id": "Microsoft.Azure.Functions.ExtensionBundle",\n  "version": "${SUPPORTED_RUNTIMES.extensionBundle}"\n}\n\`\`\`\n\n`;
+  }
+
+  // Determine if we should apply runtime version replacement
+  const shouldReplaceVersion = runtimeVersion && (language === 'java' || language === 'typescript');
+
+  // Template parameters for languages that have them (only show if not already replaced)
+  const projectTemplate = PROJECT_TEMPLATES[language];
+  if (!shouldReplaceVersion && projectTemplate.parameters && projectTemplate.parameters.length > 0) {
+    result += `## Template Parameters\n\n`;
+    result += `**Important**: Files may contain placeholders that must be replaced before use.\n\n`;
+    result += `| Placeholder | Description | Default | Valid Values |\n`;
+    result += `|-------------|-------------|---------|--------------|\n`;
+    for (const param of projectTemplate.parameters) {
+      const validValues = param.validValues ? param.validValues.join(', ') : 'Any';
+      result += `| \`{{${param.name}}}\` | ${param.description} | \`${param.defaultValue}\` | ${validValues} |\n`;
+    }
+    result += `\n`;
+    result += `**How to replace**: Detect the user's installed runtime version or ask their preference, then replace all occurrences of \`{{paramName}}\` with the actual value.\n\n`;
+  }
+
+  // Function files
+  result += `## Function Files\n\n`;
+
   let totalSize = 0;
-  for (let i = 0; i < relativeFiles.length; i++) {
-    const filePath = relativeFiles[i];
+  for (const filePath of functionFiles) {
     const fullPath = path.join(templateDir, filePath);
 
     try {
       const stat = await fs.lstat(fullPath);
       if (stat.isFile()) {
-        // Check individual file size
         if (stat.size > MAX_FILE_SIZE_BYTES) {
-          result += `## File ${i + 1}: \`${filePath}\`\n\n`;
-          result += `*File too large (${(stat.size / 1024).toFixed(1)} KB). Use get_azure_functions_templates with filePath parameter to retrieve.*\n\n`;
+          result += `### \`${filePath}\`\n\n`;
+          result += `*File too large (${(stat.size / 1024).toFixed(1)} KB)*\n\n`;
           continue;
         }
 
-        const content = await fs.readFile(fullPath, 'utf8');
+        let content = await fs.readFile(fullPath, 'utf8');
+        // Apply runtime version replacement if provided
+        if (shouldReplaceVersion) {
+          content = replaceRuntimeVersion(content, language, runtimeVersion);
+        }
+        const ext = getFileExtension(filePath);
+        const fileSection = `### \`${filePath}\`\n\n\`\`\`${ext}\n${content}\n\`\`\`\n\n`;
 
-        // Check if adding this file would exceed total response size
-        const fileSection = `## File ${i + 1}: \`${filePath}\`\n\n\`\`\`${getFileExtension(filePath)}\n${content}\n\`\`\`\n\n`;
         if (totalSize + fileSection.length > MAX_RESPONSE_SIZE_BYTES) {
-          result += `## File ${i + 1}: \`${filePath}\`\n\n`;
-          result += `*Response size limit reached. Use get_azure_functions_templates with filePath parameter to retrieve remaining files.*\n\n`;
+          result += `### \`${filePath}\`\n\n*Response size limit reached*\n\n`;
           break;
         }
 
         result += fileSection;
         totalSize += fileSection.length;
       }
-    } catch (error) {
-      result += `## File ${i + 1}: \`${filePath}\`\n`;
-      result += `ERROR: Error reading file: ${error}\n\n`;
+    } catch {
+      result += `### \`${filePath}\`\n\n*Error reading file*\n\n`;
     }
   }
-
-  // Add language-specific common files
-  const commonFiles = LANGUAGE_COMMON_FILES[language];
-  if (commonFiles && Object.keys(commonFiles).length > 0) {
-    result += `---\n\n`;
-    result += `## Common Files for ${language} (include with any template)\n\n`;
-    result += `The following files should be created alongside your template for production deployments:\n\n`;
-    let fileNum = relativeFiles.length;
-    for (const [fileName, fileContent] of Object.entries(commonFiles)) {
-      fileNum++;
-      result += `## File ${fileNum}: \`${fileName}\`\n\n`;
-      result += `\`\`\`text\n${fileContent}\`\`\`\n\n`;
-    }
-  }
-
-  result += `---\n\n`;
-  result += `**Template Ready for Use**\n`;
-  result += `- Language: ${language}\n`;
-  result += `- Template: ${template}\n`;
-  result += `- Files: ${relativeFiles.length + (commonFiles ? Object.keys(commonFiles).length : 0)}\n`;
-  result += `- You can copy and customize these files for your Azure Functions project\n`;
 
   return createSuccessResult(result);
 }

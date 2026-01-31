@@ -49,29 +49,28 @@ describe('MCP Server Integration', () => {
       const result = await client.listTools();
 
       expect(result.tools).toBeDefined();
-      expect(result.tools.length).toBeGreaterThanOrEqual(3);
+      expect(result.tools.length).toBe(4);
 
       const toolNames = result.tools.map((t) => t.name);
-      expect(toolNames).toContain('get_azure_functions_templates');
-      expect(toolNames).toContain('get_supported_languages');
-      expect(toolNames).toContain('get_templates_by_language');
-      expect(toolNames).toContain('get_template_files');
+      expect(toolNames).toContain('get_languages_list');
+      expect(toolNames).toContain('get_project_template');
+      expect(toolNames).toContain('get_azure_functions_templates_list');
+      expect(toolNames).toContain('get_azure_functions_template');
     });
 
     it('should provide tool descriptions', async () => {
       const result = await client.listTools();
 
-      const mainTool = result.tools.find((t) => t.name === 'get_azure_functions_templates');
-      expect(mainTool).toBeDefined();
-      expect(mainTool?.description).toContain('Azure Functions');
-      expect(mainTool?.inputSchema).toBeDefined();
+      const languagesTool = result.tools.find((t) => t.name === 'get_languages_list');
+      expect(languagesTool).toBeDefined();
+      expect(languagesTool?.description).toContain('Azure Functions');
     });
   });
 
-  describe('get_supported_languages', () => {
+  describe('get_languages_list', () => {
     it('should return language information', async () => {
       const result = await client.callTool({
-        name: 'get_supported_languages',
+        name: 'get_languages_list',
         arguments: {},
       });
 
@@ -83,13 +82,121 @@ describe('MCP Server Integration', () => {
       expect(text).toContain('python');
       expect(text).toContain('java');
       expect(text).toContain('typescript');
+      expect(text).toContain('Prerequisites');
+      expect(text).toContain('Quick Commands');
     });
   });
 
-  describe('get_templates_by_language', () => {
+  describe('get_project_template', () => {
+    it('should return Python project template', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'python' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('host.json');
+      expect(text).toContain('local.settings.json');
+      expect(text).toContain('requirements.txt');
+      expect(text).toContain('Setup Instructions');
+    });
+
+    it('should return TypeScript project template', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'typescript' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('package.json');
+      expect(text).toContain('tsconfig.json');
+      expect(text).toContain('host.json');
+    });
+
+    it('should return Java project template', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'java' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('pom.xml');
+      expect(text).toContain('host.json');
+    });
+
+    it('should return error for invalid language', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'invalid' },
+      });
+
+      expect(result.isError).toBe(true);
+
+      const text = getResultText(result);
+      expect(text).toContain('invalid');
+    });
+
+    it('should apply runtimeVersion for Java', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'java', runtimeVersion: '17' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('<maven.compiler.source>17</maven.compiler.source>');
+      expect(text).not.toContain('{{javaVersion}}');
+    });
+
+    it('should apply runtimeVersion for TypeScript', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'typescript', runtimeVersion: '22' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('"@types/node": "22.x"');
+      expect(text).not.toContain('{{nodeVersion}}');
+    });
+
+    it('should return error for invalid runtimeVersion', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'java', runtimeVersion: '7' },
+      });
+
+      expect(result.isError).toBe(true);
+
+      const text = getResultText(result);
+      expect(text).toContain('Invalid runtime version');
+    });
+
+    it('should accept preview runtimeVersion', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'java', runtimeVersion: '25' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('<maven.compiler.source>25</maven.compiler.source>');
+    });
+  });
+
+  describe('get_azure_functions_templates_list', () => {
     it('should return Python templates', async () => {
       const result = await client.callTool({
-        name: 'get_templates_by_language',
+        name: 'get_azure_functions_templates_list',
         arguments: { language: 'python' },
       });
 
@@ -99,57 +206,80 @@ describe('MCP Server Integration', () => {
       expect(text).toContain('HttpTrigger');
       expect(text).toContain('BlobTrigger');
       expect(text).toContain('TimerTrigger');
+      expect(text).toContain('Triggers (pick one)');
+      expect(text).toContain('Next Step');
     });
 
     it('should return error for invalid language', async () => {
       const result = await client.callTool({
-        name: 'get_templates_by_language',
+        name: 'get_azure_functions_templates_list',
         arguments: { language: 'invalid' },
       });
 
       expect(result.isError).toBe(true);
 
       const text = getResultText(result);
-      // Zod validation returns "invalid_enum_value" error
       expect(text).toContain('invalid');
     });
   });
 
-  describe('get_azure_functions_templates', () => {
+  describe('get_azure_functions_template', () => {
     it('should return Python HttpTrigger template', async () => {
       const result = await client.callTool({
-        name: 'get_azure_functions_templates',
+        name: 'get_azure_functions_template',
         arguments: { language: 'python', template: 'HttpTrigger' },
       });
 
       expect(result.isError).toBeFalsy();
 
       const text = getResultText(result);
+      expect(text).toContain('Function Template: HttpTrigger');
       expect(text).toContain('function_app.py');
-      expect(text).toContain('host.json');
-      expect(text).toContain('requirements.txt');
+      expect(text).toContain('Function Files');
     });
 
-    it('should return specific file when filePath provided', async () => {
+    it('should return C# HttpTrigger template', async () => {
       const result = await client.callTool({
-        name: 'get_azure_functions_templates',
-        arguments: {
-          language: 'python',
-          template: 'HttpTrigger',
-          filePath: 'function_app.py',
-        },
+        name: 'get_azure_functions_template',
+        arguments: { language: 'csharp', template: 'HttpTrigger' },
       });
 
       expect(result.isError).toBeFalsy();
 
       const text = getResultText(result);
-      expect(text).toContain('import azure.functions as func');
-      expect(text).toContain('@app.route');
+      expect(text).toContain('Function Template: HttpTrigger');
+      expect(text).toContain('Function Files');
+    });
+
+    it('should return Java HttpTrigger template', async () => {
+      const result = await client.callTool({
+        name: 'get_azure_functions_template',
+        arguments: { language: 'java', template: 'HttpTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('Function Template: HttpTrigger');
+      expect(text).toContain('Function Files');
+    });
+
+    it('should return TypeScript HttpTrigger template', async () => {
+      const result = await client.callTool({
+        name: 'get_azure_functions_template',
+        arguments: { language: 'typescript', template: 'HttpTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('Function Template: HttpTrigger');
+      expect(text).toContain('Function Files');
     });
 
     it('should reject invalid template', async () => {
       const result = await client.callTool({
-        name: 'get_azure_functions_templates',
+        name: 'get_azure_functions_template',
         arguments: { language: 'python', template: 'InvalidTemplate' },
       });
 
@@ -159,251 +289,79 @@ describe('MCP Server Integration', () => {
       expect(text).toContain('Invalid template');
     });
 
-    it('should reject path traversal attempts', async () => {
+    it('should include binding configuration for CosmosDB trigger', async () => {
       const result = await client.callTool({
-        name: 'get_azure_functions_templates',
-        arguments: {
-          language: 'python',
-          template: 'HttpTrigger',
-          filePath: '../../../etc/passwd',
-        },
-      });
-
-      expect(result.isError).toBe(true);
-
-      const text = getResultText(result);
-      expect(text).toContain('path traversal');
-    });
-  });
-
-  describe('get_template_files', () => {
-    it('should return complete template with all files', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'python', template: 'HttpTrigger' },
+        name: 'get_azure_functions_template',
+        arguments: { language: 'python', template: 'CosmosDBTrigger' },
       });
 
       expect(result.isError).toBeFalsy();
 
       const text = getResultText(result);
-      // Should contain full file contents, not just listing
-      expect(text).toContain('```python');
-      expect(text).toContain('import azure.functions as func');
-      expect(text).toContain('Template Ready for Use');
+      expect(text).toContain('Configuration Requirements');
+      expect(text).toContain('CosmosDbConnection');
     });
 
-    it('should return C# template with .cs files', async () => {
+    it('should include binding configuration for Blob trigger', async () => {
       const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'csharp', template: 'HttpTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('```csharp');
-      expect(text).toContain('namespace');
-    });
-
-    it('should return Java template with .java files', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'java', template: 'HttpTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('```java');
-      expect(text).toContain('pom.xml');
-    });
-
-    it('should return Java BlobTrigger template', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'java', template: 'BlobTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('```java');
-      expect(text).toContain('@BlobTrigger');
-    });
-
-    it('should return Java TimerTrigger template', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'java', template: 'TimerTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('```java');
-      expect(text).toContain('@TimerTrigger');
-    });
-
-    it('should return Java MCPToolTrigger template', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'java', template: 'MCPToolTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('```java');
-      expect(text).toContain('@McpToolTrigger');
-      expect(text).toContain('McpToolInvocationContext');
-      expect(text).toContain('pom.xml');
-    });
-
-    it('should return C# MCPToolTrigger template', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'csharp', template: 'MCPToolTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('```csharp');
-      expect(text).toContain('McpToolTrigger');
-      expect(text).toContain('ToolInvocationContext');
-      expect(text).toContain('Program.cs');
-    });
-
-    it('should return TypeScript MCPToolTrigger template', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'typescript', template: 'MCPToolTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('```typescript');
-      expect(text).toContain('app.mcpTool');
-      expect(text).toContain('package.json');
-      expect(text).toContain('tsconfig.json');
-    });
-  });
-
-  describe('README.md in templates', () => {
-    it('should include README.md for Python HttpTrigger', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'python', template: 'HttpTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('README.md');
-      expect(text).toContain('Host Storage Configuration');
-      expect(text).toContain('AzureWebJobsStorage');
-    });
-
-    it('should include README.md for C# HttpTrigger', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'csharp', template: 'HttpTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('README.md');
-      expect(text).toContain('Host Storage Configuration');
-      expect(text).toContain('identity-based connections');
-    });
-
-    it('should include README.md for Java HttpTrigger', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'java', template: 'HttpTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('README.md');
-      expect(text).toContain('Host Storage Configuration');
-      expect(text).toContain('mvn azure-functions:run');
-    });
-
-    it('should include README.md for TypeScript HttpTrigger', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'typescript', template: 'HttpTrigger' },
-      });
-
-      expect(result.isError).toBeFalsy();
-
-      const text = getResultText(result);
-      expect(text).toContain('README.md');
-      expect(text).toContain('Host Storage Configuration');
-      expect(text).toContain('npm start');
-    });
-
-    it('should include identity-based connection docs for Blob templates', async () => {
-      const result = await client.callTool({
-        name: 'get_template_files',
+        name: 'get_azure_functions_template',
         arguments: { language: 'python', template: 'BlobTrigger' },
       });
 
       expect(result.isError).toBeFalsy();
 
       const text = getResultText(result);
-      expect(text).toContain('README.md');
-      expect(text).toContain('Identity-Based Connections');
-      expect(text).toContain('functions-bindings-storage-blob-trigger');
+      expect(text).toContain('BlobStorageConnection');
     });
+  });
 
-    it('should include identity-based connection docs for Queue templates', async () => {
+  describe('MCPToolTrigger templates', () => {
+    it('should return Java MCPToolTrigger template', async () => {
       const result = await client.callTool({
-        name: 'get_template_files',
-        arguments: { language: 'csharp', template: 'QueueTrigger' },
+        name: 'get_azure_functions_template',
+        arguments: { language: 'java', template: 'MCPToolTrigger' },
       });
 
       expect(result.isError).toBeFalsy();
 
       const text = getResultText(result);
-      expect(text).toContain('README.md');
-      expect(text).toContain('Identity-Based Connections');
-      expect(text).toContain('functions-bindings-storage-queue-trigger');
+      expect(text).toContain('Function Template: MCPToolTrigger');
     });
 
-    it('should include README.md via get_azure_functions_templates', async () => {
+    it('should return C# MCPToolTrigger template', async () => {
       const result = await client.callTool({
-        name: 'get_azure_functions_templates',
-        arguments: { language: 'python', template: 'TimerTrigger' },
+        name: 'get_azure_functions_template',
+        arguments: { language: 'csharp', template: 'MCPToolTrigger' },
       });
 
       expect(result.isError).toBeFalsy();
 
       const text = getResultText(result);
-      expect(text).toContain('README.md');
+      expect(text).toContain('Function Template: MCPToolTrigger');
     });
 
-    it('should return README.md content when requested directly', async () => {
+    it('should return TypeScript MCPToolTrigger template', async () => {
       const result = await client.callTool({
-        name: 'get_azure_functions_templates',
-        arguments: {
-          language: 'java',
-          template: 'BlobTrigger',
-          filePath: 'README.md',
-        },
+        name: 'get_azure_functions_template',
+        arguments: { language: 'typescript', template: 'MCPToolTrigger' },
       });
 
       expect(result.isError).toBeFalsy();
 
       const text = getResultText(result);
-      expect(text).toContain('# Blob Trigger - Java');
-      expect(text).toContain('Identity-Based Connections');
-      expect(text).toContain('Host Storage Configuration');
-      expect(text).toContain('Azurite');
+      expect(text).toContain('Function Template: MCPToolTrigger');
+    });
+
+    it('should return Python MCPToolTrigger template', async () => {
+      const result = await client.callTool({
+        name: 'get_azure_functions_template',
+        arguments: { language: 'python', template: 'MCPToolTrigger' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('Function Template: MCPToolTrigger');
     });
   });
 });

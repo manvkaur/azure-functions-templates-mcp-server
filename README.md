@@ -5,7 +5,23 @@
 [![codecov](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 64+ templates covering all major Azure services and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
+A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 63 templates covering all major Azure services and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
+
+## Table of Contents
+
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Use with VS Code](#use-with-vs-code)
+- [What it provides](#what-it-provides)
+- [Usage examples](#usage-examples)
+- [Template Structure](#template-structure)
+- [Project scripts](#project-scripts)
+- [Directory structure](#directory-structure)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
@@ -170,12 +186,11 @@ You can use this MCP server with VS Code through GitHub Copilot or other MCP-com
    ```json
    {
      "servers": {
-       "azure-functions-template-mcp-server": {
-         "type": "stdio", 
+       "azure-functions-create-triggers-bindings": {
+         "type": "stdio",
          "command": "manvir-templates-mcp-server"
        }
-     },
-     "inputs": []
+     }
    }
    ```
 
@@ -192,13 +207,12 @@ You can use this MCP server with VS Code through GitHub Copilot or other MCP-com
    ```json
    {
      "servers": {
-       "azure-functions-template-mcp-server": {
+       "azure-functions-create-triggers-bindings": {
          "type": "stdio",
-         "command": "npx", 
+         "command": "npx",
          "args": ["manvir-templates-mcp-server"]
        }
-     },
-     "inputs": []
+     }
    }
    ```
 
@@ -210,30 +224,64 @@ You can use this MCP server with VS Code through GitHub Copilot or other MCP-com
    ```json
    {
      "servers": {
-       "azure-functions-template-mcp-server": {
+       "azure-functions-create-triggers-bindings": {
          "type": "stdio",
          "command": "node",
          "args": ["D:\\path\\to\\azure-functions-templates-mcp-server\\dist\\src\\server.js"]
        }
-     },
-     "inputs": []
+     }
    }
    ```
 
    Replace `D:\\path\\to\\azure-functions-templates-mcp-server` with the actual path to your cloned repository.
 
+### Improving Discoverability for Copilot
+
+By default, Copilot may not automatically use MCP server tools. To ensure Copilot uses this server when working with Azure Functions, add a prompt instruction file:
+
+#### Option A: VS Code Prompt File (Recommended)
+
+Create `.github/copilot-instructions.md` in your project:
+
+```markdown
+When creating, modifying, or adding Azure Functions code, triggers, or bindings:
+1. ALWAYS use the `azure-functions-create-triggers-bindings` MCP server tools
+2. Start with `get_languages_list` to see supported languages
+3. Call `get_project_template` to get project scaffolding files
+4. Call `get_azure_functions_templates_list` to browse available triggers and bindings
+5. Call `get_azure_functions_template` to get ready-to-use function code
+6. Do NOT write Azure Function code from scratch
+```
+
+#### Option B: VS Code User Prompt File
+
+Create a prompt file in VS Code's user settings directory:
+
+- Windows: `%APPDATA%\Code\User\prompts\azure-functions.md`
+- macOS: `~/Library/Application Support/Code/User/prompts/azure-functions.md`
+- Linux: `~/.config/Code/User/prompts/azure-functions.md`
+
+```markdown
+---
+applyTo: '**/*.{cs,java,py,ts}'
+---
+When working with Azure Functions code, use the azure-functions-create-triggers-bindings MCP server.
+Start with get_languages_list, then get_project_template, then get_azure_functions_templates_list.
+Always fetch templates using get_azure_functions_template instead of writing function code manually.
+```
+
 ## What it provides
 
-**Four comprehensive tools for Azure Functions template management:**
+**Four composable tools for Azure Functions template management:**
 
-1. **`get_azure_functions_templates`**: Retrieve complete Azure Functions templates with all project files, configuration, and documentation
-2. **`get_supported_languages`**: Get detailed information about all supported programming languages, their runtimes, and capabilities
-3. **`get_templates_by_language`**: Explore all available templates for a specific language with descriptions, categories, and use cases
-4. **`get_template_files`**: Get the complete file structure and content for a specific template
+1. **`get_languages_list`**: Get the list of supported languages with runtime versions and capabilities
+2. **`get_project_template`**: Get project initialization files (host.json, package.json, pom.xml, etc.) with configurable runtime parameters
+3. **`get_azure_functions_templates_list`**: Get all available function templates for a specific language with descriptions and categories
+4. **`get_azure_functions_template`**: Get the complete source code for a specific function template, plus required app settings and packages
 
 **Supported languages and templates:**
 
-- **C# (.NET Isolated Worker)**: 29 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, Dapr integration, MySQL/SQL bindings, Kusto analytics, and MCP tool integration
+- **C# (.NET Isolated Worker)**: 27 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, Dapr integration, MySQL/SQL bindings, and MCP tool integration
 - **Java (Maven-based)**: 15 templates covering core triggers, bindings, and Durable Functions with annotation-based configuration
 - **Python (v2 Programming Model)**: 11 templates using modern decorator-based patterns including blob processing, database triggers, streaming, and AI/ML integrations
 - **TypeScript (Node.js v4)**: 10 templates with full type safety covering storage, database, streaming, and real-time communication scenarios
@@ -258,16 +306,17 @@ Each template includes:
 - **Microservices**: Dapr integration for distributed architectures
 - **AI/ML**: Model Context Protocol (MCP) tool integration for AI assistants
 - **Real-time**: SignalR for live updates and notifications
-- **Analytics**: Kusto (Azure Data Explorer) for time-series analysis
 
 Perfect for bootstrapping new Azure Functions projects, learning cross-language patterns, and rapid prototyping.
 
 ## Recent Updates
 
+**Runtime Version Parameters**: Added optional `runtimeVersion` parameter to `get_project_template` and `get_azure_functions_template` tools for Java and TypeScript. Automatically replaces version placeholders in templates.  
+**Java 8 Support**: Correctly converts Java 8 to Maven-compatible `1.8` format  
 **Template Inventory Updated**: Synchronized template lists with actual available templates  
 **Language-Agnostic Descriptions**: Removed language-specific implementation details from descriptions  
 **Consistent Categories**: Unified template categorization across all languages  
-**Accurate Counts**: Updated template counts (C#: 29, Java: 14, Python: 11, TypeScript: 10)  
+**Accurate Counts**: Updated template counts (C#: 27, Java: 15, Python: 11, TypeScript: 10)  
 **Clean Documentation**: Improved descriptions for better tool compatibility (VS Code Copilot, MCP Inspector)  
 **Modern Patterns**: Reflects current Azure Functions programming models and best practices
 
@@ -291,7 +340,6 @@ HttpTrigger/
 HttpTrigger/
 ├── src/                   # Source code directory
 ├── package.json           # Node.js dependencies and scripts
-├── package-lock.json      # Locked dependency versions
 ├── tsconfig.json          # TypeScript configuration
 ├── host.json             # Function host configuration
 └── local.settings.json   # Local development settings
@@ -336,98 +384,101 @@ HttpTrigger/
 
 ## Usage examples
 
+### Workflow: Create a New Azure Functions Project
+
+The tools are designed to be used in sequence:
+
+1. **Discover languages** → `get_languages_list`
+2. **Initialize project** → `get_project_template` (with runtime parameters)
+3. **Browse templates** → `get_azure_functions_templates_list`
+4. **Add functions** → `get_azure_functions_template` (with required settings)
+
 ### Discovering Available Languages
 
 **Get supported languages:**
 
 ```text
-Tool: get_supported_languages
+Tool: get_languages_list
 ```
 
 Returns all supported languages with runtime details, programming models, and template counts.
+
+### Initializing a Project
+
+**Get project files for Python:**
+
+```text
+Tool: get_project_template
+Language: python
+```
+
+**Get project files for TypeScript with specific Node.js version:**
+
+```text
+Tool: get_project_template
+Language: typescript
+runtimeVersion: "20"
+```
+
+**Get project files for Java with specific Java version:**
+
+```text
+Tool: get_project_template
+Language: java
+runtimeVersion: "21"
+```
+
+Returns all project initialization files (host.json, requirements.txt, package.json, pom.xml, etc.) with the specified runtime parameters applied.
 
 ### Exploring Templates by Language
 
 **Get templates for a specific language:**
 
 ```text
-Tool: get_templates_by_language
+Tool: get_azure_functions_templates_list
 Language: python
 ```
 
 Returns all Python templates with descriptions, categories, and use cases.
 
-### Getting Complete Templates
+### Getting Function Templates
 
-**Get a complete template with all files:**
+**Get a complete function template:**
 
 ```text
-Tool: get_azure_functions_templates
+Tool: get_azure_functions_template
 Language: python
 Template: HttpTrigger
 ```
 
-Returns all files in the template plus key configuration files.
-
-**Get a specific file from a template:**
-
-```text
-Tool: get_azure_functions_templates
-Language: python
-Template: HttpTrigger
-FilePath: function_app.py
-```
-
-Returns just the function_app.py file content.
-
-### Getting Template Files (Alternative Method)
-
-**Get complete file structure for a template:**
-
-```text
-Tool: get_template_files
-Language: csharp
-Template: HttpTrigger
-```
-
-Returns all files with complete content and syntax highlighting.
+Returns the function source code, plus any required app settings and additional packages.
 
 ### Language-Specific Examples
 
-**Get a Java Maven configuration:**
+**Get a Java Cosmos DB trigger with specific JDK version:**
 
 ```text
-Tool: get_azure_functions_templates
+Tool: get_azure_functions_template
 Language: java
-Template: HttpTrigger
-FilePath: pom.xml
+Template: CosmosDBTrigger
+runtimeVersion: "17"
 ```
 
-**Get a C# template configuration:**
+**Get a C# Durable Functions orchestration:**
 
 ```text
-Tool: get_azure_functions_templates
+Tool: get_azure_functions_template
 Language: csharp
-Template: HttpTrigger
-FilePath: .template.config/template.json
+Template: DurableFunctionsOrchestration
 ```
 
-**Get TypeScript project configuration:**
+**Get a TypeScript Blob trigger with specific Node.js version:**
 
 ```text
-Tool: get_azure_functions_templates
+Tool: get_azure_functions_template
 Language: typescript
-Template: HttpTrigger
-FilePath: package.json
-```
-
-**Get Python requirements:**
-
-```text
-Tool: get_azure_functions_templates
-Language: python
-Template: HttpTrigger
-FilePath: requirements.txt
+Template: BlobTrigger
+runtimeVersion: "22"
 ```
 
 ## Troubleshooting
@@ -457,15 +508,15 @@ FilePath: requirements.txt
 - **Solution**:
   - Verify language parameter is one of: `csharp`, `java`, `python`, `typescript`
   - Check template name matches exactly (case-sensitive)
-  - Use `get_templates_by_language` to see valid template names
+  - Use `get_azure_functions_templates_list` to see valid template names
 
 #### Performance Issues
 
 - **Problem**: Slow response times
 - **Solution**:
   - Templates are packaged with the server for fast access
-  - Use specific `filePath` parameter to get individual files instead of entire templates
-  - Consider using `get_template_files` for complete template content
+  - Use `get_azure_functions_template` to get just the function code you need
+  - Project files are fetched separately via `get_project_template`
 
 ### Debug Mode
 

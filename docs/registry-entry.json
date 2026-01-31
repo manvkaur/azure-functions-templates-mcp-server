@@ -1,10 +1,10 @@
 {
-  "azure-functions-templates": {
+  "azure-functions-create-triggers-bindings": {
     "type": "stdio",
     "command": "manvir-templates-mcp-server",
     "args": [],
-    "title": "Azure Functions Templates",
-    "description": "Provides ready-to-use Azure Functions templates across 4 programming languages (C#, Java, Python, TypeScript) with 64+ templates covering major Azure services including Blob triggers, CosmosDB bindings, Event Hub processing, HTTP endpoints, Timer functions, Durable Functions, Service Bus messaging, and AI/ML integrations. Templates include complete project structures with dependencies, configuration files, and modern programming patterns following Azure Functions best practices. Accelerates development with production-ready code for Web APIs, Storage operations, Database integrations, Streaming data processing, Messaging systems, Scheduled tasks, Microservices architectures, and Real-time applications.",
-    "installInstructions": "The Azure Functions Templates MCP server is not installed. Install it using: npm install -g manvir-templates-mcp-server"
+    "title": "Azure Functions - Create Triggers & Bindings",
+    "description": "USE THIS when creating Azure Functions code, serverless APIs, triggers, or bindings. Provides 63 ready-to-use templates for C#, Java, Python, and TypeScript. Supports: HTTP triggers, Timer triggers, Blob/Queue/CosmosDB/EventHub/ServiceBus triggers, input/output bindings, Durable Functions orchestrations. ALWAYS call get_languages_list first, then get_project_template, then get_azure_functions_templates_list to browse triggers and bindings, then get_azure_functions_template to get production-ready code. Do NOT write Azure Function code from scratch - fetch templates instead.",
+    "installInstructions": "Install globally: npm install -g manvir-templates-mcp-server\n\nRun the server: manvir-templates-mcp-server\n\nThe server uses stdio transport. Configure your MCP client with command 'manvir-templates-mcp-server' and type 'stdio'."
   }
 }

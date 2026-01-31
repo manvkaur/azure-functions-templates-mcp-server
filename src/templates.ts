@@ -9,6 +9,782 @@ import { z } from 'zod';
 export const VALID_LANGUAGES = ['csharp', 'java', 'python', 'typescript'] as const;
 export type ValidLanguage = (typeof VALID_LANGUAGES)[number];
 
+// ============================================================================
+// RUNTIME VERSIONS - UPDATE THESE WHEN NEW VERSIONS ARE RELEASED
+// Check for updates: https://learn.microsoft.com/azure/azure-functions/functions-versions
+// ============================================================================
+
+/**
+ * Supported runtime versions for each language.
+ * Update these values when new runtime versions are released or deprecated.
+ *
+ * @see https://learn.microsoft.com/azure/azure-functions/functions-versions
+ * @see https://learn.microsoft.com/azure/azure-functions/supported-languages
+ */
+export const SUPPORTED_RUNTIMES = {
+  /** Last updated: January 2026 */
+  lastUpdated: '2026-01',
+
+  python: {
+    supported: ['3.10', '3.11', '3.12', '3.13'],
+    preview: [] as string[],
+    deprecated: ['3.8', '3.9'],
+    recommended: '3.11',
+  },
+  typescript: {
+    // TypeScript runs on Node.js runtime
+    supported: ['20', '22'],
+    preview: ['24'],
+    deprecated: ['18'],
+    recommended: '20',
+  },
+  java: {
+    supported: ['8', '11', '17', '21'],
+    preview: ['25'],
+    deprecated: [] as string[],
+    recommended: '21',
+    mavenMinVersion: '3.5',
+    /** Maven compiler plugin version - check Maven Central for updates */
+    mavenCompilerPluginVersion: '3.8.1',
+    /** Azure Functions Maven plugin version - check Maven Central for updates */
+    mavenPluginVersion: '1.37.0',
+    /** Azure Functions Java library version - check Maven Central for updates */
+    javaLibraryVersion: '3.2.2',
+  },
+  csharp: {
+    // .NET versions for isolated worker model
+    supported: ['8', '9', '10'],
+    preview: [] as string[],
+    deprecated: ['6', '7'],
+    recommended: '8',
+    // .NET Framework is also supported for Windows
+    frameworkSupported: ['4.8.1'],
+  },
+
+  /** Azure Functions runtime version */
+  functionsRuntime: '4.x',
+
+  /** Extension bundle version range */
+  extensionBundle: '[4.*, 5.0.0)',
+} as const;
+
+/**
+ * Formats runtime versions into a human-readable string.
+ */
+export function formatRuntimeVersions(language: ValidLanguage): string {
+  const runtime = SUPPORTED_RUNTIMES[language];
+
+  let result = '';
+
+  if (language === 'python') {
+    result = `Python ${runtime.supported.join(', ')}`;
+  } else if (language === 'typescript') {
+    result = `Node.js ${runtime.supported.join(', ')} (GA)`;
+    if (runtime.preview.length > 0) {
+      result += `, Node.js ${runtime.preview.join(', ')} (Preview)`;
+    }
+  } else if (language === 'java') {
+    result = `Java ${runtime.supported.join(', ')} (GA)`;
+    if (runtime.preview.length > 0) {
+      result += `, Java ${runtime.preview.join(', ')} (Preview)`;
+    }
+  } else if (language === 'csharp') {
+    result = `.NET ${runtime.supported.join(', ')} (Isolated Worker)`;
+    if ('frameworkSupported' in runtime && runtime.frameworkSupported) {
+      result += `, .NET Framework ${runtime.frameworkSupported.join(', ')}`;
+    }
+  }
+
+  return result;
+}
+
+// ============================================================================
+
+/**
+ * Language information for developers.
+ * Includes runtime versions, prerequisites, and development guidance.
+ */
+export interface LanguageInfo {
+  name: string;
+  runtime: string;
+  programmingModel: string;
+  prerequisites: string[];
+  /** General development tools and IDE recommendations (client-agnostic) */
+  developmentTools: string[];
+  initCommand: string;
+  runCommand: string;
+  buildCommand?: string;
+}
+
+/**
+ * Template parameter definition for customizable values.
+ */
+export interface TemplateParameter {
+  name: string;
+  description: string;
+  defaultValue: string;
+  validValues?: string[];
+  source?: 'SUPPORTED_RUNTIMES' | 'user_input';
+}
+
+/**
+ * Project template files for initializing a new Azure Functions project.
+ * Templates may contain {{paramName}} placeholders that should be replaced.
+ */
+export interface ProjectTemplate {
+  files: Record<string, string>;
+  initInstructions: string;
+  projectStructure: string[];
+  /** Parameters that can/should be customized. Use {{paramName}} syntax in files. */
+  parameters?: TemplateParameter[];
+}
+
+/**
+ * App setting configuration with description and metadata.
+ */
+export interface AppSettingConfig {
+  description: string;
+  required: boolean;
+  defaultLocalValue?: string;
+}
+
+/**
+ * Function-specific binding configuration.
+ */
+export interface BindingConfig {
+  /** App settings required for this binding */
+  appSettings: Record<string, AppSettingConfig>;
+  /** Whether this binding uses the extension bundle */
+  extensionBundle: boolean;
+  /** Additional packages to install (language-specific) */
+  additionalPackages?: string[];
+}
+
+/**
+ * Extended template metadata with binding configuration.
+ */
+export interface ExtendedTemplateMetadata {
+  description: string;
+  category: string;
+  useCase: string;
+  binding?: BindingConfig;
+  isProjectLevel?: boolean; // Files that belong at project level vs function level
+}
+
+/**
+ * Language information with prerequisites and development guidance.
+ *
+ * Runtime versions are derived from SUPPORTED_RUNTIMES for easy updates.
+ * @see https://learn.microsoft.com/azure/azure-functions/functions-versions
+ */
+export const LANGUAGE_INFO: Record<ValidLanguage, LanguageInfo> = {
+  python: {
+    name: 'Python',
+    runtime: formatRuntimeVersions('python'),
+    programmingModel: 'v2 programming model with @app decorators',
+    prerequisites: [
+      `Python ${SUPPORTED_RUNTIMES.python.recommended} or later installed`,
+      `Azure Functions Core Tools v${SUPPORTED_RUNTIMES.functionsRuntime}`,
+      'Azure CLI (optional, for deployment)',
+    ],
+    developmentTools: ['Azure Functions Core Tools CLI'],
+    initCommand: 'func init --python',
+    runCommand: 'func start',
+  },
+  typescript: {
+    name: 'TypeScript',
+    runtime: formatRuntimeVersions('typescript'),
+    programmingModel: 'Node.js v4 programming model with TypeScript',
+    prerequisites: [
+      `Node.js ${SUPPORTED_RUNTIMES.typescript.recommended}.x or later installed`,
+      `Azure Functions Core Tools v${SUPPORTED_RUNTIMES.functionsRuntime}`,
+      'npm package manager',
+      'Azure CLI (optional, for deployment)',
+    ],
+    developmentTools: ['Azure Functions Core Tools CLI'],
+    initCommand: 'func init --typescript',
+    runCommand: 'npm start',
+    buildCommand: 'npm run build',
+  },
+  java: {
+    name: 'Java',
+    runtime: formatRuntimeVersions('java'),
+    programmingModel: 'Annotation-based with Maven build system',
+    prerequisites: [
+      `JDK ${SUPPORTED_RUNTIMES.java.recommended} installed (${SUPPORTED_RUNTIMES.java.supported.join(', ')} supported)`,
+      `Apache Maven ${SUPPORTED_RUNTIMES.java.mavenMinVersion}+`,
+      `Azure Functions Core Tools v${SUPPORTED_RUNTIMES.functionsRuntime}`,
+      'Azure CLI (optional, for deployment)',
+    ],
+    developmentTools: ['Azure Functions Core Tools CLI'],
+    initCommand:
+      'mvn archetype:generate -DarchetypeGroupId=com.microsoft.azure -DarchetypeArtifactId=azure-functions-archetype',
+    runCommand: 'mvn azure-functions:run',
+    buildCommand: 'mvn clean package',
+  },
+  csharp: {
+    name: 'C#',
+    runtime: formatRuntimeVersions('csharp'),
+    programmingModel: 'Isolated worker process with dependency injection',
+    prerequisites: [
+      `.NET ${SUPPORTED_RUNTIMES.csharp.recommended} SDK or later installed`,
+      `Azure Functions Core Tools v${SUPPORTED_RUNTIMES.functionsRuntime}`,
+      'Azure CLI (optional, for deployment)',
+    ],
+    developmentTools: ['Azure Functions Core Tools CLI'],
+    initCommand: 'func init --dotnet-isolated',
+    runCommand: 'func start',
+    buildCommand: 'dotnet build',
+  },
+};
+
+/**
+ * Project-level template files for each language.
+ * These files initialize a new Azure Functions project.
+ */
+export const PROJECT_TEMPLATES: Record<ValidLanguage, ProjectTemplate> = {
+  python: {
+    files: {
+      'host.json': JSON.stringify(
+        {
+          version: '2.0',
+          logging: {
+            applicationInsights: {
+              samplingSettings: {
+                isEnabled: true,
+                excludedTypes: 'Request',
+              },
+            },
+          },
+          extensionBundle: {
+            id: 'Microsoft.Azure.Functions.ExtensionBundle',
+            version: SUPPORTED_RUNTIMES.extensionBundle,
+          },
+        },
+        null,
+        2
+      ),
+      'local.settings.json': JSON.stringify(
+        {
+          IsEncrypted: false,
+          Values: {
+            FUNCTIONS_WORKER_RUNTIME: 'python',
+            AzureWebJobsStorage: 'UseDevelopmentStorage=true',
+          },
+        },
+        null,
+        2
+      ),
+      'requirements.txt': `# Azure Functions dependencies
+azure-functions
+
+# Uncomment to enable Azure Monitor OpenTelemetry
+# Ref: aka.ms/functions-azure-monitor-python
+# azure-monitor-opentelemetry
+`,
+      '.funcignore': `# Azure Functions deployment exclusions for Python
+.venv/
+venv/
+.env/
+__pycache__/
+*.py[cod]
+.vscode/
+local.settings.json
+.git/
+tests/
+test_*.py
+`,
+    },
+    initInstructions: `## Python Azure Functions Project Setup
+
+1. Create a virtual environment:
+   \`\`\`bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\\Scripts\\activate
+   \`\`\`
+
+2. Install dependencies:
+   \`\`\`bash
+   pip install -r requirements.txt
+   \`\`\`
+
+3. Create your first function in \`function_app.py\`
+
+4. Run locally:
+   \`\`\`bash
+   func start
+   \`\`\`
+`,
+    projectStructure: [
+      'function_app.py    # Main application file with all functions',
+      'host.json          # Azure Functions host configuration',
+      'local.settings.json # Local development settings (do not commit)',
+      'requirements.txt   # Python dependencies',
+      '.funcignore        # Files to exclude from deployment',
+    ],
+  },
+  typescript: {
+    files: {
+      'host.json': JSON.stringify(
+        {
+          version: '2.0',
+          logging: {
+            applicationInsights: {
+              samplingSettings: {
+                isEnabled: true,
+                excludedTypes: 'Request',
+              },
+            },
+          },
+          extensionBundle: {
+            id: 'Microsoft.Azure.Functions.ExtensionBundle',
+            version: SUPPORTED_RUNTIMES.extensionBundle,
+          },
+        },
+        null,
+        2
+      ),
+      'local.settings.json': JSON.stringify(
+        {
+          IsEncrypted: false,
+          Values: {
+            FUNCTIONS_WORKER_RUNTIME: 'node',
+            AzureWebJobsStorage: 'UseDevelopmentStorage=true',
+          },
+        },
+        null,
+        2
+      ),
+      'package.json': JSON.stringify(
+        {
+          name: 'azure-functions-app',
+          version: '1.0.0',
+          description: 'Azure Functions TypeScript project',
+          main: 'dist/src/functions/*.js',
+          scripts: {
+            build: 'tsc',
+            watch: 'tsc -w',
+            clean: 'rimraf dist',
+            prestart: 'npm run clean && npm run build',
+            start: 'func start',
+            test: 'echo "No tests yet..."',
+          },
+          dependencies: {
+            '@azure/functions': '^4.0.0',
+          },
+          devDependencies: {
+            'azure-functions-core-tools': '^4.x',
+            '@types/node': '{{nodeVersion}}.x',
+            typescript: '^5.0.0',
+            rimraf: '^5.0.0',
+          },
+        },
+        null,
+        2
+      ),
+      'tsconfig.json': JSON.stringify(
+        {
+          compilerOptions: {
+            module: 'commonjs',
+            target: 'ES2022',
+            outDir: 'dist',
+            rootDir: '.',
+            strict: true,
+            esModuleInterop: true,
+            skipLibCheck: true,
+            forceConsistentCasingInFileNames: true,
+            resolveJsonModule: true,
+          },
+          include: ['src/**/*.ts'],
+          exclude: ['node_modules'],
+        },
+        null,
+        2
+      ),
+      '.funcignore': `# Azure Functions deployment exclusions for TypeScript
+node_modules/
+src/
+*.ts
+!*.d.ts
+tsconfig.json
+.vscode/
+local.settings.json
+.git/
+*.test.ts
+*.spec.ts
+`,
+    },
+    initInstructions: `## TypeScript Azure Functions Project Setup
+
+1. Install dependencies:
+   \`\`\`bash
+   npm install
+   \`\`\`
+
+2. Create your functions in \`src/functions/\` directory
+
+3. Build and run locally:
+   \`\`\`bash
+   npm start
+   \`\`\`
+
+4. For development with auto-rebuild:
+   \`\`\`bash
+   npm run watch
+   # In another terminal: func start
+   \`\`\`
+`,
+    projectStructure: [
+      'src/functions/     # Function implementation files',
+      'host.json          # Azure Functions host configuration',
+      'local.settings.json # Local development settings (do not commit)',
+      'package.json       # Node.js dependencies and scripts',
+      'tsconfig.json      # TypeScript configuration',
+      '.funcignore        # Files to exclude from deployment',
+    ],
+    parameters: [
+      {
+        name: 'nodeVersion',
+        description: 'Node.js version for @types/node. Detect from user environment or ask preference.',
+        defaultValue: SUPPORTED_RUNTIMES.typescript.recommended,
+        validValues: [...SUPPORTED_RUNTIMES.typescript.supported, ...SUPPORTED_RUNTIMES.typescript.preview],
+        source: 'SUPPORTED_RUNTIMES',
+      },
+    ],
+  },
+  java: {
+    files: {
+      'host.json': JSON.stringify(
+        {
+          version: '2.0',
+          logging: {
+            applicationInsights: {
+              samplingSettings: {
+                isEnabled: true,
+                excludedTypes: 'Request',
+              },
+            },
+          },
+          extensionBundle: {
+            id: 'Microsoft.Azure.Functions.ExtensionBundle',
+            version: SUPPORTED_RUNTIMES.extensionBundle,
+          },
+        },
+        null,
+        2
+      ),
+      'local.settings.json': JSON.stringify(
+        {
+          IsEncrypted: false,
+          Values: {
+            FUNCTIONS_WORKER_RUNTIME: 'java',
+            AzureWebJobsStorage: 'UseDevelopmentStorage=true',
+          },
+        },
+        null,
+        2
+      ),
+      'pom.xml': `<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.function</groupId>
+    <artifactId>azure-functions-app</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Azure Java Functions</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>{{javaVersion}}</maven.compiler.source>
+        <maven.compiler.target>{{javaVersion}}</maven.compiler.target>
+        <azure.functions.maven.plugin.version>${SUPPORTED_RUNTIMES.java.mavenPluginVersion}</azure.functions.maven.plugin.version>
+        <azure.functions.java.library.version>${SUPPORTED_RUNTIMES.java.javaLibraryVersion}</azure.functions.java.library.version>
+        <functionAppName>azure-functions-app</functionAppName>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.functions</groupId>
+            <artifactId>azure-functions-java-library</artifactId>
+            <version>\${azure.functions.java.library.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${SUPPORTED_RUNTIMES.java.mavenCompilerPluginVersion}</version>
+            </plugin>
+            <plugin>
+                <groupId>com.microsoft.azure</groupId>
+                <artifactId>azure-functions-maven-plugin</artifactId>
+                <version>\${azure.functions.maven.plugin.version}</version>
+                <configuration>
+                    <appName>\${functionAppName}</appName>
+                    <resourceGroup>java-functions-group</resourceGroup>
+                    <region>westus</region>
+                    <runtime>
+                        <os>linux</os>
+                        <javaVersion>{{javaVersion}}</javaVersion>
+                    </runtime>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+`,
+      '.funcignore': `# Azure Functions deployment exclusions for Java
+target/
+.idea/
+.vscode/
+*.iml
+local.settings.json
+.git/
+src/test/
+`,
+    },
+    initInstructions: `## Java Azure Functions Project Setup
+
+1. Build the project:
+   \`\`\`bash
+   mvn clean package
+   \`\`\`
+
+2. Create your functions in \`src/main/java/com/function/\` directory
+
+3. Run locally:
+   \`\`\`bash
+   mvn azure-functions:run
+   \`\`\`
+`,
+    projectStructure: [
+      'src/main/java/     # Java source files',
+      'pom.xml            # Maven project configuration',
+      'host.json          # Azure Functions host configuration',
+      'local.settings.json # Local development settings (do not commit)',
+      '.funcignore        # Files to exclude from deployment',
+    ],
+    parameters: [
+      {
+        name: 'javaVersion',
+        description: 'Java version for compilation and runtime. Detect from user environment or ask preference.',
+        defaultValue: SUPPORTED_RUNTIMES.java.recommended,
+        validValues: [...SUPPORTED_RUNTIMES.java.supported, ...SUPPORTED_RUNTIMES.java.preview],
+        source: 'SUPPORTED_RUNTIMES',
+      },
+    ],
+  },
+  csharp: {
+    files: {
+      'local.settings.json': JSON.stringify(
+        {
+          IsEncrypted: false,
+          Values: {
+            FUNCTIONS_WORKER_RUNTIME: 'dotnet-isolated',
+            AzureWebJobsStorage: 'UseDevelopmentStorage=true',
+          },
+        },
+        null,
+        2
+      ),
+      '.funcignore': `# Azure Functions deployment exclusions for C#
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+local.settings.json
+.git/
+**/[Tt]ests/
+*.Tests.csproj
+`,
+    },
+    initInstructions: `## C# Azure Functions Project Setup
+
+1. Create project using .NET CLI:
+   \`\`\`bash
+   func init --dotnet-isolated
+   \`\`\`
+
+2. Or use Visual Studio / VS Code with Azure Functions extension
+
+3. Build and run:
+   \`\`\`bash
+   dotnet build
+   func start
+   \`\`\`
+
+**Note**: C# projects are typically initialized using \`func init\` or Visual Studio
+templates which create the .csproj file with proper dependencies.
+Use \`func new\` to add functions after project initialization.
+`,
+    projectStructure: [
+      '*.csproj            # C# project file',
+      'Program.cs          # Application entry point',
+      'host.json           # Azure Functions host configuration',
+      'local.settings.json # Local development settings (do not commit)',
+      '.funcignore         # Files to exclude from deployment',
+    ],
+  },
+};
+
+/**
+ * Common configuration required for ALL Azure Functions apps.
+ * These settings are needed regardless of which triggers/bindings are used.
+ */
+export const COMMON_APP_SETTINGS: Record<string, AppSettingConfig> = {
+  /** Used by Functions host for internal operations (timers, durable state, etc.) */
+  AzureWebJobsStorage: {
+    description: 'Storage account connection for Azure Functions host internal use',
+    required: true,
+    defaultLocalValue: 'UseDevelopmentStorage=true',
+  },
+  // Add more common settings here as needed, e.g.:
+  // APPLICATIONINSIGHTS_CONNECTION_STRING: {
+  //   description: 'Application Insights connection for monitoring',
+  //   required: false,
+  // },
+};
+
+/**
+ * Binding configurations for templates that require additional settings.
+ *
+ * Note: AzureWebJobsStorage (defined in COMMON_APP_SETTINGS) is for host internal use.
+ * Customer storage bindings should use separate connection settings.
+ */
+export const BINDING_CONFIGS: Record<string, BindingConfig> = {
+  CosmosDBTrigger: {
+    appSettings: {
+      CosmosDbConnection: {
+        description: 'Connection string for Azure Cosmos DB account',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  CosmosDBInputBinding: {
+    appSettings: {
+      CosmosDbConnection: {
+        description: 'Connection string for Azure Cosmos DB account',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  CosmosDBOutputBinding: {
+    appSettings: {
+      CosmosDbConnection: {
+        description: 'Connection string for Azure Cosmos DB account',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  CosmosDBInputOutputBinding: {
+    appSettings: {
+      CosmosDbConnection: {
+        description: 'Connection string for Azure Cosmos DB account',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  BlobTrigger: {
+    appSettings: {
+      BlobStorageConnection: {
+        description: 'Connection string for Azure Blob Storage account',
+        defaultLocalValue: 'UseDevelopmentStorage=true',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  BlobInputBinding: {
+    appSettings: {
+      BlobStorageConnection: {
+        description: 'Connection string for Azure Blob Storage account',
+        defaultLocalValue: 'UseDevelopmentStorage=true',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  BlobOutputBinding: {
+    appSettings: {
+      BlobStorageConnection: {
+        description: 'Connection string for Azure Blob Storage account',
+        defaultLocalValue: 'UseDevelopmentStorage=true',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  BlobInputOutputBindings: {
+    appSettings: {
+      BlobStorageConnection: {
+        description: 'Connection string for Azure Blob Storage account',
+        defaultLocalValue: 'UseDevelopmentStorage=true',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  QueueTrigger: {
+    appSettings: {
+      QueueStorageConnection: {
+        description: 'Connection string for Azure Queue Storage account',
+        defaultLocalValue: 'UseDevelopmentStorage=true',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  EventHubTrigger: {
+    appSettings: {
+      EventHubConnection: {
+        description: 'Connection string for Azure Event Hub namespace',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  ServiceBusQueueTrigger: {
+    appSettings: {
+      ServiceBusConnection: {
+        description: 'Connection string for Azure Service Bus namespace',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  ServiceBusTopicTrigger: {
+    appSettings: {
+      ServiceBusConnection: {
+        description: 'Connection string for Azure Service Bus namespace',
+        required: true,
+      },
+    },
+    extensionBundle: true,
+  },
+  EventGridTrigger: {
+    appSettings: {},
+    extensionBundle: true,
+  },
+  TimerTrigger: {
+    appSettings: {},
+    extensionBundle: false,
+  },
+  HttpTrigger: {
+    appSettings: {},
+    extensionBundle: false,
+  },
+};
+
 /**
  * Zod schema for template metadata validation.
  * Ensures all templates have required fields with meaningful content.
@@ -26,6 +802,16 @@ export const TemplateMetadataSchema = z.object({
     .string()
     .min(10, 'Use case must be at least 10 characters')
     .max(200, 'Use case must not exceed 200 characters'),
+  bindingType: z
+    .enum(['trigger', 'input', 'output'])
+    .optional()
+    .describe(
+      'The type of Azure Functions binding: trigger (required, one per function), input (optional), output (optional)'
+    ),
+  resource: z
+    .string()
+    .optional()
+    .describe('The Azure resource this binding interacts with (e.g., blob, cosmos, queue, servicebus)'),
 });
 
 /** Template metadata structure (inferred from Zod schema) */
@@ -68,136 +854,190 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       description: 'Combines blob input and output bindings in a single function',
       category: 'Storage Bindings',
       useCase: 'File transformation, data processing pipelines, content conversion',
+      bindingType: 'input',
+      resource: 'blob',
     },
     BlobTrigger: {
       description: 'Triggered when files are added or modified in Azure Blob Storage',
       category: 'Storage Triggers',
       useCase: 'File processing, image resizing, document analysis, automated workflows',
+      bindingType: 'trigger',
+      resource: 'blob',
     },
     CosmosDBInputBinding: {
       description: 'Reads documents from Azure Cosmos DB collections',
       category: 'Database Bindings',
       useCase: 'Data retrieval, document queries, read-only database operations',
+      bindingType: 'input',
+      resource: 'cosmos',
     },
     CosmosDBOutputBinding: {
       description: 'Writes documents to Azure Cosmos DB collections',
       category: 'Database Bindings',
       useCase: 'Data persistence, document updates, write operations to NoSQL databases',
+      bindingType: 'output',
+      resource: 'cosmos',
     },
     CosmosDBTrigger: {
       description: 'Triggered by changes in Cosmos DB using the change feed',
       category: 'Database Triggers',
       useCase: 'Real-time data processing, event sourcing, maintaining materialized views',
+      bindingType: 'trigger',
+      resource: 'cosmos',
     },
     DaprPublishOutputBinding: {
       description: 'Publishes messages to Dapr pub/sub components',
       category: 'Microservices',
       useCase: 'Event-driven microservices, decoupled messaging, distributed architectures',
+      bindingType: 'output',
+      resource: 'dapr',
     },
     DaprServiceInvocationTrigger: {
       description: 'Handles Dapr service-to-service invocation requests',
       category: 'Microservices',
       useCase: 'Microservices communication, API gateways, service mesh integration',
+      bindingType: 'trigger',
+      resource: 'dapr',
     },
     DaprTopicTrigger: {
       description: 'Subscribes to Dapr pub/sub topics',
       category: 'Microservices',
       useCase: 'Event processing, asynchronous message handling, distributed workflows',
+      bindingType: 'trigger',
+      resource: 'dapr',
     },
     DurableFunctionsEntityClass: {
       description: 'Stateful entity class for managing persistent state',
       category: 'Durable Functions',
       useCase: 'State management, counters, workflow coordination, stateful processing',
+      bindingType: 'trigger',
+      resource: 'durable',
     },
     DurableFunctionsEntityFunction: {
       description: 'Entity function for Durable Functions state management',
       category: 'Durable Functions',
       useCase: 'Singleton patterns, state machines, persistent counters, stateful logic',
+      bindingType: 'trigger',
+      resource: 'durable',
     },
     DurableFunctionsOrchestration: {
       description: 'Orchestrator function for complex workflow coordination',
       category: 'Durable Functions',
       useCase: 'Multi-step workflows, business processes, saga patterns, long-running operations',
+      bindingType: 'trigger',
+      resource: 'durable',
     },
     EventGridBlobTrigger: {
       description: 'Enhanced blob trigger using Azure Event Grid for better performance',
       category: 'Storage Triggers',
       useCase: 'High-performance file processing, event-driven blob operations, scalable workflows',
+      bindingType: 'trigger',
+      resource: 'blob',
     },
     EventGridTrigger: {
       description: 'Handles Azure Event Grid events from various sources',
       category: 'Event Processing',
       useCase: 'Event-driven architectures, system integration, reactive applications',
+      bindingType: 'trigger',
+      resource: 'eventgrid',
     },
     EventHubTrigger: {
       description: 'Processes streaming data from Azure Event Hubs',
       category: 'Streaming',
       useCase: 'Real-time analytics, IoT data processing, telemetry ingestion, big data streams',
+      bindingType: 'trigger',
+      resource: 'eventhub',
     },
     HttpTrigger: {
       description: 'HTTP-triggered function for REST API endpoints',
       category: 'Web APIs',
       useCase: 'REST APIs, webhooks, web services, serverless backends',
+      bindingType: 'trigger',
+      resource: 'http',
     },
     MCPToolTrigger: {
       description: 'Model Context Protocol integration for AI assistant tools',
       category: 'AI/ML',
       useCase: 'AI assistant integrations, LLM tool calling, intelligent automation',
+      bindingType: 'trigger',
+      resource: 'mcp',
     },
     MySqlInputBinding: {
       description: 'Reads data from MySQL databases',
       category: 'Database Bindings',
       useCase: 'Database queries, data synchronization, reporting, ETL processes',
+      bindingType: 'input',
+      resource: 'mysql',
     },
     MySqlOutputBinding: {
       description: 'Writes data to MySQL databases',
       category: 'Database Bindings',
       useCase: 'Data persistence, database updates, transaction processing',
+      bindingType: 'output',
+      resource: 'mysql',
     },
     MySqlTrigger: {
       description: 'Triggered by changes in MySQL databases',
       category: 'Database Triggers',
       useCase: 'Change data capture, real-time sync, audit logging',
+      bindingType: 'trigger',
+      resource: 'mysql',
     },
     QueueTrigger: {
       description: 'Processes messages from Azure Storage Queues',
       category: 'Storage Triggers',
       useCase: 'Asynchronous processing, background jobs, work queues, task scheduling',
+      bindingType: 'trigger',
+      resource: 'queue',
     },
     RabbitMQTrigger: {
       description: 'Consumes messages from RabbitMQ queues',
       category: 'Messaging',
       useCase: 'Message processing, distributed systems, enterprise messaging',
+      bindingType: 'trigger',
+      resource: 'rabbitmq',
     },
     ServiceBusQueueTrigger: {
       description: 'Handles messages from Azure Service Bus queues',
       category: 'Messaging',
       useCase: 'Reliable messaging, enterprise integration, transactional processing',
+      bindingType: 'trigger',
+      resource: 'servicebus',
     },
     ServiceBusTopicTrigger: {
       description: 'Subscribes to Azure Service Bus topics',
       category: 'Messaging',
       useCase: 'Publish-subscribe patterns, event broadcasting, multi-consumer scenarios',
+      bindingType: 'trigger',
+      resource: 'servicebus',
     },
     SignalRConnectionInfoHttpTrigger: {
       description: 'Provides SignalR connection information via HTTP',
       category: 'Real-time Communication',
       useCase: 'Real-time web applications, chat systems, live notifications',
+      bindingType: 'trigger',
+      resource: 'signalr',
     },
     SqlInputBinding: {
       description: 'Reads data from SQL Server/Azure SQL databases',
       category: 'Database Bindings',
       useCase: 'SQL queries, reporting, data retrieval, database integration',
+      bindingType: 'input',
+      resource: 'sql',
     },
     SqlTrigger: {
       description: 'Triggered by changes in SQL Server/Azure SQL databases',
       category: 'Database Triggers',
       useCase: 'Change data capture, real-time sync, audit trails',
+      bindingType: 'trigger',
+      resource: 'sql',
     },
     TimerTrigger: {
       description: 'Scheduled function execution using CRON expressions',
       category: 'Scheduling',
       useCase: 'Batch processing, scheduled maintenance, periodic cleanup, automated tasks',
+      bindingType: 'trigger',
+      resource: 'timer',
     },
   },
   java: {
@@ -205,76 +1045,106 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       description: 'Reads blob data as input binding',
       category: 'Storage Bindings',
       useCase: 'File processing, data ingestion, content reading, document analysis',
+      bindingType: 'input',
+      resource: 'blob',
     },
     BlobOutputBinding: {
       description: 'Writes data to Azure Blob Storage as output binding',
       category: 'Storage Bindings',
       useCase: 'File generation, data export, report creation, content publishing',
+      bindingType: 'output',
+      resource: 'blob',
     },
     BlobTrigger: {
       description: 'Triggered by blob storage events',
       category: 'Storage Triggers',
       useCase: 'Automated file processing, image processing, ETL pipelines',
+      bindingType: 'trigger',
+      resource: 'blob',
     },
     CosmosDBInputBinding: {
       description: 'Reads documents from Cosmos DB collections',
       category: 'Database Bindings',
       useCase: 'Document queries, data retrieval, NoSQL database operations',
+      bindingType: 'input',
+      resource: 'cosmos',
     },
     CosmosDBOutputBinding: {
       description: 'Writes documents to Cosmos DB collections',
       category: 'Database Bindings',
       useCase: 'Data persistence, document storage, NoSQL write operations',
+      bindingType: 'output',
+      resource: 'cosmos',
     },
     CosmosDBTrigger: {
       description: 'Triggered by changes in Cosmos DB using the change feed',
       category: 'Database Triggers',
       useCase: 'Real-time data processing, event sourcing, maintaining materialized views',
+      bindingType: 'trigger',
+      resource: 'cosmos',
     },
     DurableFunctions: {
       description: 'Durable Functions orchestration and activities',
       category: 'Durable Functions',
       useCase: 'Complex workflows, business processes, stateful operations, saga patterns',
+      bindingType: 'trigger',
+      resource: 'durable',
     },
     EventGridTrigger: {
       description: 'Handles Azure Event Grid events from various sources',
       category: 'Event Processing',
       useCase: 'Event-driven architectures, reactive systems, system integration',
+      bindingType: 'trigger',
+      resource: 'eventgrid',
     },
     EventHubTrigger: {
       description: 'Processes streaming data from Azure Event Hubs',
       category: 'Streaming',
       useCase: 'Real-time analytics, IoT data processing, stream processing, big data ingestion',
+      bindingType: 'trigger',
+      resource: 'eventhub',
     },
     HttpTrigger: {
       description: 'HTTP API endpoints for web requests',
       category: 'Web APIs',
       useCase: 'REST APIs, web services, serverless backends, webhook handling',
+      bindingType: 'trigger',
+      resource: 'http',
     },
     MCPToolTrigger: {
       description: 'Model Context Protocol tool integration',
       category: 'AI/ML',
       useCase: 'AI assistant tools, LLM integrations, intelligent automation',
+      bindingType: 'trigger',
+      resource: 'mcp',
     },
     QueueTrigger: {
       description: 'Processes messages from Azure Storage Queues',
       category: 'Storage Triggers',
       useCase: 'Asynchronous processing, background jobs, task scheduling',
+      bindingType: 'trigger',
+      resource: 'queue',
     },
     ServiceBusQueueTrigger: {
       description: 'Handles messages from Azure Service Bus queues',
       category: 'Messaging',
       useCase: 'Enterprise messaging, reliable processing, transactional messaging',
+      bindingType: 'trigger',
+      resource: 'servicebus',
     },
     ServiceBusTopicTrigger: {
       description: 'Subscribes to Azure Service Bus topics',
       category: 'Messaging',
       useCase: 'Publish-subscribe patterns, event broadcasting, distributed messaging',
+      bindingType: 'trigger',
+      resource: 'servicebus',
     },
     TimerTrigger: {
       description: 'Scheduled execution using CRON expressions',
       category: 'Scheduling',
       useCase: 'Batch processing, scheduled tasks, periodic operations, maintenance jobs',
+      bindingType: 'trigger',
+      resource: 'timer',
     },
   },
   python: {
@@ -282,56 +1152,78 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       description: 'Reads blob data as input binding',
       category: 'Storage Bindings',
       useCase: 'File processing, data analysis, content reading, ML data preprocessing',
+      bindingType: 'input',
+      resource: 'blob',
     },
     BlobOutputBinding: {
       description: 'Writes data to Azure Blob Storage as output binding',
       category: 'Storage Bindings',
       useCase: 'File generation, data export, ML model outputs, report creation',
+      bindingType: 'output',
+      resource: 'blob',
     },
     BlobTrigger: {
       description: 'Triggered by blob storage events',
       category: 'Storage Triggers',
       useCase: 'Automated file processing, image analysis, data pipelines, ETL workflows',
+      bindingType: 'trigger',
+      resource: 'blob',
     },
     BlobTriggerWithEventGrid: {
       description: 'Enhanced blob trigger using Event Grid for improved performance',
       category: 'Storage Triggers',
       useCase: 'High-performance file processing, scalable blob operations, event-driven workflows',
+      bindingType: 'trigger',
+      resource: 'blob',
     },
     CosmosDBInputOutputBinding: {
       description: 'Combined Cosmos DB input and output bindings',
       category: 'Database Bindings',
       useCase: 'Document transformation, data migration, NoSQL data processing',
+      bindingType: 'input',
+      resource: 'cosmos',
     },
     CosmosDBTrigger: {
       description: 'Triggered by Cosmos DB changes using change feed',
       category: 'Database Triggers',
       useCase: 'Real-time data processing, event sourcing, data synchronization, change tracking',
+      bindingType: 'trigger',
+      resource: 'cosmos',
     },
     EventHubTrigger: {
       description: 'Processes streaming data from Azure Event Hubs',
       category: 'Streaming',
       useCase: 'Real-time analytics, IoT data processing, telemetry analysis, data science workflows',
+      bindingType: 'trigger',
+      resource: 'eventhub',
     },
     HttpTrigger: {
       description: 'HTTP API endpoints for web requests',
       category: 'Web APIs',
       useCase: 'REST APIs, webhooks, web services, ML model serving, data science APIs',
+      bindingType: 'trigger',
+      resource: 'http',
     },
     MCPToolTrigger: {
       description: 'Model Context Protocol integration for AI workflows',
       category: 'AI/ML',
       useCase: 'AI assistant tools, LLM integrations, ML pipeline automation, intelligent workflows',
+      bindingType: 'trigger',
+      resource: 'mcp',
     },
     QueueTrigger: {
       description: 'Processes messages from Azure Storage Queues',
       category: 'Storage Triggers',
       useCase: 'Background processing, async data processing, task queues, batch processing',
+      bindingType: 'trigger',
+      resource: 'queue',
     },
     TimerTrigger: {
       description: 'Scheduled execution using CRON expressions in Python',
       category: 'Scheduling',
       useCase: 'Data science jobs, ML model training, automated reports, periodic data processing',
+      bindingType: 'trigger',
+      resource: 'timer',
     },
   },
   typescript: {
@@ -339,51 +1231,71 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       description: 'Combined blob input and output bindings in a single function',
       category: 'Storage Bindings',
       useCase: 'File transformation, data processing pipelines, content conversion',
+      bindingType: 'input',
+      resource: 'blob',
     },
     BlobTrigger: {
       description: 'Triggered when files are added or modified in Azure Blob Storage',
       category: 'Storage Triggers',
       useCase: 'File processing, image manipulation, document workflows, automated processing',
+      bindingType: 'trigger',
+      resource: 'blob',
     },
     BlobTriggerWithEventGrid: {
       description: 'Enhanced blob trigger using Azure Event Grid for better performance',
       category: 'Storage Triggers',
       useCase: 'High-performance file processing, scalable blob operations, event-driven workflows',
+      bindingType: 'trigger',
+      resource: 'blob',
     },
     CosmosDBInputOutputBinding: {
       description: 'Combined Cosmos DB input and output bindings',
       category: 'Database Bindings',
       useCase: 'Document transformation, data migration, NoSQL data processing',
+      bindingType: 'input',
+      resource: 'cosmos',
     },
     CosmosDBTrigger: {
       description: 'Triggered by changes in Cosmos DB using the change feed',
       category: 'Database Triggers',
       useCase: 'Real-time data processing, change notifications, event-driven updates',
+      bindingType: 'trigger',
+      resource: 'cosmos',
     },
     EventHubTrigger: {
       description: 'Processes streaming data from Azure Event Hubs',
       category: 'Streaming',
       useCase: 'Real-time analytics, IoT telemetry processing, streaming data pipelines',
+      bindingType: 'trigger',
+      resource: 'eventhub',
     },
     HttpTrigger: {
       description: 'HTTP API endpoints for web requests',
       category: 'Web APIs',
       useCase: 'REST APIs, web services, serverless backends, webhook handlers',
+      bindingType: 'trigger',
+      resource: 'http',
     },
     MCPToolTrigger: {
       description: 'Model Context Protocol integration for AI workflows',
       category: 'AI/ML',
       useCase: 'AI assistant tools, LLM integrations, intelligent automation workflows',
+      bindingType: 'trigger',
+      resource: 'mcp',
     },
     QueueTrigger: {
       description: 'Processes messages from Azure Storage Queues',
       category: 'Storage Triggers',
       useCase: 'Asynchronous processing, background jobs, task queues, decoupled architectures',
+      bindingType: 'trigger',
+      resource: 'queue',
     },
     TimerTrigger: {
       description: 'Scheduled execution using CRON expressions',
       category: 'Scheduling',
       useCase: 'Scheduled tasks, batch processing, maintenance jobs, periodic operations',
+      bindingType: 'trigger',
+      resource: 'timer',
     },
   },
 };
@@ -846,33 +1758,76 @@ export function groupTemplatesByCategory(language: ValidLanguage): {
 }
 
 /**
- * Get language details for documentation
+ * Group templates by binding type (triggers, input bindings, output bindings).
+ * Useful for showing composable parts: pick 1 trigger + 0 or more bindings.
+ */
+export function groupTemplatesByBindingType(language: ValidLanguage): {
+  triggers: string[];
+  inputBindings: string[];
+  outputBindings: string[];
+} {
+  const templates = VALID_TEMPLATES[language];
+  const descriptions = TEMPLATE_DESCRIPTIONS[language];
+
+  const triggers: string[] = [];
+  const inputBindings: string[] = [];
+  const outputBindings: string[] = [];
+
+  templates.forEach((template) => {
+    const desc = descriptions[template];
+    switch (desc?.bindingType) {
+      case 'trigger':
+        triggers.push(template);
+        break;
+      case 'input':
+        inputBindings.push(template);
+        break;
+      case 'output':
+        outputBindings.push(template);
+        break;
+    }
+  });
+
+  return { triggers, inputBindings, outputBindings };
+}
+
+/**
+ * Get language details for documentation.
+ * Uses SUPPORTED_RUNTIMES for version information.
+ * @see https://learn.microsoft.com/azure/azure-functions/functions-versions
  */
 export function getLanguageDetails() {
+  const formatSupportedVersions = (lang: ValidLanguage): string => {
+    const runtime = SUPPORTED_RUNTIMES[lang];
+    const supported = runtime.supported.join(', ');
+    const preview = runtime.preview.length > 0 ? `, ${runtime.preview.join(', ')} (Preview)` : '';
+    return `${supported} (GA)${preview}`;
+  };
+
   return {
     csharp: {
       name: 'C#',
-      runtime: '.NET 8, 9, 10 (Isolated Worker), .NET Framework 4.8.1',
+      runtime: formatRuntimeVersions('csharp'),
       programmingModel: 'Isolated worker process with dependency injection',
       templateCount: VALID_TEMPLATES.csharp.length,
       keyFeatures: [
         'Strong typing with C# language features',
         'Isolated worker process for better performance and reliability',
         'Built-in dependency injection support',
-        'Support for .NET 8, 9, 10 and .NET Framework 4.8.1',
+        `Support for .NET ${SUPPORTED_RUNTIMES.csharp.supported.join(', ')}${'frameworkSupported' in SUPPORTED_RUNTIMES.csharp ? ` and .NET Framework ${SUPPORTED_RUNTIMES.csharp.frameworkSupported.join(', ')}` : ''}`,
         'Rich ecosystem of NuGet packages',
       ],
       filePatterns: ['.cs files', '.template.config/template.json', 'host.json', 'local.settings.json'],
     },
     java: {
       name: 'Java',
-      runtime: 'Java 8, 11, 17, 21 (GA), Java 25 (Preview)',
+      runtime: formatRuntimeVersions('java'),
       programmingModel: 'Annotation-based with Maven build system',
       templateCount: VALID_TEMPLATES.java.length,
       keyFeatures: [
         'Annotation-based function definitions',
         'Maven project structure and dependency management',
-        'Support for Java 8, 11, 17, 21, and 25 (Preview)',
+        `Support for Java ${formatSupportedVersions('java')}`,
         'Enterprise-ready with extensive libraries',
         'Cross-platform compatibility',
       ],
@@ -880,7 +1835,7 @@ export function getLanguageDetails() {
     },
     python: {
       name: 'Python',
-      runtime: 'Python 3.10, 3.11, 3.12, 3.13',
+      runtime: formatRuntimeVersions('python'),
       programmingModel: 'v2 programming model with decorators',
       templateCount: VALID_TEMPLATES.python.length,
       keyFeatures: [
@@ -894,7 +1849,7 @@ export function getLanguageDetails() {
     },
     typescript: {
       name: 'TypeScript',
-      runtime: 'Node.js 20, 22 (GA), Node.js 24 (Preview)',
+      runtime: formatRuntimeVersions('typescript'),
       programmingModel: 'Node.js v4 programming model with TypeScript support',
       templateCount: VALID_TEMPLATES.typescript.length,
       keyFeatures: [

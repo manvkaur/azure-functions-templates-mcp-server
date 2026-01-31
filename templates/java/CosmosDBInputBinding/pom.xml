@@ -11,8 +11,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>{{javaVersion}}</maven.compiler.source>
+        <maven.compiler.target>{{javaVersion}}</maven.compiler.target>
         <azure.functions.maven.plugin.version>1.39.0</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>3.2.2</azure.functions.java.library.version>
         <functionAppName>CosmosDBInputBinding-1759259493276</functionAppName>
@@ -76,7 +76,7 @@
                         <!-- runtime os, could be windows, linux (default) or docker-->
                         <!-- <os>linux</os> -->
                         <!-- runtime Java version, could be 8, 11, 17, 21 (default) -->
-                        <javaVersion>21</javaVersion>
+                        <javaVersion>{{javaVersion}}</javaVersion>
                     </runtime>
                     <appSettings>
                         <property>
