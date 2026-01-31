@@ -9,19 +9,23 @@ import {
   validateTemplate,
   isPathSafe,
   getFileExtension,
-  getKeyFilesForLanguage,
   createErrorResult,
   createSuccessResult,
-  formatSupportedLanguagesResponse,
-  formatTemplatesByLanguageResponse,
-  handleGetTemplates,
-  handleGetSupportedLanguages,
-  handleGetTemplatesByLanguage,
-  handleGetTemplateFiles,
+  replaceRuntimeVersion,
+  handleGetLanguagesList,
+  handleGetProjectTemplate,
+  handleGetFunctionTemplatesList,
+  handleGetFunctionTemplate,
   MAX_FILE_SIZE_BYTES,
   MAX_RESPONSE_SIZE_BYTES,
 } from './handlers.js';
-import { VALID_LANGUAGES, VALID_TEMPLATES, getLanguageDetails, groupTemplatesByCategory } from './templates.js';
+import {
+  VALID_LANGUAGES,
+  VALID_TEMPLATES,
+  getLanguageDetails,
+  groupTemplatesByCategory,
+  SUPPORTED_RUNTIMES,
+} from './templates.js';
 
 const TEMPLATES_ROOT = path.join(import.meta.dirname, '..', 'templates');
 
@@ -137,66 +141,6 @@ describe('getFileExtension', () => {
   });
 });
 
-describe('getKeyFilesForLanguage', () => {
-  const allFiles = [
-    'function_app.py',
-    'requirements.txt',
-    'host.json',
-    'local.settings.json',
-    'Program.cs',
-    'HttpTrigger.cs',
-    'pom.xml',
-    'src/main/java/Function.java',
-    'src/main/java/Helper.java',
-    'index.ts',
-    'function.json',
-  ];
-
-  it('should return correct key files for Python', () => {
-    const result = getKeyFilesForLanguage('python', allFiles);
-    expect(result).toContain('function_app.py');
-    expect(result).toContain('requirements.txt');
-    expect(result).toContain('host.json');
-    expect(result).toContain('local.settings.json');
-  });
-
-  it('should return correct key files for C#', () => {
-    const result = getKeyFilesForLanguage('csharp', allFiles);
-    expect(result).toContain('host.json');
-    expect(result).toContain('local.settings.json');
-    expect(result).toContain('.template.config/template.json');
-  });
-
-  it('should return correct key files for Java', () => {
-    const result = getKeyFilesForLanguage('java', allFiles);
-    expect(result).toContain('pom.xml');
-    expect(result).toContain('host.json');
-    expect(result).toContain('local.settings.json');
-  });
-
-  it('should return correct key files for TypeScript', () => {
-    const result = getKeyFilesForLanguage('typescript', allFiles);
-    expect(result).toContain('index.ts');
-    expect(result).toContain('function.json');
-    expect(result).toContain('package.json');
-    expect(result).toContain('host.json');
-  });
-
-  it('should include up to 2 .cs files for C#', () => {
-    const csFiles = ['One.cs', 'Two.cs', 'Three.cs', 'Four.cs'];
-    const result = getKeyFilesForLanguage('csharp', csFiles);
-    const includedCsFiles = result.filter((f) => f.endsWith('.cs'));
-    expect(includedCsFiles.length).toBeLessThanOrEqual(2);
-  });
-
-  it('should include up to 2 Java source files for Java', () => {
-    const javaFiles = ['src/main/java/One.java', 'src/main/java/Two.java', 'src/main/java/Three.java'];
-    const result = getKeyFilesForLanguage('java', javaFiles);
-    const includedJavaFiles = result.filter((f) => f.endsWith('.java'));
-    expect(includedJavaFiles.length).toBeLessThanOrEqual(2);
-  });
-});
-
 describe('createErrorResult', () => {
   it('should create proper error result structure', () => {
     const result = createErrorResult('Test error message');
@@ -214,6 +158,45 @@ describe('createSuccessResult', () => {
     expect(result.content).toHaveLength(1);
     expect(result.content[0].type).toBe('text');
     expect(result.content[0].text).toBe('Test success message');
+  });
+});
+
+describe('replaceRuntimeVersion', () => {
+  it('should replace {{javaVersion}} for Java', () => {
+    const content = '<maven.compiler.source>{{javaVersion}}</maven.compiler.source>';
+    const result = replaceRuntimeVersion(content, 'java', '21');
+    expect(result).toBe('<maven.compiler.source>21</maven.compiler.source>');
+  });
+
+  it('should convert Java 8 to 1.8 for Maven compatibility', () => {
+    const content = '<maven.compiler.source>{{javaVersion}}</maven.compiler.source>';
+    const result = replaceRuntimeVersion(content, 'java', '8');
+    expect(result).toBe('<maven.compiler.source>1.8</maven.compiler.source>');
+  });
+
+  it('should not convert Java 11+ versions', () => {
+    const content = '<javaVersion>{{javaVersion}}</javaVersion>';
+    expect(replaceRuntimeVersion(content, 'java', '11')).toBe('<javaVersion>11</javaVersion>');
+    expect(replaceRuntimeVersion(content, 'java', '17')).toBe('<javaVersion>17</javaVersion>');
+    expect(replaceRuntimeVersion(content, 'java', '21')).toBe('<javaVersion>21</javaVersion>');
+  });
+
+  it('should replace {{nodeVersion}} for TypeScript', () => {
+    const content = '"@types/node": "{{nodeVersion}}.x"';
+    const result = replaceRuntimeVersion(content, 'typescript', '20');
+    expect(result).toBe('"@types/node": "20.x"');
+  });
+
+  it('should not modify content for other languages', () => {
+    const content = '{{javaVersion}} {{nodeVersion}}';
+    expect(replaceRuntimeVersion(content, 'python', '3.11')).toBe(content);
+    expect(replaceRuntimeVersion(content, 'csharp', '8')).toBe(content);
+  });
+
+  it('should replace multiple occurrences', () => {
+    const content = 'source={{javaVersion}} target={{javaVersion}}';
+    const result = replaceRuntimeVersion(content, 'java', '17');
+    expect(result).toBe('source=17 target=17');
   });
 });
 
@@ -259,135 +242,136 @@ describe('getLanguageDetails', () => {
   });
 });
 
-describe('formatSupportedLanguagesResponse', () => {
-  it('should include all languages', () => {
-    const result = formatSupportedLanguagesResponse();
+// ============================================================================
+// NEW COMPOSABLE HANDLER TESTS
+// ============================================================================
+
+describe('handleGetLanguagesList', () => {
+  it('should return all supported languages', async () => {
+    const result = await handleGetLanguagesList();
+    expect(result.isError).toBeUndefined();
     for (const lang of VALID_LANGUAGES) {
-      expect(result).toContain(lang);
+      expect(result.content[0].text).toContain(lang);
     }
   });
 
-  it('should include language details', () => {
-    const result = formatSupportedLanguagesResponse();
-    expect(result).toContain('C#');
-    expect(result).toContain('Java');
-    expect(result).toContain('Python');
-    expect(result).toContain('TypeScript');
-    expect(result).toContain('Runtime');
-    expect(result).toContain('Key Features');
+  it('should include runtime information', async () => {
+    const result = await handleGetLanguagesList();
+    expect(result.content[0].text).toContain('Runtime');
+    expect(result.content[0].text).toContain(SUPPORTED_RUNTIMES.lastUpdated);
+  });
+
+  it('should include prerequisites and commands', async () => {
+    const result = await handleGetLanguagesList();
+    expect(result.content[0].text).toContain('Prerequisites');
+    expect(result.content[0].text).toContain('Quick Commands');
+    expect(result.content[0].text).toContain('func init');
   });
 });
 
-describe('formatTemplatesByLanguageResponse', () => {
-  it('should include template count', () => {
-    const result = formatTemplatesByLanguageResponse('python');
-    expect(result).toContain(`Total Templates: ${VALID_TEMPLATES.python.length}`);
-  });
-
-  it('should include template names', () => {
-    const result = formatTemplatesByLanguageResponse('python');
-    expect(result).toContain('HttpTrigger');
-  });
-
-  it('should include usage guidance', () => {
-    const result = formatTemplatesByLanguageResponse('csharp');
-    expect(result).toContain('Next Steps');
-    expect(result).toContain('get_azure_functions_templates');
-  });
-});
-
-// Handler integration tests (require actual template files)
-describe('handleGetTemplates', () => {
+describe('handleGetProjectTemplate', () => {
   it('should return error for invalid language', async () => {
-    const result = await handleGetTemplates({ language: 'invalid', template: 'HttpTrigger' }, TEMPLATES_ROOT);
+    const result = await handleGetProjectTemplate({ language: 'invalid' });
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('Invalid language');
   });
 
-  it('should return error for invalid template', async () => {
-    const result = await handleGetTemplates({ language: 'python', template: 'InvalidTemplate' }, TEMPLATES_ROOT);
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain('Invalid template');
-  });
-
-  it('should return template files for valid input', async () => {
-    const result = await handleGetTemplates({ language: 'python', template: 'HttpTrigger' }, TEMPLATES_ROOT);
+  it('should return project files for Python', async () => {
+    const result = await handleGetProjectTemplate({ language: 'python' });
     expect(result.isError).toBeUndefined();
-    expect(result.content[0].text).toContain('Azure Functions Template');
-    expect(result.content[0].text).toContain('function_app.py');
+    expect(result.content[0].text).toContain('host.json');
+    expect(result.content[0].text).toContain('local.settings.json');
+    expect(result.content[0].text).toContain('requirements.txt');
   });
 
-  it('should return specific file when filePath provided', async () => {
-    const result = await handleGetTemplates(
-      { language: 'python', template: 'HttpTrigger', filePath: 'function_app.py' },
-      TEMPLATES_ROOT
-    );
+  it('should return project files for TypeScript', async () => {
+    const result = await handleGetProjectTemplate({ language: 'typescript' });
     expect(result.isError).toBeUndefined();
-    expect(result.content[0].text).toContain('function_app.py');
+    expect(result.content[0].text).toContain('package.json');
+    expect(result.content[0].text).toContain('tsconfig.json');
   });
 
-  it('should prevent path traversal', async () => {
-    const result = await handleGetTemplates(
-      { language: 'python', template: 'HttpTrigger', filePath: '../../../etc/passwd' },
-      TEMPLATES_ROOT
-    );
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain('path traversal');
+  it('should return project files for Java', async () => {
+    const result = await handleGetProjectTemplate({ language: 'java' });
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toContain('pom.xml');
+    expect(result.content[0].text).toContain('host.json');
   });
 
-  it('should return error for non-existent file', async () => {
-    const result = await handleGetTemplates(
-      { language: 'python', template: 'HttpTrigger', filePath: 'nonexistent.xyz' },
-      TEMPLATES_ROOT
-    );
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain('File not found');
+  it('should include setup instructions', async () => {
+    const result = await handleGetProjectTemplate({ language: 'python' });
+    expect(result.content[0].text).toContain('Setup Instructions');
+    expect(result.content[0].text).toContain('Quick Commands');
   });
 });
 
-describe('handleGetSupportedLanguages', () => {
-  it('should return supported languages information', async () => {
-    const result = await handleGetSupportedLanguages();
-    expect(result.isError).toBeUndefined();
-    expect(result.content[0].text).toContain('Azure Functions Supported Languages');
-    expect(result.content[0].text).toContain('csharp');
-    expect(result.content[0].text).toContain('python');
-  });
-});
-
-describe('handleGetTemplatesByLanguage', () => {
+describe('handleGetFunctionTemplatesList', () => {
   it('should return error for invalid language', async () => {
-    const result = await handleGetTemplatesByLanguage({ language: 'invalid' });
+    const result = await handleGetFunctionTemplatesList({ language: 'invalid' });
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('Invalid language');
   });
 
   it('should return templates for valid language', async () => {
-    const result = await handleGetTemplatesByLanguage({ language: 'typescript' });
+    const result = await handleGetFunctionTemplatesList({ language: 'python' });
     expect(result.isError).toBeUndefined();
-    expect(result.content[0].text).toContain('Azure Functions Templates for TYPESCRIPT');
+    expect(result.content[0].text).toContain('Triggers (pick one)');
     expect(result.content[0].text).toContain('HttpTrigger');
+  });
+
+  it('should organize templates by binding type', async () => {
+    const result = await handleGetFunctionTemplatesList({ language: 'csharp' });
+    expect(result.content[0].text).toContain('Triggers (pick one)');
+    expect(result.content[0].text).toContain('Input Bindings');
+    expect(result.content[0].text).toContain('Output Bindings');
+  });
+
+  it('should include next step hint', async () => {
+    const result = await handleGetFunctionTemplatesList({ language: 'typescript' });
+    expect(result.content[0].text).toContain('Next Step');
+    expect(result.content[0].text).toContain('get_azure_functions_template');
   });
 });
 
-describe('handleGetTemplateFiles', () => {
+describe('handleGetFunctionTemplate', () => {
   it('should return error for invalid language', async () => {
-    const result = await handleGetTemplateFiles({ language: 'invalid', template: 'HttpTrigger' }, TEMPLATES_ROOT);
+    const result = await handleGetFunctionTemplate({ language: 'invalid', template: 'HttpTrigger' }, TEMPLATES_ROOT);
     expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain('INVALID LANGUAGE');
+    expect(result.content[0].text).toContain('Invalid language');
   });
 
   it('should return error for invalid template', async () => {
-    const result = await handleGetTemplateFiles({ language: 'java', template: 'InvalidTemplate' }, TEMPLATES_ROOT);
+    const result = await handleGetFunctionTemplate({ language: 'python', template: 'InvalidTemplate' }, TEMPLATES_ROOT);
     expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain('INVALID TEMPLATE');
+    expect(result.content[0].text).toContain('Invalid template');
   });
 
-  it('should return all template files for valid input', async () => {
-    const result = await handleGetTemplateFiles({ language: 'java', template: 'HttpTrigger' }, TEMPLATES_ROOT);
+  it('should return function template for valid input', async () => {
+    const result = await handleGetFunctionTemplate({ language: 'python', template: 'HttpTrigger' }, TEMPLATES_ROOT);
     expect(result.isError).toBeUndefined();
-    expect(result.content[0].text).toContain('Azure Functions Template: java/HttpTrigger');
-    expect(result.content[0].text).toContain('pom.xml');
+    expect(result.content[0].text).toContain('Function Template: HttpTrigger');
+    expect(result.content[0].text).toContain('function_app.py');
+  });
+
+  it('should include binding configuration for triggers with bindings', async () => {
+    const result = await handleGetFunctionTemplate({ language: 'python', template: 'CosmosDBTrigger' }, TEMPLATES_ROOT);
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toContain('Configuration Requirements');
+    expect(result.content[0].text).toContain('CosmosDbConnection');
+  });
+
+  it('should return template with function files for each language', async () => {
+    const pythonResult = await handleGetFunctionTemplate(
+      { language: 'python', template: 'HttpTrigger' },
+      TEMPLATES_ROOT
+    );
+    expect(pythonResult.content[0].text).toContain('function_app.py');
+
+    const tsResult = await handleGetFunctionTemplate(
+      { language: 'typescript', template: 'HttpTrigger' },
+      TEMPLATES_ROOT
+    );
+    expect(tsResult.content[0].text).toContain('httpTrigger');
   });
 });
 
@@ -398,10 +382,7 @@ describe('file size limits', () => {
   });
 
   it('should handle normal-sized template files', async () => {
-    const result = await handleGetTemplates(
-      { language: 'python', template: 'HttpTrigger', filePath: 'function_app.py' },
-      TEMPLATES_ROOT
-    );
+    const result = await handleGetFunctionTemplate({ language: 'python', template: 'HttpTrigger' }, TEMPLATES_ROOT);
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain('function_app.py');
   });

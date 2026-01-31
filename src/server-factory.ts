@@ -10,14 +10,14 @@ import {
   discoverTemplates,
   VALID_LANGUAGES,
   VALID_TEMPLATES,
-  generateTemplateDescriptions,
+  SUPPORTED_RUNTIMES,
   type ValidLanguage,
 } from './templates.js';
 import {
-  handleGetTemplates,
-  handleGetSupportedLanguages,
-  handleGetTemplatesByLanguage,
-  handleGetTemplateFiles,
+  handleGetLanguagesList,
+  handleGetProjectTemplate,
+  handleGetFunctionTemplatesList,
+  handleGetFunctionTemplate,
 } from './handlers.js';
 
 /** Server configuration options */
@@ -64,144 +64,129 @@ export function createServer(config: ServerConfig): McpServer {
  */
 export function registerTools(server: McpServer, templatesRoot: string): void {
   server.registerTool(
-    'get_azure_functions_templates',
+    'get_languages_list',
     {
-      title: 'Get Azure Functions Template',
-      description: `Get complete Azure Functions templates with all files for rapid development and deployment.
+      title: 'Get Languages List',
+      description: `Get supported programming languages for Azure Functions code development.
 
-Ready-to-use templates across ${VALID_LANGUAGES.length} languages with complete project structure:
+**USE THIS SERVER** when the user wants to:
+- Create an Azure Function or Functions app
+- Add a trigger (HTTP, Timer, Blob, Queue, Cosmos DB, Event Hub, Service Bus)
+- Add bindings to an existing function
+- Generate serverless function code for Azure
 
- **C# (.NET Isolated)**: ${VALID_TEMPLATES.csharp.length} templates including Durable Functions, Dapr integration, database bindings
- **Java (Maven)**: ${VALID_TEMPLATES.java.length} templates with annotation-based configuration and Maven project structure  
- **Python (v2 Model)**: ${VALID_TEMPLATES.python.length} templates using modern decorator-based programming model
- **TypeScript (Node.js)**: ${VALID_TEMPLATES.typescript.length} templates with full type safety and modern async patterns
+Returns for each language:
+- **Runtime versions**: Supported versions (e.g., Python 3.10-3.13, Node.js 20-24)
+- **Prerequisites**: What needs to be installed
+- **Quick commands**: Init, build, and run commands
 
-**Template Categories**:
-- **Web APIs**: HTTP triggers for REST APIs and webhooks
-- **Storage**: Blob triggers/bindings, Queue processing
-- **Database**: Cosmos DB, SQL Server, MySQL triggers and bindings  
-- **Streaming**: Event Hubs for real-time data processing
-- **Messaging**: Service Bus, Event Grid, RabbitMQ integration
-- **Scheduling**: Timer triggers with CRON expressions
-- **Durable Functions**: Orchestrators, activities, entities for workflows
-- **Microservices**: Dapr integration, MCP tool integration
-- **Real-time**: SignalR for live updates
-- **Analytics**: Kusto (Azure Data Explorer) integration
+Start here when creating a new Azure Functions project.
 
-Each template includes complete project files, configuration, dependencies, and follows Azure Functions best practices. Perfect for learning, prototyping, or production use.`,
-      inputSchema: {
-        language: z
-          .enum(VALID_LANGUAGES)
-          .describe(
-            `Programming language for the Azure Functions template. Valid values: ${VALID_LANGUAGES.join(', ')}`
-          ),
-        template: z.string().describe(`Template name. Valid templates vary by language:
-      
-C# (.NET Isolated Worker Model): 
-${generateTemplateDescriptions('csharp')}
-
-Java (Maven-based with Annotations): 
-${generateTemplateDescriptions('java')}
-
-Python (v2 Programming Model with Decorators): 
-${generateTemplateDescriptions('python')}
-
-TypeScript (Node.js v4 Programming Model): 
-${generateTemplateDescriptions('typescript')}`),
-        filePath: z
-          .string()
-          .optional()
-          .describe(
-            "Optional: specific file path within the template to retrieve (e.g., 'function_app.py', 'host.json', 'requirements.txt'). If omitted, returns all files in the template as a structured listing."
-          ),
-      },
-    },
-    async (args: { language: ValidLanguage; template: string; filePath?: string }) => {
-      return handleGetTemplates(args, templatesRoot);
-    }
-  );
-
-  server.registerTool(
-    'get_supported_languages',
-    {
-      title: 'Get Supported Languages',
-      description: `Get overview of all supported programming languages for Azure Functions templates.
-
-Returns detailed information about each supported language:
-- **Runtime versions**: Supported language versions and runtimes
-- **Programming models**: Language-specific patterns and frameworks  
-- **Template counts**: Number of available templates per language
-- **Key features**: Unique capabilities and strengths of each runtime
-- **File patterns**: Typical project structure and key files
-
-Perfect for choosing the right language for your Azure Functions project and understanding the development experience across different runtimes.`,
+**Workflow**: get_languages_list → get_project_template → get_azure_functions_templates_list → get_azure_functions_template`,
       inputSchema: {},
     },
     async () => {
-      return handleGetSupportedLanguages();
+      return handleGetLanguagesList();
     }
   );
 
   server.registerTool(
-    'get_templates_by_language',
+    'get_project_template',
     {
-      title: 'Get Templates by Language',
-      description: `Browse all Azure Functions templates available for a specific programming language with detailed descriptions and use cases.
+      title: 'Get Project Template',
+      description: `Get project files for initializing a new Azure Functions app.
 
-Returns organized categories of templates with:
-- **Template descriptions**: What each template does and how it works
-- **Use cases**: Real-world scenarios where each template is most useful  
-- **Categories**: Grouped by functionality (Storage, Database, Messaging, etc.)
-- **Selection guide**: Quick comparison to help choose the right template
+**Call this BEFORE writing function code manually.** Returns ready-to-use project structure:
+- **host.json**: Azure Functions host configuration
+- **local.settings.json**: Local development settings  
+- **Language-specific files**: requirements.txt, package.json, pom.xml, .csproj
+- **Setup instructions**: Step-by-step guide to get started
 
-Perfect for exploring available options and understanding Azure Functions capabilities in your preferred language before implementing a specific solution.`,
+**Workflow**: get_languages_list → **get_project_template** → get_azure_functions_templates_list → get_azure_functions_template`,
       inputSchema: {
         language: z
           .enum(VALID_LANGUAGES)
-          .describe(`Programming language to get templates for. Valid values: ${VALID_LANGUAGES.join(', ')}`),
+          .describe(`Programming language for the project. Valid values: ${VALID_LANGUAGES.join(', ')}`),
+        runtimeVersion: z
+          .string()
+          .optional()
+          .describe(
+            `Optional runtime version for Java or TypeScript. ` +
+              `For Java: JDK version [${[...SUPPORTED_RUNTIMES.java.supported, ...SUPPORTED_RUNTIMES.java.preview].join(', ')}] (recommended: ${SUPPORTED_RUNTIMES.java.recommended}). ` +
+              `For TypeScript: Node.js version [${[...SUPPORTED_RUNTIMES.typescript.supported, ...SUPPORTED_RUNTIMES.typescript.preview].join(', ')}] (recommended: ${SUPPORTED_RUNTIMES.typescript.recommended}). ` +
+              `When provided, placeholders like {{javaVersion}} or {{nodeVersion}} are replaced automatically.`
+          ),
+      },
+    },
+    async (args: { language: ValidLanguage; runtimeVersion?: string }) => {
+      return handleGetProjectTemplate(args);
+    }
+  );
+
+  server.registerTool(
+    'get_azure_functions_templates_list',
+    {
+      title: 'Get Azure Functions Templates List',
+      description: `Browse available Azure Functions templates organized by binding type.
+
+**Call this to discover templates** before writing function code. Returns:
+- **Triggers** (pick one): HttpTrigger, TimerTrigger, BlobTrigger, CosmosDBTrigger, QueueTrigger, EventHubTrigger, ServiceBusTrigger
+- **Input Bindings** (optional): Read from Blob, Cosmos DB, SQL
+- **Output Bindings** (optional): Write to Blob, Cosmos DB, Queue, Service Bus
+
+Each template includes description, resource type, and use cases.
+
+**Workflow**: get_languages_list → get_project_template → **get_azure_functions_templates_list** → get_azure_functions_template`,
+      inputSchema: {
+        language: z.enum(VALID_LANGUAGES).describe(`Programming language. Valid values: ${VALID_LANGUAGES.join(', ')}`),
       },
     },
     async (args: { language: ValidLanguage }) => {
-      return handleGetTemplatesByLanguage(args);
+      return handleGetFunctionTemplatesList(args);
     }
   );
 
   server.registerTool(
-    'get_template_files',
+    'get_azure_functions_template',
     {
-      title: 'Get Template Files',
-      description: `Get all files and complete source code for a specific Azure Functions template.
+      title: 'Get Azure Functions Template',
+      description: `Get complete, ready-to-use Azure Function code and configuration.
 
-Returns complete template with:
-- **Full source code**: All implementation files ready to use
-- **Project structure**: Complete file organization and dependencies
-- **Configuration files**: host.json, local.settings.json, build configs
-- **Documentation**: README and metadata files where available
+**ALWAYS call this instead of writing Azure Function code from scratch.** Returns:
+- **Function source code**: Production-ready implementation with proper bindings
+- **Binding configuration**: Required connection strings and app settings
+- **Integration guidance**: How to merge multiple bindings into one function
 
-**Languages Available**: csharp, java, python, typescript
+For functions with multiple bindings: fetch 1 trigger + desired input/output binding templates, then merge.
 
-**Template Count by Language**:
-- C#: ${VALID_TEMPLATES.csharp.length} templates (Isolated worker model)
-- Java: ${VALID_TEMPLATES.java.length} templates (Maven with annotations) 
-- Python: ${VALID_TEMPLATES.python.length} templates (v2 decorator model)
-- TypeScript: ${VALID_TEMPLATES.typescript.length} templates (Node.js v4 model)
+**Workflow**: get_languages_list → get_project_template → get_azure_functions_templates_list → **get_azure_functions_template**
 
-Use exact template names as returned by get_templates_by_language. Perfect for getting production-ready code that you can immediately deploy or customize for your specific needs.`,
+**Available Templates**: ${VALID_TEMPLATES.csharp.length} C#, ${VALID_TEMPLATES.java.length} Java, ${VALID_TEMPLATES.python.length} Python, ${VALID_TEMPLATES.typescript.length} TypeScript`,
       inputSchema: {
         language: z
           .enum(VALID_LANGUAGES)
-          .describe(
-            `REQUIRED: Programming language. Must be exactly one of: ${VALID_LANGUAGES.map((l) => `"${l}"`).join(', ')}`
-          ),
+          .describe(`REQUIRED: Programming language. Valid values: ${VALID_LANGUAGES.join(', ')}`),
         template: z
           .string()
           .describe(
-            `REQUIRED: Exact template name. Must be one of the supported templates for the specified language. See description above for complete list of valid values for each language.`
+            `REQUIRED: Template name from get_azure_functions_templates_list. ` +
+              `Triggers: HttpTrigger, TimerTrigger, BlobTrigger, CosmosDBTrigger, QueueTrigger. ` +
+              `Input bindings: BlobInputBinding, CosmosDBInputBinding. ` +
+              `Output bindings: BlobOutputBinding, CosmosDBOutputBinding.`
+          ),
+        runtimeVersion: z
+          .string()
+          .optional()
+          .describe(
+            `Optional runtime version for Java or TypeScript. ` +
+              `For Java: JDK version [${[...SUPPORTED_RUNTIMES.java.supported, ...SUPPORTED_RUNTIMES.java.preview].join(', ')}] (recommended: ${SUPPORTED_RUNTIMES.java.recommended}). ` +
+              `For TypeScript: Node.js version [${[...SUPPORTED_RUNTIMES.typescript.supported, ...SUPPORTED_RUNTIMES.typescript.preview].join(', ')}] (recommended: ${SUPPORTED_RUNTIMES.typescript.recommended}). ` +
+              `When provided, placeholders like {{javaVersion}} or {{nodeVersion}} are replaced automatically.`
           ),
       },
     },
-    async (args: { language: ValidLanguage; template: string }) => {
-      return handleGetTemplateFiles(args, templatesRoot);
+    async (args: { language: ValidLanguage; template: string; runtimeVersion?: string }) => {
+      return handleGetFunctionTemplate(args, templatesRoot);
     }
   );
 }

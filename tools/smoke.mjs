@@ -14,9 +14,9 @@ await client.connect(transport);
 const tools = await client.listTools();
 process.stderr.write(`Tools: ${tools.tools.map(t => t.name).join(", ")}\n`);
 
-// Call get_azure_functions_templates tool for a Python HTTP trigger
-const result = await client.callTool({ 
-  name: "get_azure_functions_templates", 
+// Call get_azure_functions_template tool for a Python HTTP trigger
+const result = await client.callTool({
+  name: "get_azure_functions_template",
   arguments: { 
     language: "python", 
     template: "HttpTrigger" 
