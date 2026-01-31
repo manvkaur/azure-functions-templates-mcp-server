@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced handler responses with project structure and prerequisites
 - Refactored tests for improved coverage
 
-## [0.1.3] - 2026-01-30
+## [0.1.3] - 2026-01-26
 
 ### Changed
 
