@@ -97,6 +97,33 @@ export function replaceRuntimeVersion(content: string, language: string, runtime
   return content;
 }
 
+/**
+ * Validates if the provided runtime version is supported for the given language.
+ * Returns null if valid, or an error message if invalid.
+ */
+export function validateRuntimeVersion(
+  language: string,
+  runtimeVersion: string
+): { valid: true } | { valid: false; error: string; validVersions: string[] } {
+  if (!isValidLanguage(language)) {
+    return { valid: false, error: `Invalid language: "${language}"`, validVersions: [] };
+  }
+
+  const runtime = SUPPORTED_RUNTIMES[language];
+  const allVersions = [...runtime.supported, ...runtime.preview];
+
+  if (!allVersions.includes(runtimeVersion)) {
+    const previewNote = runtime.preview.length > 0 ? ` (preview: ${runtime.preview.join(', ')})` : '';
+    return {
+      valid: false,
+      error: `Invalid runtime version "${runtimeVersion}" for ${language}. Supported versions: ${runtime.supported.join(', ')}${previewNote}. Recommended: ${runtime.recommended}`,
+      validVersions: allVersions,
+    };
+  }
+
+  return { valid: true };
+}
+
 // ============================================================================
 // COMPOSABLE TOOL HANDLERS
 // ============================================================================
@@ -158,6 +185,14 @@ export async function handleGetProjectTemplate(args: GetProjectTemplateArgs): Pr
 
   if (!isValidLanguage(language)) {
     return createErrorResult(`Invalid language: "${language}". Valid languages are: ${VALID_LANGUAGES.join(', ')}`);
+  }
+
+  // Validate runtimeVersion if provided
+  if (runtimeVersion !== undefined) {
+    const validation = validateRuntimeVersion(language, runtimeVersion);
+    if (!validation.valid) {
+      return createErrorResult(validation.error);
+    }
   }
 
   const projectTemplate = PROJECT_TEMPLATES[language];

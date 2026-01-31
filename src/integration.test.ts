@@ -141,6 +141,56 @@ describe('MCP Server Integration', () => {
       const text = getResultText(result);
       expect(text).toContain('invalid');
     });
+
+    it('should apply runtimeVersion for Java', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'java', runtimeVersion: '17' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('<maven.compiler.source>17</maven.compiler.source>');
+      expect(text).not.toContain('{{javaVersion}}');
+    });
+
+    it('should apply runtimeVersion for TypeScript', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'typescript', runtimeVersion: '22' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('"@types/node": "22.x"');
+      expect(text).not.toContain('{{nodeVersion}}');
+    });
+
+    it('should return error for invalid runtimeVersion', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'java', runtimeVersion: '7' },
+      });
+
+      expect(result.isError).toBe(true);
+
+      const text = getResultText(result);
+      expect(text).toContain('Invalid runtime version');
+    });
+
+    it('should accept preview runtimeVersion', async () => {
+      const result = await client.callTool({
+        name: 'get_project_template',
+        arguments: { language: 'java', runtimeVersion: '25' },
+      });
+
+      expect(result.isError).toBeFalsy();
+
+      const text = getResultText(result);
+      expect(text).toContain('<maven.compiler.source>25</maven.compiler.source>');
+    });
   });
 
   describe('get_azure_functions_templates_list', () => {

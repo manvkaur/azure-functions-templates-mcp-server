@@ -12,6 +12,7 @@ import {
   createErrorResult,
   createSuccessResult,
   replaceRuntimeVersion,
+  validateRuntimeVersion,
   handleGetLanguagesList,
   handleGetProjectTemplate,
   handleGetFunctionTemplatesList,
@@ -200,6 +201,63 @@ describe('replaceRuntimeVersion', () => {
   });
 });
 
+describe('validateRuntimeVersion', () => {
+  it('should return valid for supported Java versions', () => {
+    expect(validateRuntimeVersion('java', '8')).toEqual({ valid: true });
+    expect(validateRuntimeVersion('java', '11')).toEqual({ valid: true });
+    expect(validateRuntimeVersion('java', '17')).toEqual({ valid: true });
+    expect(validateRuntimeVersion('java', '21')).toEqual({ valid: true });
+  });
+
+  it('should return valid for preview Java versions', () => {
+    expect(validateRuntimeVersion('java', '25')).toEqual({ valid: true });
+  });
+
+  it('should return valid for supported TypeScript/Node.js versions', () => {
+    expect(validateRuntimeVersion('typescript', '20')).toEqual({ valid: true });
+    expect(validateRuntimeVersion('typescript', '22')).toEqual({ valid: true });
+  });
+
+  it('should return valid for preview Node.js versions', () => {
+    expect(validateRuntimeVersion('typescript', '24')).toEqual({ valid: true });
+  });
+
+  it('should return error for unsupported versions', () => {
+    const result = validateRuntimeVersion('java', '7');
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.error).toContain('Invalid runtime version');
+      expect(result.error).toContain('7');
+      expect(result.validVersions).toContain('21');
+    }
+  });
+
+  it('should return error for invalid language', () => {
+    const result = validateRuntimeVersion('invalid', '11');
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.error).toContain('Invalid language');
+    }
+  });
+
+  it('should include recommended version in error message', () => {
+    const result = validateRuntimeVersion('java', '999');
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.error).toContain('Recommended');
+      expect(result.error).toContain(SUPPORTED_RUNTIMES.java.recommended);
+    }
+  });
+
+  it('should include preview versions in valid list', () => {
+    const result = validateRuntimeVersion('typescript', '18');
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.validVersions).toContain('24'); // preview version
+    }
+  });
+});
+
 describe('groupTemplatesByCategory', () => {
   it('should categorize templates by category', () => {
     const { categories } = groupTemplatesByCategory('python');
@@ -302,6 +360,40 @@ describe('handleGetProjectTemplate', () => {
     const result = await handleGetProjectTemplate({ language: 'python' });
     expect(result.content[0].text).toContain('Setup Instructions');
     expect(result.content[0].text).toContain('Quick Commands');
+  });
+
+  it('should apply runtimeVersion for Java', async () => {
+    const result = await handleGetProjectTemplate({ language: 'java', runtimeVersion: '17' });
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toContain('<maven.compiler.source>17</maven.compiler.source>');
+    expect(result.content[0].text).toContain('<maven.compiler.target>17</maven.compiler.target>');
+  });
+
+  it('should apply runtimeVersion for TypeScript', async () => {
+    const result = await handleGetProjectTemplate({ language: 'typescript', runtimeVersion: '22' });
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toContain('"@types/node": "22.x"');
+  });
+
+  it('should return error for invalid runtimeVersion', async () => {
+    const result = await handleGetProjectTemplate({ language: 'java', runtimeVersion: '7' });
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Invalid runtime version');
+    expect(result.content[0].text).toContain('7');
+  });
+
+  it('should show template parameters when runtimeVersion not provided', async () => {
+    const result = await handleGetProjectTemplate({ language: 'java' });
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toContain('Template Parameters');
+    expect(result.content[0].text).toContain('{{javaVersion}}');
+  });
+
+  it('should not show template parameters when runtimeVersion is provided', async () => {
+    const result = await handleGetProjectTemplate({ language: 'java', runtimeVersion: '21' });
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).not.toContain('Template Parameters');
+    expect(result.content[0].text).not.toContain('{{javaVersion}}');
   });
 });
 
