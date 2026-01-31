@@ -12,7 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `get_project_template` tool for project scaffolding with host.json, local.settings.json, and language-specific config files
 - `SUPPORTED_RUNTIMES` configuration with version info for Python, TypeScript, Java, and C#
 - Runtime version helper `formatRuntimeVersions()` for human-readable version strings
-- MCP prompt resource documentation (`docs/workitem-mcp-prompts.md`)
 
 ### Changed
 
