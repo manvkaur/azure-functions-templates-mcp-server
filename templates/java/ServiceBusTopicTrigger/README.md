@@ -4,6 +4,18 @@ This template demonstrates an Azure Function that subscribes to Azure Service Bu
 
 ## Configuration
 
+### Service Bus Connection
+
+The `ServiceBusConnection` setting specifies the connection to Azure Service Bus. Configure it in your `local.settings.json`:
+
+```json
+"ServiceBusConnection": "<your-service-bus-connection-string>"
+```
+
+For production, use identity-based connections:
+
+- [Identity-based connections for Service Bus](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-trigger?pivots=programming-language-java&tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cqueue%2Cextensionv5#identity-based-connections)
+
 ### Host Storage Configuration
 
 The `AzureWebJobsStorage` setting is used by the Azure Functions runtime. By default, it uses Azurite for local development:

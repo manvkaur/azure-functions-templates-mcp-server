@@ -15,7 +15,7 @@ public class BlobTrigger
     }
 
     [Function(nameof(BlobTrigger))]
-    public async Task Run([BlobTrigger("samples-workitems/{name}", Connection = "BlobConnection")] Stream stream, string name)
+    public async Task Run([BlobTrigger("samples-workitems/{name}", Connection = "BlobStorageConnection")] Stream stream, string name)
     {
         using var blobStreamReader = new StreamReader(stream);
         var content = await blobStreamReader.ReadToEndAsync();

@@ -6,6 +6,6 @@ export async function storageQueueTrigger(queueItem: unknown, context: Invocatio
 
 app.storageQueue('storageQueueTrigger', {
     queueName: 'js-queue-items',
-    connection: 'QueueStoreConnection',
+    connection: 'QueueStorageConnection',
     handler: storageQueueTrigger
 });

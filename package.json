@@ -1,7 +1,7 @@
 {
   "name": "manvir-templates-mcp-server",
-  "version": "0.1.4",
-  "description": "An MCP server that provides ready-to-use Azure Functions templates across 4 programming languages with 63+ templates covering all major Azure services and trigger types",
+  "version": "0.1.5",
+  "description": "An MCP server that provides ready-to-use Azure Functions templates across 4 programming languages with 68 templates covering all major Azure services and trigger types",
   "keywords": [
     "azure-functions",
     "mcp-server",

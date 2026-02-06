@@ -4,6 +4,23 @@ This template demonstrates an entity function for Durable Functions state manage
 
 ## Configuration
 
+### Durable Task Configuration
+
+The `host.json` must include the `extensions.durableTask` configuration:
+
+```json
+{
+  "version": "2.0",
+  "extensions": {
+    "durableTask": {
+      "hubName": "DurableFunctionsHub"
+    }
+  }
+}
+```
+
+For more options, see [Durable Functions host.json settings](https://learn.microsoft.com/azure/azure-functions/durable/durable-functions-bindings#host-json).
+
 ### Host Storage Configuration
 
 The `AzureWebJobsStorage` setting is used by the Azure Functions runtime. By default, it uses Azurite for local development:

@@ -382,31 +382,11 @@ test_*.py
         null,
         2
       ),
-      'tsconfig.json': JSON.stringify(
-        {
-          compilerOptions: {
-            module: 'commonjs',
-            target: 'ES2022',
-            outDir: 'dist',
-            rootDir: '.',
-            strict: true,
-            esModuleInterop: true,
-            skipLibCheck: true,
-            forceConsistentCasingInFileNames: true,
-            resolveJsonModule: true,
-          },
-          include: ['src/**/*.ts'],
-          exclude: ['node_modules'],
-        },
-        null,
-        2
-      ),
       '.funcignore': `# Azure Functions deployment exclusions for TypeScript
 node_modules/
 src/
 *.ts
 !*.d.ts
-tsconfig.json
 .vscode/
 local.settings.json
 .git/
@@ -439,7 +419,6 @@ local.settings.json
       'host.json          # Azure Functions host configuration',
       'local.settings.json # Local development settings (do not commit)',
       'package.json       # Node.js dependencies and scripts',
-      'tsconfig.json      # TypeScript configuration',
       '.funcignore        # Files to exclude from deployment',
     ],
     parameters: [
@@ -484,59 +463,6 @@ local.settings.json
         null,
         2
       ),
-      'pom.xml': `<?xml version="1.0" encoding="UTF-8" ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.function</groupId>
-    <artifactId>azure-functions-app</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
-
-    <name>Azure Java Functions</name>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>{{javaVersion}}</maven.compiler.source>
-        <maven.compiler.target>{{javaVersion}}</maven.compiler.target>
-        <azure.functions.maven.plugin.version>${SUPPORTED_RUNTIMES.java.mavenPluginVersion}</azure.functions.maven.plugin.version>
-        <azure.functions.java.library.version>${SUPPORTED_RUNTIMES.java.javaLibraryVersion}</azure.functions.java.library.version>
-        <functionAppName>azure-functions-app</functionAppName>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.microsoft.azure.functions</groupId>
-            <artifactId>azure-functions-java-library</artifactId>
-            <version>\${azure.functions.java.library.version}</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${SUPPORTED_RUNTIMES.java.mavenCompilerPluginVersion}</version>
-            </plugin>
-            <plugin>
-                <groupId>com.microsoft.azure</groupId>
-                <artifactId>azure-functions-maven-plugin</artifactId>
-                <version>\${azure.functions.maven.plugin.version}</version>
-                <configuration>
-                    <appName>\${functionAppName}</appName>
-                    <resourceGroup>java-functions-group</resourceGroup>
-                    <region>westus</region>
-                    <runtime>
-                        <os>linux</os>
-                        <javaVersion>{{javaVersion}}</javaVersion>
-                    </runtime>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>
-`,
       '.funcignore': `# Azure Functions deployment exclusions for Java
 target/
 .idea/
@@ -548,6 +474,8 @@ src/test/
 `,
     },
     initInstructions: `## Java Azure Functions Project Setup
+
+**Note**: pom.xml content is available in \`get_azure_functions_template\`. Copy/Merge the pom.xml from the function template you choose.
 
 1. Build the project:
    \`\`\`bash
@@ -563,7 +491,7 @@ src/test/
 `,
     projectStructure: [
       'src/main/java/     # Java source files',
-      'pom.xml            # Maven project configuration',
+      'pom.xml            # Maven project configuration (from template)',
       'host.json          # Azure Functions host configuration',
       'local.settings.json # Local development settings (do not commit)',
       '.funcignore        # Files to exclude from deployment',
@@ -955,10 +883,17 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       bindingType: 'trigger',
       resource: 'http',
     },
+    MCPResourceTrigger: {
+      description: 'Model Context Protocol resource trigger for exposing resources to MCP clients',
+      category: 'Integration',
+      useCase: 'Resource discovery, documentation exposure, data retrieval, knowledge base integration',
+      bindingType: 'trigger',
+      resource: 'mcp',
+    },
     MCPToolTrigger: {
-      description: 'Model Context Protocol integration for AI assistant tools',
-      category: 'AI/ML',
-      useCase: 'AI assistant integrations, LLM tool calling, intelligent automation',
+      description: 'Model Context Protocol trigger for exposing functions as discoverable tools',
+      category: 'Integration',
+      useCase: 'Tool discovery, function invocation, automation workflows, client integrations',
       bindingType: 'trigger',
       resource: 'mcp',
     },
@@ -1112,9 +1047,9 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       resource: 'http',
     },
     MCPToolTrigger: {
-      description: 'Model Context Protocol tool integration',
-      category: 'AI/ML',
-      useCase: 'AI assistant tools, LLM integrations, intelligent automation',
+      description: 'Model Context Protocol trigger for exposing functions as discoverable tools',
+      category: 'Integration',
+      useCase: 'Tool discovery, function invocation, automation workflows, client integrations',
       bindingType: 'trigger',
       resource: 'mcp',
     },
@@ -1204,10 +1139,24 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       bindingType: 'trigger',
       resource: 'http',
     },
+    GenericTrigger: {
+      description: 'Generic trigger for any extension trigger type without dedicated decorators',
+      category: 'Advanced',
+      useCase: 'Custom triggers, new extension triggers, experimental triggers',
+      bindingType: 'trigger',
+      resource: 'generic',
+    },
+    MCPResourceTrigger: {
+      description: 'Model Context Protocol resource trigger for exposing resources to MCP clients',
+      category: 'Integration',
+      useCase: 'Resource discovery, documentation exposure, data retrieval, knowledge base integration',
+      bindingType: 'trigger',
+      resource: 'mcp',
+    },
     MCPToolTrigger: {
-      description: 'Model Context Protocol integration for AI workflows',
-      category: 'AI/ML',
-      useCase: 'AI assistant tools, LLM integrations, ML pipeline automation, intelligent workflows',
+      description: 'Model Context Protocol trigger for exposing functions as discoverable tools',
+      category: 'Integration',
+      useCase: 'Tool discovery, function invocation, automation workflows, client integrations',
       bindingType: 'trigger',
       resource: 'mcp',
     },
@@ -1269,6 +1218,13 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       bindingType: 'trigger',
       resource: 'eventhub',
     },
+    GenericTrigger: {
+      description: 'Generic trigger template for any extension trigger type using app.generic()',
+      category: 'Custom Triggers',
+      useCase: 'Custom extension triggers, new trigger types, experimental triggers, MCP triggers',
+      bindingType: 'trigger',
+      resource: 'custom',
+    },
     HttpTrigger: {
       description: 'HTTP API endpoints for web requests',
       category: 'Web APIs',
@@ -1276,10 +1232,17 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
       bindingType: 'trigger',
       resource: 'http',
     },
+    MCPResourceTrigger: {
+      description: 'Model Context Protocol resource trigger for exposing resources to MCP clients',
+      category: 'Integration',
+      useCase: 'Resource discovery, documentation exposure, data retrieval, knowledge base integration',
+      bindingType: 'trigger',
+      resource: 'mcp',
+    },
     MCPToolTrigger: {
-      description: 'Model Context Protocol integration for AI workflows',
-      category: 'AI/ML',
-      useCase: 'AI assistant tools, LLM integrations, intelligent automation workflows',
+      description: 'Model Context Protocol trigger for exposing functions as discoverable tools',
+      category: 'Integration',
+      useCase: 'Tool discovery, function invocation, automation workflows, client integrations',
       bindingType: 'trigger',
       resource: 'mcp',
     },
@@ -1418,7 +1381,6 @@ node_modules/
 src/
 *.ts
 !*.d.ts
-tsconfig.json
 
 # IDE files
 .vscode/

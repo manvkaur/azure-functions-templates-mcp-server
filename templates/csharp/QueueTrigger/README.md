@@ -10,6 +10,14 @@ For production deployments, use identity-based connections instead of connection
 
 - [Identity-based connections for Queue Storage](https://learn.microsoft.com/azure/azure-functions/functions-bindings-storage-queue-trigger?pivots=programming-language-csharp&tabs=in-process%2Cextensionv5#identity-based-connections)
 
+### Queue Storage Connection
+
+The `QueueStorageConnection` setting specifies the connection to Azure Queue Storage. For local development with Azurite:
+
+```json
+"QueueStorageConnection": "UseDevelopmentStorage=true"
+```
+
 ### Host Storage Configuration
 
 The `AzureWebJobsStorage` setting is used by the Azure Functions runtime. By default, it uses Azurite for local development:

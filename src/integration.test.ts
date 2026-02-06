@@ -113,7 +113,6 @@ describe('MCP Server Integration', () => {
 
       const text = getResultText(result);
       expect(text).toContain('package.json');
-      expect(text).toContain('tsconfig.json');
       expect(text).toContain('host.json');
     });
 
@@ -143,6 +142,7 @@ describe('MCP Server Integration', () => {
     });
 
     it('should apply runtimeVersion for Java', async () => {
+      // Java project template no longer includes pom.xml (project-specific)
       const result = await client.callTool({
         name: 'get_project_template',
         arguments: { language: 'java', runtimeVersion: '17' },
@@ -151,8 +151,8 @@ describe('MCP Server Integration', () => {
       expect(result.isError).toBeFalsy();
 
       const text = getResultText(result);
-      expect(text).toContain('<maven.compiler.source>17</maven.compiler.source>');
-      expect(text).not.toContain('{{javaVersion}}');
+      expect(text).toContain('Java');
+      expect(text).not.toContain('Template Parameters'); // No placeholders in Java project template
     });
 
     it('should apply runtimeVersion for TypeScript', async () => {
@@ -181,6 +181,7 @@ describe('MCP Server Integration', () => {
     });
 
     it('should accept preview runtimeVersion', async () => {
+      // Java project template no longer includes pom.xml (project-specific)
       const result = await client.callTool({
         name: 'get_project_template',
         arguments: { language: 'java', runtimeVersion: '25' },
@@ -189,7 +190,7 @@ describe('MCP Server Integration', () => {
       expect(result.isError).toBeFalsy();
 
       const text = getResultText(result);
-      expect(text).toContain('<maven.compiler.source>25</maven.compiler.source>');
+      expect(text).toContain('Java');
     });
   });
 

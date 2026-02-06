@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2026-02-05
+
+### Added
+
+- MCPResourceTrigger templates for C#, Python, and TypeScript
+- GenericTrigger templates for Python and TypeScript
+- Durable Functions host.json files for C# templates
+
+### Changed
+
+- Java templates: standardized package structure to `com.function`
+- Blob trigger templates: updated connection configurations
+- Queue and Service Bus trigger READMEs improved
+
+### Removed
+
+- Redundant tsconfig.json files from TypeScript templates
+
 ## [0.1.4] - 2026-01-30
 
 ### Added
