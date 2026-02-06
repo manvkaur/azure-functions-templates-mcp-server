@@ -164,15 +164,29 @@ describe('createSuccessResult', () => {
 
 describe('replaceRuntimeVersion', () => {
   it('should replace {{javaVersion}} for Java', () => {
-    const content = '<maven.compiler.source>{{javaVersion}}</maven.compiler.source>';
+    const content = '<java.version>{{javaVersion}}</java.version>';
     const result = replaceRuntimeVersion(content, 'java', '21');
-    expect(result).toBe('<maven.compiler.source>21</maven.compiler.source>');
+    expect(result).toBe('<java.version>21</java.version>');
   });
 
-  it('should convert Java 8 to 1.8 for Maven compatibility', () => {
-    const content = '<maven.compiler.source>{{javaVersion}}</maven.compiler.source>';
+  it('should convert Java 8 to 1.8 for Maven java.version only', () => {
+    const content = '<java.version>{{javaVersion}}</java.version>';
     const result = replaceRuntimeVersion(content, 'java', '8');
-    expect(result).toBe('<maven.compiler.source>1.8</maven.compiler.source>');
+    expect(result).toBe('<java.version>1.8</java.version>');
+  });
+
+  it('should keep Java 8 as 8 for Azure runtime javaVersion', () => {
+    const content = '<javaVersion>{{javaVersion}}</javaVersion>';
+    const result = replaceRuntimeVersion(content, 'java', '8');
+    expect(result).toBe('<javaVersion>8</javaVersion>');
+  });
+
+  it('should handle both java.version and javaVersion in same file', () => {
+    const content = `<java.version>{{javaVersion}}</java.version>
+<javaVersion>{{javaVersion}}</javaVersion>`;
+    const result = replaceRuntimeVersion(content, 'java', '8');
+    expect(result).toBe(`<java.version>1.8</java.version>
+<javaVersion>8</javaVersion>`);
   });
 
   it('should not convert Java 11+ versions', () => {
@@ -346,7 +360,7 @@ describe('handleGetProjectTemplate', () => {
     const result = await handleGetProjectTemplate({ language: 'typescript' });
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain('package.json');
-    expect(result.content[0].text).toContain('tsconfig.json');
+    expect(result.content[0].text).toContain('host.json');
   });
 
   it('should return project files for Java', async () => {
@@ -363,10 +377,12 @@ describe('handleGetProjectTemplate', () => {
   });
 
   it('should apply runtimeVersion for Java', async () => {
+    // Java project template no longer includes pom.xml (project-specific)
+    // So runtimeVersion is accepted but has nothing to replace in project files
     const result = await handleGetProjectTemplate({ language: 'java', runtimeVersion: '17' });
     expect(result.isError).toBeUndefined();
-    expect(result.content[0].text).toContain('<maven.compiler.source>17</maven.compiler.source>');
-    expect(result.content[0].text).toContain('<maven.compiler.target>17</maven.compiler.target>');
+    expect(result.content[0].text).toContain('Java');
+    expect(result.content[0].text).not.toContain('Template Parameters'); // No placeholders in Java project template
   });
 
   it('should apply runtimeVersion for TypeScript', async () => {

@@ -65,20 +65,20 @@ describe('VALID_TEMPLATES', () => {
     }
   });
 
-  it('should have 27 templates for csharp', () => {
-    expect(VALID_TEMPLATES.csharp).toHaveLength(27);
+  it('should have 28 templates for csharp', () => {
+    expect(VALID_TEMPLATES.csharp).toHaveLength(28);
   });
 
   it('should have 15 templates for java', () => {
     expect(VALID_TEMPLATES.java).toHaveLength(15);
   });
 
-  it('should have 11 templates for python', () => {
-    expect(VALID_TEMPLATES.python).toHaveLength(11);
+  it('should have 13 templates for python', () => {
+    expect(VALID_TEMPLATES.python).toHaveLength(13);
   });
 
-  it('should have 10 templates for typescript', () => {
-    expect(VALID_TEMPLATES.typescript).toHaveLength(10);
+  it('should have 12 templates for typescript', () => {
+    expect(VALID_TEMPLATES.typescript).toHaveLength(12);
   });
 
   it('should include HttpTrigger for all languages', () => {
@@ -385,10 +385,10 @@ describe('getTemplatesForLanguage()', () => {
   });
 
   it('should return correct number of templates', () => {
-    expect(getTemplatesForLanguage('csharp')?.length).toBe(27);
+    expect(getTemplatesForLanguage('csharp')?.length).toBe(28);
     expect(getTemplatesForLanguage('java')?.length).toBe(15);
-    expect(getTemplatesForLanguage('python')?.length).toBe(11);
-    expect(getTemplatesForLanguage('typescript')?.length).toBe(10);
+    expect(getTemplatesForLanguage('python')?.length).toBe(13);
+    expect(getTemplatesForLanguage('typescript')?.length).toBe(12);
   });
 });
 
@@ -540,10 +540,10 @@ describe('getLanguageDetails()', () => {
 
   it('should have correct template counts', () => {
     const details = getLanguageDetails();
-    expect(details.csharp.templateCount).toBe(27);
+    expect(details.csharp.templateCount).toBe(28);
     expect(details.java.templateCount).toBe(15);
-    expect(details.python.templateCount).toBe(11);
-    expect(details.typescript.templateCount).toBe(10);
+    expect(details.python.templateCount).toBe(13);
+    expect(details.typescript.templateCount).toBe(12);
   });
 
   it('should have descriptive names', () => {

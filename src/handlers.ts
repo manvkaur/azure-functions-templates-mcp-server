@@ -83,14 +83,23 @@ export function createSuccessResult(text: string): HandlerResult {
 
 /**
  * Replaces template placeholders with the provided runtime version.
- * For Java: replaces {{javaVersion}} with the provided version (converts "8" to "1.8" for Maven compatibility)
+ * For Java: replaces {{javaVersion}} with the provided version
+ *   - For <java.version> (Maven compiler): converts "8" to "1.8"
+ *   - For <javaVersion> (Azure runtime): keeps as-is (e.g., "8")
  * For TypeScript: replaces {{nodeVersion}} with the provided version
  */
 export function replaceRuntimeVersion(content: string, language: string, runtimeVersion: string): string {
   if (language === 'java') {
-    // Java 8 uses "1.8" format in Maven, while Java 11+ uses just the version number
+    // For Java 8: Maven compiler needs "1.8" but Azure runtime needs "8"
     const mavenVersion = runtimeVersion === '8' ? '1.8' : runtimeVersion;
-    return content.replace(/\{\{javaVersion\}\}/g, mavenVersion);
+    // Replace <java.version>{{javaVersion}}</java.version> with Maven-compatible version
+    let result = content.replace(
+      /<java\.version>\{\{javaVersion\}\}<\/java\.version>/g,
+      `<java.version>${mavenVersion}</java.version>`
+    );
+    // Replace remaining {{javaVersion}} (e.g., <javaVersion> for Azure runtime) with original version
+    result = result.replace(/\{\{javaVersion\}\}/g, runtimeVersion);
+    return result;
   } else if (language === 'typescript') {
     return content.replace(/\{\{nodeVersion\}\}/g, runtimeVersion);
   }
@@ -259,6 +268,10 @@ export async function handleGetProjectTemplate(args: GetProjectTemplateArgs): Pr
     result += `| Build | \`${languageInfo.buildCommand}\` |\n`;
   }
 
+  // Next step hint
+  result += `\n---\n\n`;
+  result += `**Next Step**: Call \`get_azure_functions_templates_list\` with language "${language}" to browse available function Triggers and Bindings.\n`;
+
   return createSuccessResult(result);
 }
 
@@ -374,12 +387,12 @@ Use \`get_azure_functions_templates_list\` to see all templates with description
   const relativeFiles = allFiles.map((f) => path.relative(templateDir, f));
 
   // Identify function-specific files vs project files
+  // Note: pom.xml is project-specific, so we return it with function templates instead
   const projectFiles = [
     'host.json',
     'local.settings.json',
     'requirements.txt',
     'package.json',
-    'pom.xml',
     'tsconfig.json',
     '.funcignore',
   ];
@@ -475,6 +488,17 @@ Use \`get_azure_functions_templates_list\` to see all templates with description
       result += `### \`${filePath}\`\n\n*Error reading file*\n\n`;
     }
   }
+
+  // Merge instructions for brownfield projects
+  result += `## Merging with Existing Projects
+
+Consume function files directly, update logic as per user prompt. For config files, merge as follows:
+- **local.settings.json**: Add new "Values", keep existing
+- **host.json**: Use template's extensionBundle; merge other settings
+- **Dependencies**: Merge; prefer template versions on conflict, avoid duplicates
+- **.funcignore**: Merge patterns, avoid duplicates
+
+`;
 
   return createSuccessResult(result);
 }

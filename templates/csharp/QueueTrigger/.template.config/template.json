@@ -23,7 +23,7 @@
     "Connection": {
       "description": "The name of the app setting containing your Storage connection.",
       "type": "parameter",
-      "defaultValue": "",
+      "defaultValue": "QueueStorageConnection",
       "replaces": "ConnectionValue"
     },
     "QueueName": {

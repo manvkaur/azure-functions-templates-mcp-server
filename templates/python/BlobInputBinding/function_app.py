@@ -8,7 +8,7 @@ import azurefunctions.extensions.bindings.blob as blob
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 @app.route(route="file")
 @app.blob_input(
-    arg_name="client", path="PATH/TO/BLOB", connection="BlobConnection"
+    arg_name="client", path="PATH/TO/BLOB", connection="BlobStorageConnection"
 )
 def blob_input(req: func.HttpRequest, client: blob.BlobClient):
     logging.info(

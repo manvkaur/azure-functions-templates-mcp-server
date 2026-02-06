@@ -9,12 +9,12 @@ app = func.FunctionApp()
 @app.blob_input(
     arg_name="inputblob",
     path="sample-workitems/test.txt",
-    connection="BlobConnection"
+    connection="BlobStorageConnection"
 )
 @app.blob_output(
     arg_name="outputblob",
     path="newblob/test.txt",
-    connection="BlobConnection"
+    connection="BlobStorageConnection"
 )
 def main(req: func.HttpRequest, inputblob: str, outputblob: func.Out[str]):
     logging.info(

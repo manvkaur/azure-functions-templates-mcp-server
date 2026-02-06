@@ -4,6 +4,23 @@ This template demonstrates Durable Functions orchestration and activities for co
 
 ## Configuration
 
+### Durable Task Configuration
+
+The `host.json` must include the `extensions.durableTask` configuration:
+
+```json
+{
+  "version": "2.0",
+  "extensions": {
+    "durableTask": {
+      "hubName": "JavaTestHub"
+    }
+  }
+}
+```
+
+For more options, see [Durable Functions host.json settings](https://learn.microsoft.com/azure/azure-functions/durable/durable-functions-bindings#host-json).
+
 ### Host Storage Configuration
 
 The `AzureWebJobsStorage` setting is used by the Azure Functions runtime. By default, it uses Azurite for local development:
