@@ -1,11 +1,11 @@
-# Azure Functions Templates MCP Server
+# Azure Functions Create Triggers and Bindings MCP Server
 
 [![CI](https://github.com/manvkaur/azure-functions-templates-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/manvkaur/azure-functions-templates-mcp-server/actions/workflows/ci.yml)
 [![npm version](https://badge.fury.io/js/manvir-templates-mcp-server.svg)](https://www.npmjs.com/package/manvir-templates-mcp-server)
 [![codecov](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 68 templates covering all major Azure services and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
+A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 68 templates covering all major Azure service bindings and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
 
 ## Table of Contents
 
