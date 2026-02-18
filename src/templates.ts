@@ -893,20 +893,6 @@ export const COMMON_TEMPLATE_METADATA = {
     bindingType: 'trigger' as const,
     resource: 'rabbitmq',
   },
-  'dapr-topic-trigger': {
-    description: 'Subscribes to Dapr pub/sub topics',
-    category: 'Microservices',
-    useCase: 'Event-driven microservices, distributed architectures, decoupled messaging',
-    bindingType: 'trigger' as const,
-    resource: 'dapr',
-  },
-  'dapr-service-trigger': {
-    description: 'Handles Dapr service-to-service invocation requests',
-    category: 'Microservices',
-    useCase: 'Microservices communication, API gateways, service mesh integration',
-    bindingType: 'trigger' as const,
-    resource: 'dapr',
-  },
   'generic-trigger': {
     description: 'Generic trigger for custom extension trigger types',
     category: 'Advanced',
@@ -1055,13 +1041,6 @@ export const COMMON_TEMPLATE_METADATA = {
     bindingType: 'output' as const,
     resource: 'twilio',
   },
-  'dapr-publish-output': {
-    description: 'Publishes messages to Dapr pub/sub components',
-    category: 'Microservices',
-    useCase: 'Event-driven microservices, distributed messaging, decoupled architectures',
-    bindingType: 'output' as const,
-    resource: 'dapr',
-  },
 } as const;
 
 /** Helper to get common metadata by key */
@@ -1081,9 +1060,6 @@ export const TEMPLATE_DESCRIPTIONS: Record<ValidLanguage, Record<string, Templat
     CosmosDBInputBinding: common('cosmosdb-input'),
     CosmosDBOutputBinding: common('cosmosdb-output'),
     CosmosDBTrigger: common('cosmosdb-trigger'),
-    DaprPublishOutputBinding: common('dapr-publish-output'),
-    DaprServiceInvocationTrigger: common('dapr-service-trigger'),
-    DaprTopicTrigger: common('dapr-topic-trigger'),
     DurableFunctionsEntityClass: common('durable-entity'),
     DurableFunctionsEntityFunction: common('durable-entity'),
     DurableFunctionsOrchestration: common('durable-orchestration'),

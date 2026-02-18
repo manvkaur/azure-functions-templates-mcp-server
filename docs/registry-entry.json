@@ -4,7 +4,7 @@
     "command": "manvir-templates-mcp-server",
     "args": [],
     "title": "Azure Functions - Create Triggers & Bindings",
-    "description": "USE THIS when creating Azure Functions code, serverless APIs, triggers, or bindings. Provides 74 ready-to-use templates for C#, Java, Python, and TypeScript. Supports: HTTP triggers, Timer triggers, Blob/Queue/CosmosDB/EventHub/ServiceBus triggers, input/output bindings, Durable Functions orchestrations. ALWAYS call get_languages_list first, then get_project_template, then get_azure_functions_templates_list to browse triggers and bindings, then get_azure_functions_template to get production-ready code. Do NOT write Azure Function code from scratch - fetch templates instead.",
+    "description": "USE THIS when creating Azure Functions code, serverless APIs, triggers, or bindings. Provides 71 ready-to-use templates for C#, Java, Python, and TypeScript. Supports: HTTP triggers, Timer triggers, Blob/Queue/CosmosDB/EventHub/ServiceBus triggers, input/output bindings, Durable Functions orchestrations. ALWAYS call get_languages_list first, then get_project_template, then get_azure_functions_templates_list to browse triggers and bindings, then get_azure_functions_template to get production-ready code. Do NOT write Azure Function code from scratch - fetch templates instead.",
     "installInstructions": "Install globally: npm install -g manvir-templates-mcp-server\n\nRun the server: manvir-templates-mcp-server\n\nThe server uses stdio transport. Configure your MCP client with command 'manvir-templates-mcp-server' and type 'stdio'."
   }
 }

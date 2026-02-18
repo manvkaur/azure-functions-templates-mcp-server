@@ -1,6 +1,7 @@
 # Template Coverage TODO
 
-This document tracks template coverage across all supported languages.
+This document tracks template coverage across all supported languages, based on the
+[official Azure Functions supported bindings](https://learn.microsoft.com/azure/azure-functions/functions-triggers-bindings#supported-bindings) and bindings available in GA [extension bundle](https://github.com/Azure/azure-functions-extension-bundles/blob/main/src/Microsoft.Azure.Functions.ExtensionBundle/extensions.json).
 Templates are defined in `src/templates.ts` and use `COMMON_TEMPLATE_METADATA` for consistent descriptions.
 
 Last updated: February 17, 2026
@@ -13,34 +14,37 @@ Last updated: February 17, 2026
 | -------- | --------- |
 | ✅ | Implemented and available |
 | 🔲 | Not implemented (add placeholder or implement) |
-| ⚠️ | Partially implemented or needs review |
+| ➖ | Not applicable or supported by Azure Functions for this binding type |
 
 ---
 
 ## Triggers (What starts the function)
+
+Based on [supported bindings table](https://learn.microsoft.com/azure/azure-functions/functions-triggers-bindings#supported-bindings).
 
 | Trigger | C# | Java | Python | TypeScript | Priority | Notes |
 | --------- | :--: | :----: | :------: | :----------: | :--------: | ------- |
 | **HTTP** | ✅ | ✅ | ✅ | ✅ | - | Complete |
 | **Timer** | ✅ | ✅ | ✅ | ✅ | - | Complete |
 | **Blob Storage** | ✅ | ✅ | ✅ | ✅ | - | Complete |
-| **Blob (EventGrid)** | ✅ | 🔲 | ✅ | ✅ | Medium | Preferred over polling-based blob trigger |
 | **Queue Storage** | ✅ | ✅ | ✅ | ✅ | - | Complete |
+| **Event Hubs** | ✅ | ✅ | ✅ | ✅ | - | Complete |
+| **Cosmos DB** | ✅ | ✅ | ✅ | ✅ | - | Complete |
+| **MCP Tool** | ✅ | ✅ | ✅ | ✅ | - | Complete |
 | **Service Bus Queue** | ✅ | ✅ | ✅ | 🔲 | **High** | Add TypeScript template |
 | **Service Bus Topic** | ✅ | ✅ | ✅ | 🔲 | **High** | Add TypeScript template |
-| **Event Hub** | ✅ | ✅ | ✅ | ✅ | - | Complete |
 | **Event Grid** | ✅ | ✅ | 🔲 | 🔲 | **High** | Add Python and TypeScript templates |
-| **Cosmos DB** | ✅ | ✅ | ✅ | ✅ | - | Complete |
-| **SQL** | ✅ | 🔲 | 🔲 | 🔲 | Medium | C# only - add others |
-| **MySQL** | ✅ | 🔲 | 🔲 | 🔲 | Low | C# only - add others |
-| **Kafka** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented in any language |
 | **Durable Functions** | ✅ | ✅ | 🔲 | 🔲 | **High** | Add Python and TypeScript templates |
-| **MCP Tool** | ✅ | ✅ | ✅ | ✅ | - | Complete |
+| **Blob (EventGrid)** | ✅ | 🔲 | ✅ | ✅ | Medium | Preferred over polling-based blob trigger |
+| **Azure SQL** | ✅ | 🔲 | 🔲 | 🔲 | Medium | C# only — add others |
 | **MCP Resource** | ✅ | 🔲 | ✅ | ✅ | Medium | Add Java template |
-| **RabbitMQ** | ✅ | 🔲 | 🔲 | 🔲 | Low | C# only - add others |
-| **Dapr Topic** | ✅ | 🔲 | 🔲 | 🔲 | Low | C# only - add others |
-| **Dapr Service** | ✅ | 🔲 | 🔲 | 🔲 | Low | C# only - add others |
-| **Generic** | 🔲 | 🔲 | ✅ | ✅ | - | For custom triggers |
+| **MySQL** | ✅ | 🔲 | 🔲 | 🔲 | Low | C# only — add others |
+| **RabbitMQ** | ✅ | 🔲 | 🔲 | 🔲 | Low | Requires runtime-driven triggers |
+| **Generic** | ➖ | 🔲 | ✅ | ✅ | Low | For custom triggers |
+| **IoT Hub** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Uses Event Hubs under the hood |
+| **Kafka** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Requires runtime-driven triggers |
+| **Redis** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented in any language |
+| **SignalR** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented in any language |
 
 ---
 
@@ -48,11 +52,13 @@ Last updated: February 17, 2026
 
 | Binding | C# | Java | Python | TypeScript | Priority | Notes |
 | --------- | :--: | :----: | :------: | :----------: | :--------: | ------- |
-| **Blob** | ✅ | ✅ | ✅ | ✅ | - | Complete |
+| **Blob Storage** | ✅ | ✅ | ✅ | ✅ | - | Complete |
 | **Cosmos DB** | ✅ | ✅ | ✅ | ✅ | - | Complete |
-| **SQL** | ✅ | 🔲 | 🔲 | 🔲 | Medium | C# only |
+| **Azure SQL** | ✅ | 🔲 | 🔲 | 🔲 | Medium | C# only |
+| **SignalR** | ✅ | 🔲 | 🔲 | 🔲 | Medium | C# has SignalRConnectionInfoHttpTrigger |
 | **MySQL** | ✅ | 🔲 | 🔲 | 🔲 | Low | C# only |
 | **Table Storage** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented |
+| **Redis** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented |
 
 ---
 
@@ -60,74 +66,97 @@ Last updated: February 17, 2026
 
 | Binding | C# | Java | Python | TypeScript | Priority | Notes |
 | --------- | :--: | :----: | :------: | :----------: | :--------: | ------- |
-| **Blob** | ✅ | ✅ | ✅ | ✅ | - | Complete |
+| **Blob Storage** | ✅ | ✅ | ✅ | ✅ | - | Complete |
+| **Cosmos DB** | ✅ | ✅ | ✅ | ✅ | - | Complete |
+| **SignalR** | ✅ | 🔲 | 🔲 | 🔲 | Medium | C# only (SignalRConnectionInfoHttpTrigger) |
 | **Queue Storage** | 🔲 | 🔲 | 🔲 | 🔲 | Medium | Not implemented |
 | **Service Bus** | 🔲 | 🔲 | 🔲 | 🔲 | Medium | Not implemented |
-| **Event Hub** | 🔲 | 🔲 | 🔲 | 🔲 | Medium | Not implemented |
-| **Cosmos DB** | ✅ | ✅ | ✅ | ✅ | - | Complete |
-| **SQL** | 🔲 | 🔲 | 🔲 | 🔲 | Medium | Not implemented |
+| **Event Hubs** | 🔲 | 🔲 | 🔲 | 🔲 | Medium | Not implemented |
+| **Event Grid** | 🔲 | 🔲 | 🔲 | 🔲 | Medium | Not implemented |
+| **Azure SQL** | 🔲 | 🔲 | 🔲 | 🔲 | Medium | Not implemented |
 | **MySQL** | ✅ | 🔲 | 🔲 | 🔲 | Low | C# only |
 | **Table Storage** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented |
-| **SignalR** | ✅ | 🔲 | 🔲 | 🔲 | Medium | C# only |
+| **Redis** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented |
+| **IoT Hub** | 🔲 | 🔲 | 🔲 | ➖ | Low | Uses Event Hubs under the hood |
+| **Kafka** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented |
+| **RabbitMQ** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented |
 | **SendGrid** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented |
 | **Twilio** | 🔲 | 🔲 | 🔲 | 🔲 | Low | Not implemented |
-| **Dapr Publish** | ✅ | 🔲 | 🔲 | 🔲 | Low | C# only |
 
 ---
 
 ## High Priority Action Items
 
-### 1. TypeScript - Add Service Bus Templates
+### 1. TypeScript — Add Service Bus Templates
 
-- [ ] `ServiceBusQueueTrigger` - Create template files in `templates/typescript/ServiceBusQueueTrigger/`
-- [ ] `ServiceBusTopicTrigger` - Create template files in `templates/typescript/ServiceBusTopicTrigger/`
+- [ ] `ServiceBusQueueTrigger` — Create in `templates/typescript/ServiceBusQueueTrigger/`
+- [ ] `ServiceBusTopicTrigger` — Create in `templates/typescript/ServiceBusTopicTrigger/`
 - [ ] Update `TEMPLATE_DESCRIPTIONS` in `src/templates.ts`
 
-### 2. TypeScript & Python - Add Event Grid Templates  
+### 2. Python & TypeScript — Add Event Grid Templates
 
-- [ ] `EventGridTrigger` for Python - Create in `templates/python/EventGridTrigger/`
-- [ ] `EventGridTrigger` for TypeScript - Create in `templates/typescript/EventGridTrigger/`
+- [ ] `EventGridTrigger` for Python — Create in `templates/python/EventGridTrigger/`
+- [ ] `EventGridTrigger` for TypeScript — Create in `templates/typescript/EventGridTrigger/`
 - [ ] Update `TEMPLATE_DESCRIPTIONS` in `src/templates.ts`
 
-### 3. TypeScript & Python - Add Durable Functions Templates
+### 3. Python & TypeScript — Add Durable Functions Templates
 
-- [ ] Durable Functions for Python - Create in `templates/python/DurableFunctions/`
-- [ ] Durable Functions for TypeScript - Create in `templates/typescript/DurableFunctions/`
+- [ ] Durable Functions for Python — Create in `templates/python/DurableFunctions/`
+- [ ] Durable Functions for TypeScript — Create in `templates/typescript/DurableFunctions/`
 - [ ] Update `TEMPLATE_DESCRIPTIONS` in `src/templates.ts`
 
 ---
 
 ## Medium Priority Action Items
 
-### 4. Java - Add MCP Resource Template
+### 4. Java — Add MCP Resource Template
 
-- [ ] `MCPResourceTrigger` for Java - Create in `templates/java/MCPResourceTrigger/`
+- [ ] `MCPResourceTrigger` for Java — Create in `templates/java/MCPResourceTrigger/`
 - [ ] Update `TEMPLATE_DESCRIPTIONS` in `src/templates.ts`
 
-### 5. Java - Add EventGrid Blob Trigger Template
+### 5. Java — Add EventGrid Blob Trigger Template
 
-- [ ] `BlobTriggerWithEventGrid` for Java - Create in `templates/java/BlobTriggerWithEventGrid/`
+- [ ] `BlobTriggerWithEventGrid` for Java — Create in `templates/java/BlobTriggerWithEventGrid/`
 - [ ] Update `TEMPLATE_DESCRIPTIONS` in `src/templates.ts`
 
-### 6. Add SQL Triggers for Other Languages
+### 6. Add Azure SQL Templates for Other Languages
 
-- [ ] `SqlTrigger` for Java
-- [ ] `SqlTrigger` for Python
-- [ ] `SqlTrigger` for TypeScript
+- [ ] `SqlTrigger` for Java, Python, TypeScript
 - [ ] `SqlInputBinding` for Java, Python, TypeScript
+- [ ] `SqlOutputBinding` for all languages (not implemented in any)
+
+### 7. Add Output Bindings for Common Services
+
+- [ ] Queue Storage output binding (all languages)
+- [ ] Service Bus output binding (all languages)
+- [ ] Event Hubs output binding (all languages)
+- [ ] Event Grid output binding (all languages)
+
+### 8. Add SignalR Templates for Other Languages
+
+- [ ] SignalR input binding for Java, Python, TypeScript
+- [ ] SignalR output binding for Java, Python, TypeScript
 
 ---
 
 ## Low Priority / Future Enhancements
 
-- Kafka templates for all languages
-- Table Storage input/output bindings
-- Queue Storage output binding
-- Service Bus output binding
-- Event Hub output binding
-- SendGrid/Twilio output bindings
-- RabbitMQ for Java, Python, TypeScript
-- Dapr templates for Java, Python, TypeScript
+- MySQL trigger, input, and output for Java, Python, TypeScript
+- RabbitMQ trigger for Java, Python, TypeScript
+- IoT Hub trigger for all languages (uses Event Hubs protocol)
+- Kafka triggers and output bindings for all languages
+- Redis triggers, input, and output bindings for all languages
+- SignalR trigger for all languages
+- Table Storage input/output bindings for all languages
+- SendGrid / Twilio output bindings for all languages
+
+---
+
+## Out of Scope
+
+The following bindings have been deprioritised and are not planned:
+
+- **Dapr** (Topic Trigger, Service Invocation Trigger, Publish Output) — self-hosted only, limited adoption
 
 ---
 
@@ -153,5 +182,6 @@ Template metadata is now consolidated in `COMMON_TEMPLATE_METADATA` to:
 
 ## References
 
-- [Azure Functions triggers and bindings](https://learn.microsoft.com/azure/azure-functions/functions-triggers-bindings)
-- [Supported bindings](https://learn.microsoft.com/azure/azure-functions/functions-triggers-bindings#supported-bindings)
+- [Azure Functions triggers and bindings overview](https://learn.microsoft.com/azure/azure-functions/functions-triggers-bindings)
+- [Supported bindings table](https://learn.microsoft.com/azure/azure-functions/functions-triggers-bindings#supported-bindings)
+- [Code examples for bindings](https://learn.microsoft.com/azure/azure-functions/functions-triggers-bindings#code-examples-for-bindings)

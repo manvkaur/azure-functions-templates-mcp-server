@@ -6,7 +6,7 @@
 - **Package**: manvir-templates-mcp-server
 - **NPM Package**: <https://www.npmjs.com/package/manvir-templates-mcp-server>
 - **Repository**: <https://github.com/manvkaur/azure-functions-templates-mcp-server>
-- **Description**: Provides ready-to-use Azure Functions templates across 4 programming languages with 74+ templates covering major Azure services and trigger types
+- **Description**: Provides ready-to-use Azure Functions templates across 4 programming languages with 71+ templates covering major Azure services and trigger types
 
 ## Installation Command
 
@@ -22,7 +22,7 @@ npm install -g manvir-templates-mcp-server
 
 ## Features Provided
 
-- **74+ Azure Functions templates** across 4 programming languages
+- **71+ Azure Functions templates** across 4 programming languages
 - **Complete project structures** with configuration files and dependencies
 - **Modern programming models**: C# Isolated Worker, Java Maven, Python v2, TypeScript Node.js v4
 - **Comprehensive coverage**: Web APIs, Storage, Database, Streaming, Messaging, Scheduling, Durable Functions, AI/ML integration
@@ -37,7 +37,7 @@ npm install -g manvir-templates-mcp-server
 
 ### Supported Languages & Template Counts
 
-- **C# (.NET Isolated Worker)**: 29 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, Dapr integration, database bindings, and analytics
+- **C# (.NET Isolated Worker)**: 26 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, database bindings, and analytics
 - **Java (Maven-based)**: 15 templates covering core triggers, bindings, and Durable Functions with annotation-based configuration
 - **Python (v2 Programming Model)**: 16 templates using modern decorator-based patterns including storage, database, streaming, and AI/ML integrations  
 - **TypeScript (Node.js v4)**: 14 templates with full type safety covering storage, database, streaming, and real-time communication
@@ -85,7 +85,7 @@ This server provides significant value to the Azure development community by:
 
 ### **Comprehensive Coverage**  
 
-- **74+ Templates**: Covers virtually all Azure Functions scenarios and triggers
+- **71+ Templates**: Covers virtually all Azure Functions scenarios and triggers
 - **Complete Projects**: Not just code snippets - full project structures with dependencies
 - **Modern Patterns**: Uses latest programming models (v2 Python, .NET Isolated, etc.)
 

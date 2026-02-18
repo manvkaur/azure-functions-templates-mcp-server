@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 74 templates covering all major Azure service bindings and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
+A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 71 templates covering all major Azure service bindings and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
 
 ## Table of Contents
 
@@ -28,7 +28,7 @@ A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions
 **Multi-Language Support**: C# (.NET Isolated), Java (Maven), Python (v2 Model), TypeScript (Node.js v4)  
 **Complete Templates**: Full project structure with dependencies, configuration, and best practices  
 **Modern Patterns**: Latest programming models and Azure Functions runtime features  
-**Rich Categories**: Web APIs, Storage, Database, Streaming, Messaging, AI/ML, Microservices, Analytics  
+**Rich Categories**: Web APIs, Storage, Database, Streaming, Messaging, AI/ML, Analytics  
 **Tool Integration**: Built-in support for VS Code Copilot, MCP Inspector, and AI assistants  
 **Packaged Distribution**: Templates embedded with server for easy deployment and offline usage
 
@@ -281,7 +281,7 @@ Always fetch templates using get_azure_functions_template instead of writing fun
 
 **Supported languages and templates:**
 
-- **C# (.NET Isolated Worker)**: 29 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, Dapr integration, MySQL/SQL bindings, MCP tool and resource triggers
+- **C# (.NET Isolated Worker)**: 26 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, MySQL/SQL bindings, MCP tool and resource triggers
 - **Java (Maven-based)**: 15 templates covering core triggers, bindings, Durable Functions, and MCP tool trigger with annotation-based configuration
 - **Python (v2 Programming Model)**: 16 templates using modern decorator-based patterns including blob processing, database triggers, streaming, AI/ML integrations, and generic trigger support
 - **TypeScript (Node.js v4)**: 14 templates with full type safety covering storage, database, streaming, MCP integration, and real-time communication scenarios
@@ -303,8 +303,7 @@ Each template includes:
 - **Messaging**: Service Bus, Event Grid, RabbitMQ integration
 - **Scheduling**: Timer triggers with CRON expressions
 - **Durable Functions**: Orchestrators, activities, entities for workflows
-- **Microservices**: Dapr integration for distributed architectures
-- **AI/ML**: Model Context Protocol (MCP) tool integration for AI assistants
+- **AI/ML**: Model Context Protocol (MCP) tool and resources integration for AI assistants
 - **Real-time**: SignalR for live updates and notifications
 
 Perfect for bootstrapping new Azure Functions projects, learning cross-language patterns, and rapid prototyping.
@@ -316,7 +315,7 @@ Perfect for bootstrapping new Azure Functions projects, learning cross-language 
 **Template Inventory Updated**: Synchronized template lists with actual available templates  
 **Language-Agnostic Descriptions**: Removed language-specific implementation details from descriptions  
 **Consistent Categories**: Unified template categorization across all languages  
-**Accurate Counts**: Updated template counts (C#: 29, Java: 15, Python: 16, TypeScript: 14)  
+**Accurate Counts**: Updated template counts (C#: 26, Java: 15, Python: 16, TypeScript: 14)  
 **Clean Documentation**: Improved descriptions for better tool compatibility (VS Code Copilot, MCP Inspector)  
 **Modern Patterns**: Reflects current Azure Functions programming models and best practices
 
