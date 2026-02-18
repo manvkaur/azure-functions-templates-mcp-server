@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/manvkaur/azure-functions-templates-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 68 templates covering all major Azure service bindings and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
+A Model Context Protocol (MCP) server that provides ready-to-use Azure Functions templates across 4 programming languages with 74 templates covering all major Azure service bindings and trigger types. Templates include complete project structures, configuration files, and follow modern programming patterns for rapid development and deployment.
 
 ## Table of Contents
 
@@ -281,10 +281,10 @@ Always fetch templates using get_azure_functions_template instead of writing fun
 
 **Supported languages and templates:**
 
-- **C# (.NET Isolated Worker)**: 28 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, Dapr integration, MySQL/SQL bindings, MCP tool and resource triggers
+- **C# (.NET Isolated Worker)**: 29 templates including HTTP, Blob, Timer, Service Bus, Cosmos DB, Durable Functions, Dapr integration, MySQL/SQL bindings, MCP tool and resource triggers
 - **Java (Maven-based)**: 15 templates covering core triggers, bindings, Durable Functions, and MCP tool trigger with annotation-based configuration
-- **Python (v2 Programming Model)**: 13 templates using modern decorator-based patterns including blob processing, database triggers, streaming, AI/ML integrations, and generic trigger support
-- **TypeScript (Node.js v4)**: 12 templates with full type safety covering storage, database, streaming, MCP integration, and real-time communication scenarios
+- **Python (v2 Programming Model)**: 16 templates using modern decorator-based patterns including blob processing, database triggers, streaming, AI/ML integrations, and generic trigger support
+- **TypeScript (Node.js v4)**: 14 templates with full type safety covering storage, database, streaming, MCP integration, and real-time communication scenarios
 
 Each template includes:
 
@@ -316,7 +316,7 @@ Perfect for bootstrapping new Azure Functions projects, learning cross-language 
 **Template Inventory Updated**: Synchronized template lists with actual available templates  
 **Language-Agnostic Descriptions**: Removed language-specific implementation details from descriptions  
 **Consistent Categories**: Unified template categorization across all languages  
-**Accurate Counts**: Updated template counts (C#: 28, Java: 15, Python: 13, TypeScript: 12)  
+**Accurate Counts**: Updated template counts (C#: 29, Java: 15, Python: 16, TypeScript: 14)  
 **Clean Documentation**: Improved descriptions for better tool compatibility (VS Code Copilot, MCP Inspector)  
 **Modern Patterns**: Reflects current Azure Functions programming models and best practices
 

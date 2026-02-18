@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - Unreleased
+
+### Changed
+
+- Split combined InputOutput binding templates into separate Input and Output folders
+- Standardized binding samples to use HTTP triggers
+- Added trigger usage notes to binding template READMEs
+- Updated template counts to 74 (C# 29, Java 15, Python 16, TypeScript 14)
+
 ## [0.1.5] - 2026-02-05
 
 ### Added
@@ -88,6 +97,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Python**: 11 templates including HTTP, Timer, Queue, Blob, Cosmos DB, and Event Hub
 - **TypeScript**: 10 templates including HTTP, Timer, Queue, Blob, Cosmos DB, and Event Hub
 
+[0.1.6]: https://github.com/manvkaur/azure-functions-templates-mcp-server/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/manvkaur/azure-functions-templates-mcp-server/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/manvkaur/azure-functions-templates-mcp-server/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/manvkaur/azure-functions-templates-mcp-server/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/manvkaur/azure-functions-templates-mcp-server/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/manvkaur/azure-functions-templates-mcp-server/releases/tag/v0.1.1
