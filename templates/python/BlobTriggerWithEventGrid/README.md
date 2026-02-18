@@ -1,6 +1,6 @@
 # Blob Trigger with Event Grid - Python - Preferred
 
-This template demonstrates an Azure Function with enhanced blob trigger using Azure Event Grid for better performance and preferred.
+This template demonstrates an Azure Function with enhanced blob trigger using Azure Event Grid for better performance (preferred).
 
 ## Configuration
 
@@ -25,5 +25,5 @@ For production, configure identity-based connections:
 ## Local Development
 
 1. The blob trigger uses EventGrid source per best practices. For local testing with Azurite, you may temporarily change the source parameter to remove source="EventGrid" in function_app.py, since EventGrid isn't available locally.
-1. Install [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) for local storage emulation
-1. Run `func start` to start the function locally
+2. Install [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) for local storage emulation
+3. Run `func start` to start the function locally

@@ -11,7 +11,7 @@ app = func.FunctionApp()
     arg_name="outputDocument",
     database_name="MyDatabase",
     collection_name="MyCollection",
-    connection_string_setting="MyAccount_COSMOSDB",
+    connection_string_setting="CosmosDbConnection",
 )
 def test_function(
     req: func.HttpRequest,

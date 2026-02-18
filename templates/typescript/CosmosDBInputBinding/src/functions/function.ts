@@ -5,7 +5,7 @@ const cosmosInput = input.cosmosDB({
     collectionName: 'Items',
     id: '{Query.id}',
     partitionKey: '{Query.partitionKeyValue}',
-    connectionStringSetting: 'CosmosDBConnection',
+    connectionStringSetting: 'CosmosDbConnection',
 });
 
 interface ToDoDocument {

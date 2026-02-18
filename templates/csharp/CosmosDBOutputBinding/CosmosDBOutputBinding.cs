@@ -15,7 +15,7 @@ namespace SampleApp
         }
 
         [Function(nameof(CosmosDBFunction))]
-        [CosmosDBOutput("%CosmosDb%", "%CosmosContainerOut%", Connection = "CosmosDBConnection", CreateIfNotExists = true)]
+        [CosmosDBOutput("%CosmosDb%", "%CosmosContainerOut%", Connection = "CosmosDbConnection", CreateIfNotExists = true)]
         public object? Run(
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
             FunctionContext context)

@@ -3,7 +3,7 @@
 This document tracks template coverage across all supported languages.
 Templates are defined in `src/templates.ts` and use `COMMON_TEMPLATE_METADATA` for consistent descriptions.
 
-Last updated: February 12, 2026
+Last updated: February 17, 2026
 
 ---
 

@@ -12,17 +12,17 @@ def servicebus_topic_trigger(azservicebus: func.ServiceBusMessage):
 
 
 # This example uses SDK types to directly access the underlying ServiceBusReceivedMessage object provided by the Service Bus trigger.
-# To use add azurefunctions-extensions-bindings-servicebus to your requirements.txt file
+# To use, uncomment the code below and add azurefunctions-extensions-bindings-servicebus to your requirements.txt file.
 # Ref: aka.ms/functions-sdk-servicebus-python
 #
-import azurefunctions.extensions.bindings.servicebus as servicebus
-@app.service_bus_topic_trigger(arg_name="receivedmessage",
-                               topic_name="topic",
-                               connection="ServiceBusConnection",
-                               subscription_name="subscription")
-def servicebus_topic_trigger(receivedmessage: servicebus.ServiceBusReceivedMessage):
-    logging.info("Python ServiceBus topic trigger processed message.")
-    logging.info("Receiving: %s\n"
-                 "Body: %s\n",
-                 receivedmessage,
-                 receivedmessage.body)
+# import azurefunctions.extensions.bindings.servicebus as servicebus
+# @app.service_bus_topic_trigger(arg_name="receivedmessage",
+#                                topic_name="topic",
+#                                connection="ServiceBusConnection",
+#                                subscription_name="subscription")
+# def servicebus_topic_trigger_sdk(receivedmessage: servicebus.ServiceBusReceivedMessage):
+#     logging.info("Python ServiceBus topic trigger processed message.")
+#     logging.info("Receiving: %s\n"
+#                  "Body: %s\n",
+#                  receivedmessage,
+#                  receivedmessage.body)

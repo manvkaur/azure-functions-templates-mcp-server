@@ -20,7 +20,7 @@ public class CosmosDBInputBinding
     [CosmosDBInput(
         databaseName: "ToDoItems",
         containerName: "Items",
-        Connection  = "CosmosDBConnection",
+        Connection  = "CosmosDbConnection",
         Id = "{Query.id}",
         PartitionKey = "{Query.partitionKey}")] ToDoItem toDoItem)
     {

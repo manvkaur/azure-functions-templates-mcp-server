@@ -3,7 +3,7 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext, output } from '@
 const cosmosOutput = output.cosmosDB({
     databaseName: 'ToDoItems',
     collectionName: 'Items',
-    connectionStringSetting: 'CosmosDBConnection',
+    connectionStringSetting: 'CosmosDbConnection',
     createIfNotExists: true,
 });
 
