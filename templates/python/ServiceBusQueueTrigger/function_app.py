@@ -16,7 +16,7 @@ def servicebus_trigger(azservicebus: func.ServiceBusMessage):
 # Ref: aka.ms/functions-sdk-servicebus-python
 #
 # import azurefunctions.extensions.bindings.servicebus as servicebus
-# @app.service_bus_queue_trigger_sdk_type(arg_name="receivedmessage",
+# @app.service_bus_queue_trigger(arg_name="receivedmessage",
 #                                queue_name="messages",
 #                                connection="ServiceBusConnection")
 # def servicebus_trigger_sdk(receivedmessage: servicebus.ServiceBusReceivedMessage):
