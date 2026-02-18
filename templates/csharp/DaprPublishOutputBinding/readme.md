@@ -1,4 +1,6 @@
-# DaprPublishOutputBinding - C<span>#</span>
+# DaprPublishOutputBinding - CSharp
+
+> **Note:** This sample uses an **HTTP trigger** to invoke the function. The trigger is not the focus of this sample — it is used only to demonstrate the Dapr publish output binding.
 
 `Dapr Publish Output Binding` - Dapr's output binding feature enables you to publish messages to external messaging systems (such as message queues, event hubs, or other event-driven systems) as part of your application's workflow. It's a way to send data from your Dapr application to external services.
 

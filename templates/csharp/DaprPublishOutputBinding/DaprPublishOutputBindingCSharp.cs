@@ -1,6 +1,7 @@
 namespace Company.Function
 {
     using CloudNative.CloudEvents;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.Functions.Extensions.Dapr.Core;
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Azure.Functions.Worker.Extensions.Dapr;
@@ -13,18 +14,19 @@ namespace Company.Function
         /// These tasks should be completed prior to running :
         ///   1. Install Dapr
         /// Start function app with Dapr: dapr run --app-id functionapp --app-port 3001 --dapr-http-port 3501 -- func host start
-        /// Function will be invoked by Timer trigger and publish messages to message bus.
+        /// Function will be invoked by HTTP trigger and publish messages to message bus.
         /// </summary>
+        /// <param name="req">HTTP request.</param>
         /// <param name="functionContext">Function context.</param>
         [Function("DaprPublishOutputBindingCSharp")]
         [DaprPublishOutput(PubSubName = "pubsub", Topic = "A")]
-        public static DaprPubSubEvent Run([TimerTrigger("*/10 * * * * *")] object myTimer,
+        public static DaprPubSubEvent Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
                                           FunctionContext functionContext)
         {
             var log = functionContext.GetLogger("DaprPublishOutputCSharp");
             log.LogInformation("C# DaprPublish output binding function processed a request.");
 
-            return new DaprPubSubEvent("Invoked by Timer trigger: " + $"Hello, World! The time is {System.DateTime.Now}");
+            return new DaprPubSubEvent("Invoked by HTTP trigger: " + $"Hello, World! The time is {System.DateTime.Now}");
         }
     }
 

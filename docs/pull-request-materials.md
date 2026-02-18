@@ -12,7 +12,7 @@ Add Azure Functions Templates MCP server to registry
 
 - Adds the Azure Functions Templates MCP server to the Azure MCP registry
 - Enables proxying of Azure Functions template tools through Azure MCP
-- Provides developers with 64+ ready-to-use templates across 4 programming languages (C#, Java, Python, TypeScript)
+- Provides developers with 74+ ready-to-use templates across 4 programming languages (C#, Java, Python, TypeScript)
 
 ### GitHub issue number?
 
@@ -40,9 +40,9 @@ This addition enables developers to:
 **Template Coverage**:
 
 - **C# (.NET Isolated Worker)**: 29 templates including Durable Functions, Dapr integration, database bindings
-- **Java (Maven-based)**: 14 templates with annotation-based configuration  
-- **Python (v2 Programming Model)**: 11 templates using modern decorator patterns
-- **TypeScript (Node.js v4)**: 10 templates with full type safety
+- **Java (Maven-based)**: 15 templates with annotation-based configuration  
+- **Python (v2 Programming Model)**: 16 templates using modern decorator patterns
+- **TypeScript (Node.js v4)**: 14 templates with full type safety
 
 **Categories Covered**: Web APIs, Storage, Database, Streaming, Messaging, Scheduling, Durable Functions, Microservices, AI/ML, Real-time, Analytics
 
@@ -86,7 +86,7 @@ This server provides immediate value to:
   "command": "manvir-templates-mcp-server",
   "args": [],
   "title": "Azure Functions Templates",
-  "description": "Provides ready-to-use Azure Functions templates across 4 programming languages (C#, Java, Python, TypeScript) with 64+ templates covering major Azure services including Blob triggers, CosmosDB bindings, Event Hub processing, HTTP endpoints, Timer functions, Durable Functions, Service Bus messaging, and AI/ML integrations. Templates include complete project structures with dependencies, configuration files, and modern programming patterns following Azure Functions best practices. Accelerates development with production-ready code for Web APIs, Storage operations, Database integrations, Streaming data processing, Messaging systems, Scheduled tasks, Microservices architectures, and Real-time applications.",
+  "description": "Provides ready-to-use Azure Functions templates across 4 programming languages (C#, Java, Python, TypeScript) with 74+ templates covering major Azure services including Blob triggers, CosmosDB bindings, Event Hub processing, HTTP endpoints, Timer functions, Durable Functions, Service Bus messaging, and AI/ML integrations. Templates include complete project structures with dependencies, configuration files, and modern programming patterns following Azure Functions best practices. Accelerates development with production-ready code for Web APIs, Storage operations, Database integrations, Streaming data processing, Messaging systems, Scheduled tasks, Microservices architectures, and Real-time applications.",
   "installInstructions": "The Azure Functions Templates MCP server is not installed. Install it using: npm install -g manvir-templates-mcp-server"
 }
 ```

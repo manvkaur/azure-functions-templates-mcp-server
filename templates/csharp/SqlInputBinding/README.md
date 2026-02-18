@@ -2,6 +2,8 @@
 
 This template demonstrates an Azure Function that reads data from SQL Server/Azure SQL databases.
 
+> **Note:** This sample uses an **HTTP trigger** to invoke the function. The trigger is not the focus of this sample — it is used only to demonstrate the SQL input binding.
+
 ## Configuration
 
 ### Host Storage Configuration

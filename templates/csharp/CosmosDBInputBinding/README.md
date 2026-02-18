@@ -2,6 +2,8 @@
 
 This template demonstrates an Azure Function that reads documents from Azure Cosmos DB.
 
+> **Note:** This sample uses an **HTTP trigger** to invoke the function. The trigger is not the focus of this sample — it is used only to demonstrate the Cosmos DB input binding.
+
 ## Configuration
 
 ### Host Storage Configuration
