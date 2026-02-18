@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -13,24 +15,24 @@ public class CosmosDBInputBinding
     }
 
     [Function(nameof(DocByIdFromJSON))]
-    public void DocByIdFromJSON(
-    [QueueTrigger("todoqueueforlookup")] ToDoItemLookup toDoItemLookup,
+    public IActionResult DocByIdFromJSON(
+    [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
     [CosmosDBInput(
         databaseName: "ToDoItems",
         containerName: "Items",
         Connection  = "CosmosDBConnection",
-        Id = "{ToDoItemId}",
-        PartitionKey = "{ToDoItemPartitionKeyValue}")] ToDoItem toDoItem)
+        Id = "{Query.id}",
+        PartitionKey = "{Query.partitionKey}")] ToDoItem toDoItem)
     {
-        _logger.LogInformation($"C# Queue trigger function processed Id={toDoItemLookup?.ToDoItemId} Key={toDoItemLookup?.ToDoItemPartitionKeyValue}");
-
         if (toDoItem == null)
         {
-            _logger.LogInformation($"ToDo item not found");
+            _logger.LogInformation("ToDo item not found");
+            return new NotFoundResult();
         }
         else
         {
             _logger.LogInformation($"Found ToDo item, Description={toDoItem.Description}");
+            return new OkObjectResult(toDoItem);
         }
     }
 }

@@ -2,6 +2,8 @@
 
 This template demonstrates an Azure Function with Blob input binding.
 
+> **Note:** This sample uses an **HTTP trigger** to invoke the function. The trigger is not the focus of this sample — it is used only to demonstrate the Blob input binding.
+
 ## Configuration
 
 ### Identity-Based Connections (Recommended)

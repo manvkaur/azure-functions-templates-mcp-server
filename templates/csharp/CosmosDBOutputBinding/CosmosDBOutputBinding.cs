@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -12,43 +14,20 @@ namespace SampleApp
             _logger = logger;
         }
 
-        //<docsnippet_exponential_backoff_retry_example>
         [Function(nameof(CosmosDBFunction))]
-        [ExponentialBackoffRetry(5, "00:00:04", "00:15:00")]
         [CosmosDBOutput("%CosmosDb%", "%CosmosContainerOut%", Connection = "CosmosDBConnection", CreateIfNotExists = true)]
         public object? Run(
-            [CosmosDBTrigger(
-                "%CosmosDb%",
-                "%CosmosContainerIn%",
-                Connection = "CosmosDBConnection",
-                LeaseContainerName = "leases",
-                CreateLeaseContainerIfNotExists = true)] IReadOnlyList<MyDocument> input,
+            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
             FunctionContext context)
         {
-            if (input != null && input.Any())
+            var requestBody = new StreamReader(req.Body).ReadToEndAsync().Result;
+            if (!string.IsNullOrEmpty(requestBody))
             {
-                foreach (var doc in input)
-                {
-                    _logger.LogInformation("Doc Id: {id}", doc.Id);
-                }
-
-                // Cosmos Output
-                return input.Select(p => new { id = p.Id });
+                _logger.LogInformation("Writing document to Cosmos DB");
+                return new { id = Guid.NewGuid().ToString(), text = requestBody };
             }
 
             return null;
         }
-        //</docsnippet_exponential_backoff_retry_example>
-    }
-
-    public class MyDocument
-    {
-        public string? Id { get; set; }
-
-        public string? Text { get; set; }
-
-        public int Number { get; set; }
-
-        public bool Boolean { get; set; }
     }
 }

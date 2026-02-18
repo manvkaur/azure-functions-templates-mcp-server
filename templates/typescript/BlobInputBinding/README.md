@@ -1,0 +1,30 @@
+# Blob Input Binding - TypeScript
+
+This template demonstrates an Azure Function with Blob input binding.
+
+> **Note:** This sample uses an **HTTP trigger** to invoke the function. The trigger is not the focus of this sample — it is used only to demonstrate the Blob input binding.
+
+## Configuration
+
+### Identity-Based Connections (Recommended)
+
+For production deployments, use identity-based connections instead of connection strings:
+
+- [Identity-based connections for Blob Storage](https://learn.microsoft.com/azure/azure-functions/functions-bindings-storage-blob-trigger?pivots=programming-language-typescript&tabs=nodejs-v4%2Cextensionv5#identity-based-connections)
+
+### Host Storage Configuration
+
+The `AzureWebJobsStorage` setting is used by the Azure Functions runtime. By default, it uses Azurite for local development:
+
+```json
+"AzureWebJobsStorage": "UseDevelopmentStorage=true"
+```
+
+For production, configure identity-based connections:
+
+- [Connecting to host storage with an identity](https://learn.microsoft.com/azure/azure-functions/functions-reference?tabs=blob&pivots=programming-language-typescript#connecting-to-host-storage-with-an-identity)
+
+## Local Development
+
+1. Install [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) for local storage emulation
+2. Run `npm start` to start the function locally
